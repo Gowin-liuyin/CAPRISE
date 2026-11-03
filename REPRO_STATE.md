@@ -24,12 +24,14 @@
 | M10 向量分析 | M4,M9 | IN_PROGRESS | — | privacy-attacks；exp4 初版已出（需真实 GTR + 修 dist_err NaN） |
 | M11 Vec2Text | M4,M0 | PENDING | — | 依赖 .venv-vec2text（transformers 4.x，已验证导入） |
 | M12 DistanceDP | — | PASS | results/gate_M12_distance_dp.json | Gamma 均值 0.099989（期望 0.1） |
-| M13 Theorem1 | M12 | IN_PROGRESS | — | theory-efficiency；Table III + MC |
-| M14 Phase1 | M4,M9 | PASS | results/gate_M14_phase1.json | 服务器无密钥/无明文；AES 8000/8000；DecDB 9.8e-9 |
+| M13 Theorem1 | M12 | PASS | results/gate_M13_theorem1.json | 20/20；Δα/r=1.213±0.044（A10）；MC 偏差<2.4%；最小 k'≈k（F9） |
+| M14 Phase1 | M4,M9 | PASS | results/gate_M14_phase1.json | 12/12；服务器无密钥/无明文；AES 8000/8000；DecDB 9.4e-9 |
+| M15 Phase2 | M6,M12,M13,M14 | PASS | results/gate_M15_phase2.json | 11/11；只收 e'_q；k'=Theorem1=55；recall@10=0.959(k'=k)/1.000(k'=20,DP) |
+| M16 Phase3 | M15 | PASS | results/gate_M16_phase3.json | 11/11；prompt 精确、无未检索文档泄漏 |
 | M15 Phase2 | M6,M12,M13,M14 | PENDING | — | 等待上游 |
 | M16 Phase3 | M15 | PENDING | — | 等待上游 |
-| M17 效率 | M4,M6,M1 | PENDING | — | theory-efficiency，M13 后做 |
-| M18 检索精度 | M15,M0 | PENDING | — | data-retrieval，M14–16 后做 |
+| M17 效率 | M4,M6,M1 | IN_PROGRESS | — | theory-efficiency 正在做 |
+| M18 检索精度 | M15,M0 | IN_PROGRESS | — | data-retrieval 正在做 exp2 |
 | M19 报告 | 全部 | PENDING | — | Lead 收尾 |
 
 下一动作:

@@ -718,6 +718,7 @@ def run_experiment(cfg: dict) -> dict:
 
 
 def make_figure(results: dict, path: Path) -> None:
+    """4-panel style report figure (2x3) mirroring paper Fig. 5 + controls."""
     import os
 
     os.environ.setdefault("MPLCONFIGDIR", str(ROOT / ".cache" / "mpl"))
@@ -726,85 +727,130 @@ def make_figure(results: dict, path: Path) -> None:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
-    synth = results["main"]["synthetic"]
-    dims = sorted(int(d) for d in synth)
-
-    def cell_get(section, d):
-        return section[str(d)]
-
-    fig, axes = plt.subplots(2, 2, figsize=(12.5, 9.0))
     colors = {"ADCPE": "#1f77b4", "CAPRISE": "#d62728"}
     markers = {"ADCPE": "o", "CAPRISE": "s"}
+    paper = results["paper_fig5_reference"]
 
-    # (a) ASR@1/5/10 vs dimension (synthetic trend) + real d=768 markers
+    pap = results.get("paper_dims_synthetic") or {}
+    pap_dims = sorted(int(d) for d in pap)
+    synth = results["main"]["synthetic"]
+    synth_dims = sorted(int(d) for d in synth)
+    real = results["main"]["real_gtr"]
+    real_cells = {int(d): c for d, c in real.items() if isinstance(c, dict) and "ADCPE" in c}
+
+    fig, axes = plt.subplots(2, 3, figsize=(17.5, 9.6))
+
+    # ------------------------------------------------------------------ (a)
+    # ASR@10 vs embedding size: paper Fig. 5 values vs our controlled sweep.
     ax = axes[0, 0]
     for method in METHODS:
-        for t, ls in ((1, ":"), (5, "--"), (10, "-")):
-            ys = [cell_get(synth, d)[method][f"asr@{t}"] for d in dims]
-            ax.plot(dims, ys, ls, color=colors[method], marker=markers[method], ms=5,
-                    label=f"{method} ASR@{t}")
-    real = results["main"]["real_gtr"]
-    for d, cell in real.items():
-        if isinstance(cell, dict) and "ADCPE" in cell:
-            for method in METHODS:
-                first = True
-                for t in (1, 5, 10):
-                    ax.scatter([int(d)], [cell[method][f"asr@{t}"]], marker="*", s=230,
-                               color=colors[method], edgecolor="black", zorder=5, alpha=0.9,
-                               label=(f"{method} real GTR" if first else None))
-                    first = False
+        ax.plot(
+            paper["dims"], [v / 100.0 for v in paper[method]],
+            linestyle="--", color=colors[method], marker="x", ms=6, lw=1.4, alpha=0.75,
+            label=f"{method} paper Fig. 5 (digitised)",
+        )
+        if pap_dims:
+            ax.plot(
+                pap_dims, [pap[str(d)][method]["asr@10"] for d in pap_dims],
+                linestyle="-", color=colors[method], marker=markers[method], ms=5,
+                label=f"{method} ours (synthetic, L2-normalised)",
+            )
+        # main synthetic dims 1536/3072 (OOD dimension extension)
+        extra = [d for d in synth_dims if d not in pap_dims]
+        if extra:
+            ax.scatter(
+                extra, [synth[str(d)][method]["asr@10"] for d in extra],
+                marker=markers[method], s=46, facecolor="white",
+                edgecolor=colors[method], linewidths=1.4, zorder=4,
+                label=f"{method} ours (synthetic, OOD dim)",
+            )
+        pts = real_cells
+        if pts:
+            ax.scatter(
+                list(pts), [c[method]["asr@10"] for c in pts.values()],
+                marker="*", s=240, color=colors[method], edgecolor="black", zorder=6,
+                label=f"{method} ours (real GTR d=768)",
+            )
     ax.set_xscale("log")
-    ax.set_xticks(dims)
-    ax.set_xticklabels([str(d) for d in dims])
-    ax.set_xlabel("embedding dimension n")
-    ax.set_ylabel("ASR@t  (lower = more privacy)")
-    ax.set_ylim(-0.02, 1.02)
-    ax.set_title("(a) vector-analysis ASR vs dimension\n(paper Fig. 5; synthetic trend, * = real GTR d=768)")
-    ax.grid(alpha=0.3)
-    ax.legend(fontsize=7, ncol=2, loc="lower left")
+    ax.set_xticks(paper["dims"])
+    ax.set_xticklabels([str(d) for d in paper["dims"]], rotation=45, fontsize=8)
+    ax.set_xlabel("embedding size n (paper Fig. 5 grid)")
+    ax.set_ylabel("ASR@10  (lower = more privacy)")
+    ax.set_ylim(0, 1.02)
+    ax.set_title("(a) ASR@10 vs embedding size:\npaper Fig. 5 (digitised) vs this reproduction")
+    ax.grid(alpha=0.3, which="both")
+    ax.legend(fontsize=6.3, loc="lower right")
 
-    # (b) Kendall tau / Spearman rho vs dimension
+    # ------------------------------------------------------------------ (b)
+    # ASR@1/5/10 on the paper dimension grid + real GTR d=768.
     ax = axes[0, 1]
     for method in METHODS:
-        ax.plot(dims, [cell_get(synth, d)[method]["kendall"] for d in dims], "-",
-                color=colors[method], marker=markers[method], label=f"{method} Kendall $\\tau$")
-        ax.plot(dims, [cell_get(synth, d)[method]["spearman"] for d in dims], ":",
-                color=colors[method], marker=markers[method], ms=4, label=f"{method} Spearman $\\rho$")
-    for d, cell in real.items():
-        if isinstance(cell, dict) and "ADCPE" in cell:
-            for method in METHODS:
-                ax.scatter([int(d)], [cell[method]["kendall"]], marker="*", s=180,
-                           color=colors[method], edgecolor="black", zorder=5)
+        for t, ls in ((1, ":"), (5, "--"), (10, "-")):
+            if pap_dims:
+                ax.plot(pap_dims, [pap[str(d)][method][f"asr@{t}"] for d in pap_dims], ls,
+                        color=colors[method], marker=markers[method], ms=4,
+                        label=f"{method} ASR@{t}")
+            if t == 10 and real_cells:
+                ax.scatter(list(real_cells), [c[method]["asr@10"] for c in real_cells.values()],
+                           marker="*", s=220, color=colors[method], edgecolor="black", zorder=6)
     ax.set_xscale("log")
-    ax.set_xticks(dims)
-    ax.set_xticklabels([str(d) for d in dims])
-    ax.set_xlabel("embedding dimension n")
-    ax.set_ylabel("rank correlation (higher = more leakage)")
-    ax.set_title("(b) full-ranking agreement")
-    ax.grid(alpha=0.3)
-    ax.legend(fontsize=7)
+    ax.set_xticks(paper["dims"])
+    ax.set_xticklabels([str(d) for d in paper["dims"]], rotation=45, fontsize=8)
+    ax.set_xlabel("embedding size n")
+    ax.set_ylabel("ASR@t")
+    ax.set_ylim(0, 1.02)
+    ax.set_title("(b) sensitivity to t (top-t overlap)\npaper dims, synthetic; * = real GTR d=768 (ASR@10)")
+    ax.grid(alpha=0.3, which="both")
+    ax.legend(fontsize=6.5, ncol=2, loc="lower right")
 
-    # (c) distance-reconstruction error vs dimension
+    # ------------------------------------------------------------------ (c)
+    # Kendall tau / Spearman rho (full-ranking agreement).
+    ax = axes[0, 2]
+    for method in METHODS:
+        if pap_dims:
+            ax.plot(pap_dims, [pap[str(d)][method]["kendall"] for d in pap_dims], "-",
+                    color=colors[method], marker=markers[method], ms=4,
+                    label=f"{method} Kendall $\\tau$")
+            ax.plot(pap_dims, [pap[str(d)][method]["spearman"] for d in pap_dims], ":",
+                    color=colors[method], marker=markers[method], ms=4,
+                    label=f"{method} Spearman $\\rho$")
+        if real_cells:
+            ax.scatter(list(real_cells), [c[method]["kendall"] for c in real_cells.values()],
+                       marker="*", s=180, color=colors[method], edgecolor="black", zorder=6)
+    ax.set_xscale("log")
+    ax.set_xticks(paper["dims"])
+    ax.set_xticklabels([str(d) for d in paper["dims"]], rotation=45, fontsize=8)
+    ax.set_xlabel("embedding size n")
+    ax.set_ylabel("rank correlation (higher = more leakage)")
+    ax.set_ylim(0.88, 1.002)
+    ax.set_title("(c) full-ranking agreement:\nKendall tau / Spearman rho")
+    ax.grid(alpha=0.3, which="both")
+    ax.legend(fontsize=6.5, ncol=2, loc="lower right")
+
+    # ------------------------------------------------------------------ (d)
+    # Distance-reconstruction error (finding A19): the measurable CAPRISE
+    # advantage over ADCPE, expected to be ~1.5x from the noise radii.
     ax = axes[1, 0]
     for method in METHODS:
-        ax.plot(dims, [cell_get(synth, d)[method]["dist_err"] for d in dims], "-",
-                color=colors[method], marker=markers[method], label=f"{method} dist. error")
-    for d, cell in real.items():
-        if isinstance(cell, dict) and "ADCPE" in cell:
-            for method in METHODS:
-                ax.scatter([int(d)], [cell[method]["dist_err"]], marker="*", s=180,
-                           color=colors[method], edgecolor="black", zorder=5)
+        if pap_dims:
+            ax.plot(pap_dims, [pap[str(d)][method]["dist_err"] for d in pap_dims], "-",
+                    color=colors[method], marker=markers[method], ms=4,
+                    label=f"{method} dist. error")
+        if real_cells:
+            ax.scatter(list(real_cells), [c[method]["dist_err"] for c in real_cells.values()],
+                       marker="*", s=180, color=colors[method], edgecolor="black", zorder=6)
     ax.set_xscale("log")
     ax.set_yscale("log")
-    ax.set_xticks(dims)
-    ax.set_xticklabels([str(d) for d in dims])
-    ax.set_xlabel("embedding dimension n")
+    ax.set_xticks(paper["dims"])
+    ax.set_xticklabels([str(d) for d in paper["dims"]], rotation=45, fontsize=8)
+    ax.set_xlabel("embedding size n")
     ax.set_ylabel("mean |d_cipher/s - d_plain|")
-    ax.set_title("(c) distance-reconstruction error\n(finding A19: measurable CAPRISE advantage)")
+    ax.set_title("(d) distance-reconstruction error:\nCAPRISE / ADCPE ~ 1.5-2.2x (finding A19)")
     ax.grid(alpha=0.3, which="both")
     ax.legend(fontsize=8)
 
-    # (d) beta sweep at d=768 synthetic
+    # ------------------------------------------------------------------ (e)
+    # beta sweep at d=768 synthetic (privacy knob).
     ax = axes[1, 1]
     bs = results.get("beta_sweep", {})
     if bs:
@@ -816,17 +862,45 @@ def make_figure(results: dict, path: Path) -> None:
                     color=colors[method], marker=markers[method], ms=4,
                     label=f"{method} 10x dist. error")
         ax.set_xlabel("beta (noise scale)")
-        ax.legend(fontsize=8)
+        ax.legend(fontsize=7.5)
     ax.set_ylabel("ASR@10 / scaled error")
     ax.set_ylim(-0.02, 1.02)
-    ax.set_title("(d) privacy knob beta (d=768 synthetic)")
+    ax.set_title("(e) privacy knob beta\n(d=768 synthetic)")
     ax.grid(alpha=0.3)
 
+    # ------------------------------------------------------------------ (f)
+    # Real-GTR database-size sweep: ASR drops as the database gets denser,
+    # explaining why the paper's (unstated) m matters for absolute ASR.
+    ax = axes[1, 2]
+    rms = results.get("real_m_sweep", {})
+    rows = [(int(k), v) for k, v in rms.items() if isinstance(v, dict) and "ADCPE" in v]
+    rows.sort()
+    if rows:
+        mv = [r[0] for r in rows]
+        for method in METHODS:
+            ax.plot(mv, [r[1][method]["asr@10"] for r in rows], "-",
+                    color=colors[method], marker=markers[method], label=f"{method} ASR@10")
+        ax.set_xscale("log")
+        ax.set_xlabel("database size m (real GTR, d=768)")
+        ax.set_ylabel("ASR@10")
+        ax.set_ylim(0, 1.02)
+        ax2 = ax.twinx()
+        ax2.plot(mv, [r[1]["plaintext_gap_stats"]["nn_distance_mean"] for r in rows], ":",
+                 color="gray", marker=".", label="mean NN distance")
+        ax2.set_ylabel("mean plaintext NN distance", color="gray")
+        ax2.tick_params(axis="y", colors="gray")
+        lines, labels = ax.get_legend_handles_labels()
+        l2, lb2 = ax2.get_legend_handles_labels()
+        ax.legend(lines + l2, labels + lb2, fontsize=7.5, loc="center right")
+        ax.grid(alpha=0.3, which="both")
+    ax.set_title("(f) database size m\n(real GTR d=768; paper does not state m)")
+
     fig.suptitle(
-        "CAPRISE vs ADCPE -- vector-analysis attack (paper Fig. 5 reproduction)",
-        fontsize=13,
+        "CAPRISE vs ADCPE -- vector-analysis attack (paper Fig. 5 reproduction; s=3, beta=0.2, "
+        "m=5000, |Q|=100; paper values digitised from figures/exp_asr.png)",
+        fontsize=11,
     )
-    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.tight_layout(rect=(0, 0, 1, 0.965))
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=150)
     plt.close(fig)
@@ -838,19 +912,37 @@ def make_figure(results: dict, path: Path) -> None:
 
 
 def write_csv(results: dict, path: Path) -> None:
-    rows = ["source,dim,method,m,beta,asr@1,asr@1_std,asr@5,asr@5_std,asr@10,asr@10_std,kendall,spearman,dist_err,dist_err_rel"]
+    rows = [
+        "source,dim,method,m,beta,asr@1,asr@1_std,asr@5,asr@5_std,asr@10,asr@10_std,"
+        "kendall,spearman,dist_err,dist_err_rel,nn_distance,gap_rank1,gap_rank10"
+    ]
+
+    def emit(source, dim, cell):
+        gap = cell.get("plaintext_gap_stats", {})
+        for method in METHODS:
+            c = cell[method]
+            rows.append(
+                f"{source},{dim},{method},{c['m']},{results['setup']['beta']},"
+                f"{c['asr@1']:.6f},{c['asr@1_std']:.6f},{c['asr@5']:.6f},{c['asr@5_std']:.6f},"
+                f"{c['asr@10']:.6f},{c['asr@10_std']:.6f},{c['kendall']:.6f},{c['spearman']:.6f},"
+                f"{c['dist_err']:.8f},{c['dist_err_rel']:.6f},"
+                f"{gap.get('nn_distance_mean', float('nan')):.6f},"
+                f"{gap.get('gap_rank1', float('nan')):.8f},{gap.get('gap_rank10', float('nan')):.8f}"
+            )
+
     for section in ("synthetic", "real_gtr"):
         for d, cell in results["main"][section].items():
-            if not isinstance(cell, dict) or "ADCPE" not in cell:
-                continue
-            for method in METHODS:
-                c = cell[method]
-                rows.append(
-                    f"{cell.get('source','')},{d},{method},{c['m']},{results['setup']['beta']},"
-                    f"{c['asr@1']:.6f},{c['asr@1_std']:.6f},{c['asr@5']:.6f},{c['asr@5_std']:.6f},"
-                    f"{c['asr@10']:.6f},{c['asr@10_std']:.6f},{c['kendall']:.6f},{c['spearman']:.6f},"
-                    f"{c['dist_err']:.8f},{c['dist_err_rel']:.6f}"
-                )
+            if isinstance(cell, dict) and "ADCPE" in cell:
+                emit(cell.get("source", section), d, cell)
+    for d, cell in results.get("paper_dims_synthetic", {}).items():
+        emit(cell.get("source", "paper_dims_synthetic"), d, cell)
+    for mv, cell in results.get("real_m_sweep", {}).items():
+        if isinstance(cell, dict) and "ADCPE" in cell:
+            emit("real_gtr_m_sweep", mv, cell)
+    for mv, cell in results.get("m_sweep", {}).items():
+        emit(cell.get("source", "synthetic_m_sweep"), mv, cell)
+    for b, cell in results.get("beta_sweep", {}).items():
+        emit("synthetic_beta_sweep", b, cell)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(rows) + "\n", encoding="utf-8")
 
@@ -871,6 +963,9 @@ def default_config() -> dict:
         "real_dim": 768,
         "ts": [1, 5, 10],
         "m_sweep": [2000, 5000, 10000],
+        "real_m_sweep": [2000, 5000, 10000, 20000, 50000],
+        "paper_dims": list(PAPER_FIG5["dims"]),
+        "norm_control_dims": [64, 768, 2048],
         "beta_sweep": [0.1, 0.2, 0.4],
         "selfcheck_dim": 768,
         "selfcheck_m": 1000,
@@ -889,6 +984,9 @@ def quick_config() -> dict:
         "real_dim": 0,
         "ts": [1, 5, 10],
         "m_sweep": [],
+        "real_m_sweep": [],
+        "paper_dims": [],
+        "norm_control_dims": [],
         "beta_sweep": [],
         "selfcheck_dim": 768,
         "selfcheck_m": 600,
