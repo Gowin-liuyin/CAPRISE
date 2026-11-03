@@ -16,17 +16,17 @@
 
 | 组件 | 论文对应 | 状态 |
 |---|---|---|
-| CAPRISE 加密方案 (KeyGen/EncDB/DecDB/EncQ) | Algorithm 1 | 🚧 M1–M9 |
-| ADCPE (SAP) 基线 | Fuchsbauer et al. 2022 | 🚧 M9 |
-| 距离比较性质 (Eq.2 / Eq.3) 验证 | §III-B1 | 🚧 M7–M8 |
-| DistanceDP + Theorem 1 | §III-B2, Eq.21 | 🚧 M12–M13 |
-| ppRAG 三阶段流程 | Algorithm 2 | 🚧 M14–M16 |
-| 数据: MS MARCO 子集 + gtr-t5-base | §V setup | 🚧 M0 |
-| 效率实验 (Fig.4) | §V-1 | 🚧 M17 |
-| 检索精度（补充） | §V（论文未给数字） | 🚧 M18 |
-| Vec2Text 攻击 (Table II) | §V-2 | 🚧 M11 |
-| 向量分析 ASR (Fig.5) | §V-3 | 🚧 M10 |
-| top-k' 扩张表 (Table III) | §V-4 | 🚧 M13 |
+| CAPRISE 加密方案 (KeyGen/EncDB/DecDB/EncQ) | Algorithm 1 | ✅ M1–M6 PASS |
+| ADCPE (SAP) 基线 | Fuchsbauer et al. 2022 | ✅ M9 PASS |
+| 距离比较性质 (Eq.2 / Eq.3) 验证 | §III-B1 | ✅ M7–M8 PASS（M8 含 finding F2） |
+| DistanceDP + Theorem 1 | §III-B2, Eq.21 | ✅ M12–M13 PASS（含 finding F1/F9） |
+| ppRAG 三阶段流程 | Algorithm 2 | ✅ M14–M16 PASS |
+| 数据: MS MARCO 子集 + gtr-t5-base | §V setup | ✅ M0 PASS（m=50,000，1000 queries） |
+| 效率实验 (Fig.4) | §V-1 | ✅ M17 PASS |
+| 检索精度（补充） | §V（论文未给数字） | ✅ M18 PASS（CAPRISE k'=k recall@10=0.9699） |
+| Vec2Text 攻击 (Table II) | §V-2 | ✅ M11 PASS |
+| 向量分析 ASR (Fig.5) | §V-3 | ✅ M10 PASS（论文图数字化对照） |
+| top-k' 扩张表 (Table III) | §V-4 | ✅ M13 PASS（论文表值与公式不一致） |
 
 ## 环境
 
