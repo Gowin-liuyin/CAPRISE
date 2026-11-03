@@ -316,7 +316,7 @@ Vec2Text 攻击适配/Table III 约定/Fig.5 维度配置等；每项给出决�
 | 验收对象 | 验收人 | 方式 | 结果 |
 |---|---|---|---|
 | M12/M13/M17 | data-retrieval | 独立重跑门禁 + **从零实现** Table III 复算（diff=0.0、反推 Δα/r 一致）+ 独立 MC（−1.99%）+ exp1 手算（86,490 emb/s、overhead 0.6913%）+ 逐行读 diff | **PASS**；0 个影响结论的问题；6 条 minor（V1–V6，V1/V2 已修） |
-| M0/M14–M18 | theory-efficiency | 独立重跑门禁 + 独立复算 exp2 CAPRISE k'=k Recall@10 + DP k' 自洽性 + 读 diff | 见 `results/verify_retrieval.json`（M11 完成后补齐） |
+| M0/M14–M18 | theory-efficiency | 独立重跑门禁（M0 15/15、M14 12/12、M15 11/11、M16 11/11、M18 19/19）+ 独立复算 exp2（CAPRISE k'=k Recall@10=0.9704 vs 报告 0.9699；明文 MRR=0.722997 vs 0.7230；DP k'=72、recall=1.0000；ADCPE=0.9746 vs 0.9724）+ 数据完整性核对 + 读 diff | **PASS**；0 个影响测量值/结论的问题（见 `results/verify_retrieval.json`、`notes/verify_retrieval.md`） |
 | M1–M9 | Lead + 全部门禁 | 核心协议门禁 + M7/M8 构造式验证 | PASS |
 | M10/M11 | Lead + privacy-attacks | 门禁 + 论文 LaTeX 源图数字化对照 | PASS（M10）；M11 运行中 |
 

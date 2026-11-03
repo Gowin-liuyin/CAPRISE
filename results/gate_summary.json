@@ -1,14 +1,14 @@
 {
   "range": [
-    "M18",
-    "M18"
+    "M17",
+    "M17"
   ],
   "modules": [
     {
-      "module": "M18",
-      "name": "retrieval",
+      "module": "M17",
+      "name": "efficiency",
       "status": "PASS",
-      "result_file": "results/gate_M18_retrieval.json"
+      "result_file": "results/gate_M17_efficiency.json"
     }
   ],
   "failed_module": null,

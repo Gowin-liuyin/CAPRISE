@@ -28,21 +28,30 @@
     "s": 3
   },
   "throughput": {
-    "description": "EncDB on batch=1000 L2-normalised random embeddings; median of 3 runs",
+    "description": "EncDB on batch=1000 L2-normalised random embeddings; median of 3 runs. Wall-clock rates are the operational numbers (paper comparison); *_cpu rates use time.process_time() and are robust to co-running jobs on the machine (used by the M17 gate's independent re-check).",
     "rows": [
       {
         "d": 384,
         "batch": 1000,
         "reps": 3,
         "runs_s": [
-          0.009575,
-          0.009843,
-          0.009915
+          0.010912,
+          0.015186,
+          0.014319
         ],
-        "median_s": 0.009843,
-        "embeddings_per_s": 101595.0,
-        "elements_per_s": 39012496.0,
-        "ms_per_vector": 0.0098,
+        "median_s": 0.014319,
+        "runs_cpu_s": [
+          0.010753,
+          0.014579,
+          0.014237
+        ],
+        "median_cpu_s": 0.014237,
+        "embeddings_per_s": 69838.1,
+        "elements_per_s": 26817828.0,
+        "ms_per_vector": 0.0143,
+        "embeddings_per_s_cpu": 70239.5,
+        "elements_per_s_cpu": 26971974.0,
+        "ms_per_vector_cpu": 0.0142,
         "input_mb": 3.07
       },
       {
@@ -50,14 +59,23 @@
         "batch": 1000,
         "reps": 3,
         "runs_s": [
-          0.011562,
-          0.011225,
-          0.011694
+          0.014564,
+          0.015097,
+          0.014037
         ],
-        "median_s": 0.011562,
-        "embeddings_per_s": 86491.5,
-        "elements_per_s": 66425453.0,
-        "ms_per_vector": 0.0116,
+        "median_s": 0.014564,
+        "runs_cpu_s": [
+          0.014462,
+          0.01497,
+          0.014033
+        ],
+        "median_cpu_s": 0.014462,
+        "embeddings_per_s": 68660.3,
+        "elements_per_s": 52731108.0,
+        "ms_per_vector": 0.0146,
+        "embeddings_per_s_cpu": 69146.7,
+        "elements_per_s_cpu": 53104688.0,
+        "ms_per_vector_cpu": 0.0145,
         "input_mb": 6.14
       },
       {
@@ -65,14 +83,23 @@
         "batch": 1000,
         "reps": 3,
         "runs_s": [
-          0.017904,
-          0.01792,
-          0.017584
+          0.020962,
+          0.02082,
+          0.023868
         ],
-        "median_s": 0.017904,
-        "embeddings_per_s": 55853.4,
-        "elements_per_s": 85790885.0,
-        "ms_per_vector": 0.0179,
+        "median_s": 0.020962,
+        "runs_cpu_s": [
+          0.020641,
+          0.020668,
+          0.023638
+        ],
+        "median_cpu_s": 0.020668,
+        "embeddings_per_s": 47704.8,
+        "elements_per_s": 73274577.0,
+        "ms_per_vector": 0.021,
+        "embeddings_per_s_cpu": 48384.0,
+        "elements_per_s_cpu": 74317786.0,
+        "ms_per_vector_cpu": 0.0207,
         "input_mb": 12.29
       },
       {
@@ -80,14 +107,23 @@
         "batch": 1000,
         "reps": 3,
         "runs_s": [
-          0.02024,
-          0.02027,
-          0.020342
+          0.025128,
+          0.028386,
+          0.025132
         ],
-        "median_s": 0.02027,
-        "embeddings_per_s": 49333.4,
-        "elements_per_s": 101034768.0,
-        "ms_per_vector": 0.0203,
+        "median_s": 0.025132,
+        "runs_cpu_s": [
+          0.024762,
+          0.026958,
+          0.024867
+        ],
+        "median_cpu_s": 0.024867,
+        "embeddings_per_s": 39789.7,
+        "elements_per_s": 81489329.0,
+        "ms_per_vector": 0.0251,
+        "embeddings_per_s_cpu": 40213.9,
+        "elements_per_s_cpu": 82358145.0,
+        "ms_per_vector_cpu": 0.0249,
         "input_mb": 16.38
       },
       {
@@ -95,14 +131,23 @@
         "batch": 1000,
         "reps": 3,
         "runs_s": [
-          0.025237,
-          0.025109,
-          0.025288
+          0.037216,
+          0.026968,
+          0.026116
         ],
-        "median_s": 0.025237,
-        "embeddings_per_s": 39624.4,
-        "elements_per_s": 121726037.0,
-        "ms_per_vector": 0.0252,
+        "median_s": 0.026968,
+        "runs_cpu_s": [
+          0.035305,
+          0.026803,
+          0.025875
+        ],
+        "median_cpu_s": 0.026803,
+        "embeddings_per_s": 37080.3,
+        "elements_per_s": 113910674.0,
+        "ms_per_vector": 0.027,
+        "embeddings_per_s_cpu": 37309.3,
+        "elements_per_s_cpu": 114614036.0,
+        "ms_per_vector_cpu": 0.0268,
         "input_mb": 24.58
       },
       {
@@ -110,29 +155,38 @@
         "batch": 1000,
         "reps": 3,
         "runs_s": [
-          0.029529,
-          0.02964,
-          0.029299
+          0.038998,
+          0.041311,
+          0.040302
         ],
-        "median_s": 0.029529,
-        "embeddings_per_s": 33864.9,
-        "elements_per_s": 138710703.0,
-        "ms_per_vector": 0.0295,
+        "median_s": 0.040302,
+        "runs_cpu_s": [
+          0.038525,
+          0.040812,
+          0.03911
+        ],
+        "median_cpu_s": 0.03911,
+        "embeddings_per_s": 24812.8,
+        "elements_per_s": 101633198.0,
+        "ms_per_vector": 0.0403,
+        "embeddings_per_s_cpu": 25568.9,
+        "elements_per_s_cpu": 104730248.0,
+        "ms_per_vector_cpu": 0.0391,
         "input_mb": 32.77
       }
     ],
     "embeddings_per_s_decreasing": true,
     "elements_per_s_range": [
-      39012496.0,
-      138710703.0
+      26817828.0,
+      113910674.0
     ],
-    "elements_per_s_ratio": 3.556,
+    "elements_per_s_ratio": 4.248,
     "checks": {
       "throughput_monotone_decreasing_embeddings_per_s": true,
       "elements_per_s_within_one_order_of_magnitude": true,
       "elements_per_s_high_stable_1536_3072": true,
-      "element_ratio": 3.556,
-      "element_high_ratio": 1.419
+      "element_ratio": 4.248,
+      "element_high_ratio": 1.555
     }
   },
   "phase1_overhead": {
@@ -149,12 +203,19 @@
       "d": 768,
       "reps": 3,
       "runs_ms": [
-        1.471,
-        1.504,
-        1.435
+        1.905,
+        2.281,
+        2.475
       ],
-      "median_ms": 1.471,
-      "vectors_per_s": 87035.3
+      "median_ms": 2.281,
+      "runs_cpu_ms": [
+        1.901,
+        2.228,
+        2.352
+      ],
+      "median_cpu_ms": 2.228,
+      "vectors_per_s": 56119.8,
+      "vectors_per_s_cpu": 57450.6
     },
     "embeddings": {
       "source": "measured_local_gtr_t5_base",
@@ -165,13 +226,13 @@
           "batch_size": 128,
           "n_queries": 128,
           "runs_ms": [
-            332.365,
-            212.117,
-            212.8
+            361.113,
+            222.037,
+            224.68
           ],
-          "median_ms": 212.8,
-          "per_query_ms": 1.6625,
-          "model_load_s": 0.63,
+          "median_ms": 224.68,
+          "per_query_ms": 1.7553,
+          "model_load_s": 1.4,
           "model_path": "data/raw/gtr-t5-base"
         },
         "cpu": {
@@ -180,13 +241,13 @@
           "batch_size": 128,
           "n_queries": 128,
           "runs_ms": [
-            645.803,
-            632.105,
-            624.051
+            747.822,
+            773.324,
+            727.391
           ],
-          "median_ms": 632.105,
-          "per_query_ms": 4.9383,
-          "model_load_s": 0.37,
+          "median_ms": 747.822,
+          "per_query_ms": 5.8424,
+          "model_load_s": 0.48,
           "model_path": "data/raw/gtr-t5-base"
         }
       }
@@ -196,20 +257,20 @@
         "embedding_source": "mps",
         "device": "mps",
         "dtype": "float16",
-        "embedding_ms_128q": 212.8,
-        "caprise_enc_ms_128q": 1.471,
-        "overhead_ms": 1.471,
-        "overhead_pct": 0.691,
+        "embedding_ms_128q": 224.68,
+        "caprise_enc_ms_128q": 2.281,
+        "overhead_ms": 2.281,
+        "overhead_pct": 1.015,
         "note": ""
       },
       {
         "embedding_source": "cpu",
         "device": "cpu",
         "dtype": "float32",
-        "embedding_ms_128q": 632.105,
-        "caprise_enc_ms_128q": 1.471,
-        "overhead_ms": 1.471,
-        "overhead_pct": 0.233,
+        "embedding_ms_128q": 747.822,
+        "caprise_enc_ms_128q": 2.281,
+        "overhead_ms": 2.281,
+        "overhead_pct": 0.305,
         "note": ""
       },
       {
@@ -217,9 +278,9 @@
         "device": "NVIDIA A100",
         "dtype": "n/a",
         "embedding_ms_128q": 79.52,
-        "caprise_enc_ms_128q": 1.471,
-        "overhead_ms": 1.471,
-        "overhead_pct": 1.85,
+        "caprise_enc_ms_128q": 2.281,
+        "overhead_ms": 2.281,
+        "overhead_pct": 2.868,
         "note": "hardware-mixed reference: paper embedding time + our measured encryption time"
       }
     ]
@@ -228,10 +289,14 @@
     "caprise": {
       "d": 768,
       "n_vectors": 2000,
-      "elapsed_ms": 25.46,
-      "us_per_vector": 12.728,
-      "vectors_per_s": 78566.8,
-      "elements_per_s": 60339312.0,
+      "elapsed_ms": 29.41,
+      "elapsed_cpu_ms": 29.22,
+      "us_per_vector": 14.707,
+      "us_per_vector_cpu": 14.612,
+      "vectors_per_s": 67996.4,
+      "vectors_per_s_cpu": 68434.6,
+      "elements_per_s": 52221215.0,
+      "elements_per_s_cpu": 52557742.0,
       "measurement": "single-vector EncQ calls in a loop (no batching)"
     },
     "phe_baselines": [
@@ -240,11 +305,11 @@
         "n_bits": 1024,
         "n_vectors_768": 5,
         "n_elements": 3840,
-        "keygen_s": 0.002,
-        "elapsed_s": 2.288,
-        "us_per_element": 595.85,
-        "vector_768_elems_s": 0.457614,
-        "vectors_per_s": 2.1852,
+        "keygen_s": 0.007,
+        "elapsed_s": 3.076,
+        "us_per_element": 801.1,
+        "vector_768_elems_s": 0.615242,
+        "vectors_per_s": 1.6254,
         "note": "extrapolated from n_vectors x 768 element encryptions; CPU only, no batching in Paillier"
       },
       {
@@ -252,11 +317,11 @@
         "n_bits": 2048,
         "n_vectors_768": 5,
         "n_elements": 3840,
-        "keygen_s": 0.006,
-        "elapsed_s": 16.855,
-        "us_per_element": 4389.36,
-        "vector_768_elems_s": 3.371032,
-        "vectors_per_s": 0.2966,
+        "keygen_s": 0.038,
+        "elapsed_s": 19.894,
+        "us_per_element": 5180.69,
+        "vector_768_elems_s": 3.978766,
+        "vectors_per_s": 0.2513,
         "note": "extrapolated from n_vectors x 768 element encryptions; CPU only, no batching in Paillier"
       }
     ],
@@ -264,18 +329,20 @@
       {
         "impl": "pure CPython builtin pow (no GMP)",
         "n_bits": 1024,
+        "modulus_type": "synthetic 1024-bit odd modulus (timing-only emulation of pow(r, n, n^2); NOT a real Paillier keypair -- primality is irrelevant for measuring modpow cost)",
         "n_elements": 24,
-        "us_per_element": 8390.82,
-        "vector_768_elems_s": 6.444151,
-        "vectors_per_s": 0.1552
+        "us_per_element": 9149.49,
+        "vector_768_elems_s": 7.026811,
+        "vectors_per_s": 0.1423
       },
       {
         "impl": "pure CPython builtin pow (no GMP)",
         "n_bits": 2048,
+        "modulus_type": "synthetic 2048-bit odd modulus (timing-only emulation of pow(r, n, n^2); NOT a real Paillier keypair -- primality is irrelevant for measuring modpow cost)",
         "n_elements": 8,
-        "us_per_element": 63923.64,
-        "vector_768_elems_s": 49.093352,
-        "vectors_per_s": 0.0204
+        "us_per_element": 67872.71,
+        "vector_768_elems_s": 52.12624,
+        "vectors_per_s": 0.0192
       }
     ],
     "comparisons": {
@@ -284,22 +351,22 @@
           250.0,
           300.0
         ],
-        "speedup_vs_250": 314.3,
-        "speedup_vs_300": 261.9
+        "speedup_vs_250": 272.0,
+        "speedup_vs_300": 226.7
       },
       "measured_paillier_1024bit": {
-        "phe_vectors_per_s": 2.1852,
-        "speedup": 35954.1
+        "phe_vectors_per_s": 1.6254,
+        "speedup": 41833.6
       },
       "measured_paillier_2048bit": {
-        "phe_vectors_per_s": 0.2966,
-        "speedup": 264891.4
+        "phe_vectors_per_s": 0.2513,
+        "speedup": 270578.6
       },
       "paper_caprise_2339": {
         "paper_vectors_per_s": 2339.0,
-        "our_over_paper": 33.59,
+        "our_over_paper": 29.07,
         "paper_caprise_over_paper_phe_mid": 8.51,
-        "note": "paper claims ~9x (2339 / 250-300 = 7.8-9.4x); our implementation is additionally ~35x faster than the paper's CAPRISE implementation because it is vectorised (A17)"
+        "note": "paper claims ~9x (2339 / 250-300 = 7.8-9.4x); our implementation is additionally 29.07x faster than the paper's CAPRISE implementation on the same single-vector basis because it is vectorised (A17)"
       }
     },
     "paper": {
@@ -314,11 +381,13 @@
   },
   "implementation_style_probe": {
     "d": 768,
-    "vectorised_standard_normal_us": 2.875,
-    "per_element_scalar_loop_us": 98.334,
-    "ratio_per_element_over_vectorised": 34.2,
-    "per_element_loop_vectors_per_s": 10169.5,
-    "note": "The paper reports 2339 vectors/s at d=768 = 428 us/vector = 0.56 us/element; a per-element Python/numpy-scalar implementation does a handful of scalar ops per element (~0.5-0.7 us), which reproduces that order of magnitude. This reproduction draws all d Gaussians with a single PCG64 call, hence the ~35x higher throughput."
+    "vectorised_standard_normal_us": 2.916,
+    "vectorised_standard_normal_us_per_vector": 2.916,
+    "per_element_scalar_loop_us_per_vector": 98.438,
+    "per_element_scalar_loop_us_per_element": 0.1282,
+    "ratio_per_element_over_vectorised": 33.75,
+    "per_element_loop_vectors_per_s": 10158.7,
+    "note": "Per-element cost of the raw scalar draw is 0.128 us/element (measured), while the paper's 2339 vectors/s at d=768 corresponds to 428 us/vector = 0.56 us/element. A per-element Python implementation doing a handful of numpy-scalar operations per coordinate would land in that range, so the 'paper used a per-element-style implementation' statement is a plausible reconstruction (A17), NOT a measurement of the paper's code. This reproduction draws all d Gaussians with a single PCG64 call, hence the ~34x higher per-vector throughput."
   },
   "paper_numbers": {
     "phase1_embedding_ms_128q": 79.52,
@@ -335,7 +404,7 @@
   "findings": [
     {
       "id": "A17",
-      "statement": "The paper's CAPRISE throughput (2339 vectors/s at d=768 = 428 us/vector) is consistent with a per-element Python implementation (~0.56 us/element); this reproduction uses vectorised numpy noise generation (one PCG64 call for all d Gaussians) and reaches 86492 embeddings/s at d=768 (~37x the paper's implementation). Absolute numbers are therefore implementation-style sensitive, not scheme-inherent."
+      "statement": "The paper's CAPRISE throughput (2339 vectors/s at d=768 = 428 us/vector) is consistent with a per-element Python implementation style (see implementation_style_probe; plausible reconstruction, not a measurement of the paper's code). This reproduction uses vectorised numpy noise generation (one PCG64 call for all d Gaussians) and reaches 67996.4 single-vector encryptions/s at d=768 (same measurement basis as the paper's Phase-2 number), i.e. 29.07x the paper's CAPRISE implementation. The batch EncDB throughput at d=768 (68660.3 embeddings/s) is a different (batch) measurement basis and is therefore not used for the paper comparison. Absolute numbers are implementation-style sensitive, not scheme-inherent."
     },
     {
       "id": "A17b",
@@ -343,8 +412,8 @@
     },
     {
       "id": "A17c",
-      "statement": "Phase-1: the embedding step dominates. On this machine gtr-t5-base embeds 128 queries in ~224 ms (MPS fp16) / ~606 ms (CPU fp32), while CAPRISE encrypts the same batch in ~1.6 ms, so the encryption overhead is ~0.26-0.71% (paper: 15/79.52 = 18.9%, <19%). CAPRISE is even relatively cheaper here because our implementation is faster; the paper's 15 ms encryption corresponds to a per-element Python implementation. Embedding remains the bottleneck in both."
+      "statement": "Phase-1: the embedding step dominates. On this machine gtr-t5-base embeds 128 queries in mps 224.680 ms, cpu 747.822 ms, while CAPRISE encrypts the same batch in 2.281 ms, so the encryption overhead is mps 1.015%, cpu 0.305% (paper: 15/79.52 = 18.86%, <19%). CAPRISE is even relatively cheaper here because our implementation is faster; the paper's 15 ms encryption corresponds to a per-element Python implementation. Embedding remains the bottleneck in both. All numbers are read from this JSON's measured medians (not hardcoded)."
     }
   ],
-  "runtime_s": 28.3
+  "runtime_s": 37.1
 }

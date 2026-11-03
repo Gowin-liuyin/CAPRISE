@@ -1,0 +1,335 @@
+{
+  "task": "task-5 (cross-review of data-retrieval's M0/M14/M15/M16/M18)",
+  "target": "data-retrieval: M0 data pipeline, M14-M16 ppRAG phases, M18 retrieval accuracy",
+  "verifier": "theory-efficiency",
+  "verdict": {
+    "result": "PASS",
+    "summary": "All five gates re-run independently and observed PASS (M0 15/15, M14 12/12, M15 11/11, M16 11/11, M18 19/19). exp2's headline numbers were reproduced with an independent implementation: CAPRISE k'=k recall@10 vs plaintext = 0.9704 (reported 0.9699), plaintext qrels MRR@10 = 0.722997 (reported 0.7230), CAPRISE+DP(r=0.02) k' = ceil(71.025370) = 72 (reported k'=72, fixed radius) with recall 1.0000 (reported 1.0000), ADCPE k'=k recall 0.9746 (reported 0.9724). Data integrity and corpus composition fully match notes/data_manifest.md (1000 eval qids, m=50000, sources 1053/18544/30403, qrels 1080 pairs all in corpus, 100% eval coverage). No fabricated/hidden-shrinkage/plaintext-substitution issues found: 0 issues affecting measured values or conclusions. Minor issues are gate strength/notes-accuracy items only.",
+    "issues_affecting_measured_values_or_conclusions": 0,
+    "minor_issues_found": 7
+  },
+  "environment": {
+    "note": "shared Apple M5; co-running teammate jobs (load average ~4-5) inflate absolute latencies; timings below are reported as observed.",
+    "data": "data/ (m=50000 MS MARCO passages, 1000 dev queries, gtr-t5-base 768-d L2)"
+  },
+  "gate_reruns": [
+    {
+      "module": "M0",
+      "command": ".venv/bin/python -m gates.run_gates --from M0 --to M0",
+      "observed": "PASS",
+      "checks": 15,
+      "key_output": "m=50000, nq=1000, max L2 dev 4.868e-4, qrels coverage 1000/1000, MRR@10=0.7219, Recall@10=0.9700"
+    },
+    {
+      "module": "M14",
+      "command": ".venv/bin/python -m gates.run_gates --from M14 --to M16",
+      "observed": "PASS",
+      "checks": 12,
+      "key_output": "real data m=8000 (all 1053 qrels passages in prefix); server has no CryptoKey/plaintext; 8000 unique 16B nonces; DecDB roundtrip 9.47e-9; 0 noise-bound violations"
+    },
+    {
+      "module": "M15",
+      "command": ".venv/bin/python -m gates.run_gates --from M14 --to M16",
+      "observed": "PASS",
+      "checks": 11,
+      "key_output": "k'=k recall 0.9630 (m=8000, 100 q, fresh nonces); k'=20 recall 1.0; DP r=0.02 k'=55==ceil(Theorem1(10,8000,768,0.02)); server.search spy: q' (d=768), ||q'||=3.0035 vs s||q||=3.0012"
+    },
+    {
+      "module": "M16",
+      "command": ".venv/bin/python -m gates.run_gates --from M14 --to M16",
+      "observed": "PASS",
+      "checks": 11,
+      "key_output": "prompt exact template, 10/10 docs in order, no leaks, 20/20 batch prompts ok"
+    },
+    {
+      "module": "M18",
+      "command": ".venv/bin/python -m gates.run_gates --from M18 --to M18",
+      "observed": "PASS",
+      "checks": 19,
+      "key_output": "artifact-based verification of results/exp2_retrieval.json: 11 configs, CAPRISE k'=k 0.9699, DP r=0.02 k'=72/recall 1.0, beta monotone 0.9910/0.9854/0.9699/0.9401"
+    }
+  ],
+  "independent_recompute": {
+    "method": "Own code, no import of experiments/exp2_retrieval.py or its helpers; only src/caprise core primitives (KeyGen/EncDB/EncQ/DecDB_one/EncryptedVectorDB/distance_dp/theorem.k_prime) and data/*.npy. 1000 queries, k=10, m=50000, s=3, beta=0.2.",
+    "plaintext_baseline": {
+      "qrels_MRR@10": 0.722997,
+      "qrels_Recall@10": 0.97,
+      "qrels_queries": 1000,
+      "exp2_reported_MRR@10": 0.723,
+      "exp2_reported_Recall@10": 0.97,
+      "match": true
+    },
+    "caprise_kp_eq_k": {
+      "recall@10_vs_plaintext": 0.9704,
+      "exp2_reported": 0.9699,
+      "abs_diff": 0.0005,
+      "qrels_MRR@10": 0.723197,
+      "exp2_reported_qrels_MRR@10": 0.723,
+      "note": "difference within nonce-randomness/MC noise (per-query flip floor ~0.03 => sigma ~0.005); reproduces the reported value."
+    },
+    "caprise_kp_15": {
+      "recall@10_vs_plaintext": 0.9998,
+      "exp2_reported": 0.9999
+    },
+    "caprise_kp_20": {
+      "recall@10_vs_plaintext": 1.0,
+      "exp2_reported": 1.0
+    },
+    "caprise_dp_r002": {
+      "theorem_k_prime": 71.02537,
+      "theorem_k_prime_ceil": 72,
+      "independent_scipy_beta_recompute": 71.02537,
+      "independent_recompute_abs_diff": 1.09e-12,
+      "exp2_json_k_prime_mean": 72.0,
+      "exp2_json_k_prime_set": [
+        72
+      ],
+      "exp2_k_prime_interpretation": "FIXED radius r=0.02 (dp_radius float) -> ceil(Theorem1) constant for every query; NOT per-query gamma sampling (correcting the reviewer brief's assumption).",
+      "gamma_sampled_alternative": {
+        "protocol": "if r ~ Gamma(shape=768, scale=0.02/768) per query (mean 0.02)",
+        "E[ceil(k_prime(R))]": 71.678,
+        "median": 71.0,
+        "conclusion": "average would still be ~72, so the reported k'=72 is self-consistent under either convention; the implementation itself uses the fixed-radius convention."
+      },
+      "recall@10_vs_plaintext": 1.0,
+      "exp2_reported": 1.0,
+      "qrels_MRR@10": 0.722997,
+      "exp2_reported_qrels_MRR@10": 0.723,
+      "note": "DP recall = 1.0 is expected because k'=72 is a sufficient (and deliberately loose, see M13/F9) Theorem-1 bound; it is not an independent accuracy gain."
+    },
+    "caprise_dp_r005": {
+      "theorem_k_prime": 784.820258,
+      "theorem_k_prime_ceil": 785,
+      "exp2_json_k_prime_mean": 785.0,
+      "match": true
+    },
+    "adcpe_kp_eq_k": {
+      "recall@10_vs_plaintext": 0.9746,
+      "exp2_reported": 0.9724,
+      "abs_diff": 0.0022,
+      "note": "same ordering as exp2: ADCPE slightly above CAPRISE (CAPRISE uses larger DB noise 3sB/8 vs sB/4)."
+    },
+    "latency_spot_check": {
+      "own_measurement_under_load": {
+        "plaintext_f32_top10_ms_per_query": 11.15,
+        "encrypted_search_ms_per_query_m20000": 4.97
+      },
+      "exp2_reported": {
+        "plaintext_f32_kernel": 2.45,
+        "caprise_kp_eq_k_end_to_end": 2.35,
+        "server_search": 2.17
+      },
+      "conclusion": "absolute latencies are load-sensitive on this shared machine (own measurements 2-4x slower under load ~4.8); the relative claim (encrypted pipeline <=2x plaintext, server search dominates) is consistent with the same-run measurements. Cannot reproduce absolute milliseconds bit-for-bit."
+    }
+  },
+  "data_integrity": {
+    "eval_qids": 1000,
+    "eval_qids_match_query_ids": true,
+    "query_jsonl_ids_aligned": true,
+    "passage_jsonl_ids_aligned": true,
+    "corpus_sources": {
+      "qrels": 1053,
+      "bm25_hard_neg": 18544,
+      "random_fill": 30403
+    },
+    "corpus_sources_match_manifest": true,
+    "qrels_pairs": 1080,
+    "qrels_pairs_present_in_corpus": 1080,
+    "eval_coverage_with_ge1_relevant": "1000/1000",
+    "first_1053_rows_are_qrels_sources": true,
+    "passage_embedding_norm_max_dev": 0.000487,
+    "query_embedding_norm_max_dev": 0.000472,
+    "note": "L2 deviation ~4.9e-4 comes from MPS fp16 encoding and is documented in notes/data_manifest.md §3 (M0 gate tolerance 1e-3 is set accordingly)."
+  },
+  "m15_server_input_check": {
+    "question": "does the M15 gate actually inspect the arguments passed to server.search (not just logs)?",
+    "mechanism_found": "gates/gate_m15_phase2.py monkeypatches server.db.search with _spy_search(q_prime, k) that copies the real q_prime ndarray and the k argument, so it records ACTUAL call arguments.",
+    "verified_by_verifier": {
+      "own_spy_run": "own PPRAGServer/Client on m=2000 real data, own wrapper around server.db.search",
+      "captured_args": {
+        "type": "numpy.ndarray + int",
+        "shape": [
+          768
+        ],
+        "requested_k_prime": 44
+      },
+      "norm_check": {
+        "||q'||": 3.001,
+        "s*||q||": 3.0012,
+        "bound_s_beta_over_8": 0.075
+      },
+      "plaintext_check": {
+        "allclose(q', q)": false,
+        "allclose(q', s*q)": false,
+        "||q'-q||": 2.001,
+        "||q'-3q||": 0.095
+      },
+      "server_state": {
+        "attributes": [
+          "db",
+          "doc_ciphertexts"
+        ],
+        "has_CryptoKey": false
+      }
+    },
+    "gate_06_strength": "checks shape(768), not-equal to plaintext, not-equal to s*plaintext, and ||q'|| within s*beta/8 of s*||q|| for the FIRST call -> content-level check is real but single-sample.",
+    "gate_07_strength": "only asserts shape==(768,) for all 300 calls and the call count; it does NOT verify ciphertext-ness/content per call (the wording 'all with a (d,) ciphertext query' overstates what is asserted).",
+    "gate_04_strength": "compares the CLIENT-reported k' (res.k_prime_requested) to ceil(Theorem1); the server-observed k in the spy record is stored but never asserted.",
+    "verdict": "the gate does check real server.search inputs (not logs), but two assertions are weaker than their wording: (a) all-call check is shape-only; (b) server-side k' not cross-checked. Recommend tightening (see issue V-M15-1)."
+  },
+  "static_review": [
+    {
+      "file": "experiments/exp2_retrieval.py",
+      "checked": "full read",
+      "findings": [
+        "real data m=50000/nq=1000 loaded from data/ (no hidden subsetting; default args run full scale, command recorded in meta).",
+        "encrypted pipelines use PPRAGClient/PPRAGServer: server-side search runs on ciphertext E' and q' (EncryptedVectorDB); plaintext distances are used ONLY client-side for re-ranking, as declared in SPEC §3 - not a hidden substitution.",
+        "CAPRISE k'=k path passes k_prime=None and dp_radius=0 -> k'=k (no oversampling leak).",
+        "DP path uses fixed r=0.02/0.05 and k'=ceil(theorem.k_prime); pprag re-derives k' from r_used, so exp2's precomputed value matches (verified in JSON: k_prime_set=[72]/[785]).",
+        "recall@10 metric = |encrypted top-10 ∩ plaintext top-10|/10; qrels MRR@10 = mean 1/rank of first relevant among top-10 - consistent with docs/CLAIMS_CHECKLIST.md section '统计口径说明'.",
+        "no hardcoded expected metric values; result JSON written from measured arrays; fresh 128-bit nonces documented."
+      ]
+    },
+    {
+      "file": "gates/gate_m18_retrieval.py",
+      "checked": "full read",
+      "findings": [
+        "reads stored artifacts and validates scale/configs/metric ranges; no tampering with exp2 code.",
+        "thresholds are loose (see issues): recall k'=k >=0.90 (measured 0.9699), k'=2k >=0.99 (1.0), DP recall >=0.99 (1.0), plaintext qrels MRR in [0.2,0.9] (0.723), latency <=2x plaintext.",
+        "check 10 compares exp2's k_prime_mean with meta theorem_k_prime computed by the SAME theorem function inside exp2 (consistency, not independent validation); Theorem 1 itself is independently gated by M13/exp5."
+      ]
+    },
+    {
+      "file": "gates/gate_m15_phase2.py",
+      "checked": "full read",
+      "findings": [
+        "spy-based server.search argument inspection (real args, see m15_server_input_check).",
+        "uses m=8000 real prefix (contains all 1053 qrels passages per data_manifest order); declared in check 00.",
+        "recall thresholds 0.70 (k'=k) / 0.80 (DP) are loose vs measured 0.9630 / 1.0.",
+        "DP k'=55 for m=8000 consistent: ceil(k_prime(10,8000,768,0.02))=55."
+      ]
+    },
+    {
+      "file": "gates/gate_m0_data.py",
+      "checked": "read + independent re-check",
+      "findings": [
+        "validates files/npys/meta consistency/NaN/L2 norm/row counts/ids/qrels coverage/sanity retrieval; thresholds documented in comments.",
+        "L2 normalization tolerance 1e-3 is required because embeddings were encoded in fp16 on MPS (actual 4.87e-4); documented in notes/data_manifest.md §3.",
+        "qrels coverage 100% and MRR 0.7219 are re-computed by the gate itself (not copied from notes)."
+      ]
+    },
+    {
+      "file": "gates/gate_m14_phase1.py / gate_m16_phase3.py",
+      "checked": "read",
+      "findings": [
+        "M14 checks server holds only protocol fields, no CryptoKey, ciphertext-only DB, unique 128-bit nonces, roundtrips, strict noise bound, id preservation.",
+        "M16 checks exact prompt template/order/no leakage/batch/empty context.",
+        "M14 check 'no plaintext documents on server' scans only the first 200 of 8000 documents (sampling; see issue)."
+      ]
+    },
+    {
+      "file": "scripts/prepare_data.py + notes/data_manifest.md",
+      "checked": "key sections + independent integrity recompute",
+      "findings": [
+        "data sources official MS MARCO; corpus = qrels-relevant (1053) + BM25 hard negatives (18544) + deterministic random fill (30403), order documented and verified (first 1053 rows all source=qrels).",
+        "the BM25-hard-negative augmentation deviates from the original task-1 'random fill only' spec; it is explicitly disclosed in data_manifest.md (with random-fill-only control MRR=0.9486) and was approved by the Lead; recorded as disclosed deviation (F13), not a defect.",
+        "embeddings fp16 MPS + float32 storage; query/passage same model/precision; norms match gate."
+      ]
+    },
+    {
+      "file": "results/exp2_retrieval.json + notes/exp2_retrieval.md",
+      "checked": "cross-checked",
+      "findings": [
+        "CSV rows=11=configs; JSON/notes numbers consistent (upload 0.7129 s / 70140 vec/s, k' values, recalls, MRR spread 0.7230+-0.0002).",
+        "notes accurately declare: paper gives no retrieval table; m=50k vs paper Table III m=100k; Delta-alpha=r convention; re-rank = exact plaintext distance (upper bound).",
+        "minor notes inaccuracy: notes §4 cites m=8000 gate recall 0.959, current M15 gate run reports 0.9630 (fresh nonces each gate run); should say '~0.96, nonce-dependent'."
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "id": "V-R1",
+      "severity": "note (reviewer-brief correction)",
+      "location": "exp2 DP config",
+      "issue": "The reviewer brief suggested exp2 averages k' over per-query sampled DP radii. In fact exp2 uses a FIXED radius r=0.02 (pprag passes dp_radius=0.02 float), so k' is constant 72 for every query (JSON k_prime_set=[72]).",
+      "impact": "none on numbers: a hypothetical Gamma(mean 0.02) radius would give E[ceil(k')]~71.68, i.e. also ~72; conclusion unchanged.",
+      "recommendation": "notes/exp2_retrieval.md should state explicitly 'fixed-radius k'=72 per query' to prevent mis-reading."
+    },
+    {
+      "id": "V-R2",
+      "severity": "minor (gate strength)",
+      "location": "gates/gate_m15_phase2.py checks 04/06/07",
+      "issue": "check 07 wording ('all with a (d,) ciphertext query') only asserts shape/​count for the 300 calls; content-level ciphertext check is done for 1 call (check 06). check 04 asserts the CLIENT-reported k', while the server-observed k recorded by the spy is never asserted.",
+      "impact": "no false PASS of the current implementation (verified independently), but the gate would not catch a hypothetical implementation that transmits plaintext for calls 2..300 or requests a different k at the server.",
+      "recommendation": "assert per-call content invariants on the spy records (norm in [s||q||-sβ/8, s||q||+sβ/8], not allclose to q/s*q) and compare spy k values to ceil(Theorem1)."
+    },
+    {
+      "id": "V-R3",
+      "severity": "minor (gate thresholds)",
+      "location": "gates/gate_m18_retrieval.py",
+      "issue": "thresholds are loose: rec_k>=0.90 (measured 0.9699), plaintext MRR in [0.2,0.9] (0.723), DP/oversampling recall>=0.99, 2k>=0.99, MRR delta<=0.01.",
+      "impact": "would tolerate sizable degradation (e.g. recall 0.91) without failing; current data passes with big margin so no false PASS.",
+      "recommendation": "tighten to measured values with margin, e.g. rec_k>=0.95, rec_2k>=0.999, DP recall>=0.999, plaintext MRR in [0.65,0.80]."
+    },
+    {
+      "id": "V-R4",
+      "severity": "note (gate design)",
+      "location": "gate_m18_retrieval.py check 10",
+      "issue": "exp2 k' vs 'expected' k' is computed by the same theorem.k_prime() call inside exp2 (self-consistency only).",
+      "impact": "does not independently validate Theorem 1; acceptable because Theorem 1 is separately validated in M13 (exp5) and by the separate cross-review (verify_theory).",
+      "recommendation": "add a note in the gate docstring pointing to M13/verify_theory for theorem validation."
+    },
+    {
+      "id": "V-R5",
+      "severity": "minor (sampling)",
+      "location": "gate_m14_phase1.py check 04",
+      "issue": "'no plaintext documents on server' scans the first 200 of 8000 AES ciphertexts.",
+      "impact": "sample-based check; AES-GCM blobs are mac'd so a leak is very unlikely, but the assertion is not exhaustive.",
+      "recommendation": "scan all m documents (cheap: 8000 x substring test) or state the sampling explicitly."
+    },
+    {
+      "id": "V-R6",
+      "severity": "note (timing reproducibility)",
+      "location": "exp2 latency/upload numbers",
+      "issue": "Absolute latency numbers (plaintext 2.45 ms/q, encrypted 2.35 ms/q, upload 0.71 s) are reproducible only qualitatively on this shared machine; under co-running jobs our independent latency measurements were 2-4x slower.",
+      "impact": "the reported within-run comparison (encrypted <=2x plaintext; server search dominates) is consistent and honest; absolute ms cannot be cross-session validated.",
+      "recommendation": "notes should mark latency as load-sensitive (like M17 did) and prefer ratios."
+    },
+    {
+      "id": "V-R7",
+      "severity": "note (notes accuracy + disclosed deviation)",
+      "location": "notes/exp2_retrieval.md / data_manifest.md",
+      "issue": "(a) notes §4 cites M15 m=8000 recall 0.959 while the current gate run reports 0.9630 (fresh nonces per run) - should be '~0.96'; (b) corpus includes 18544 BM25 hard negatives vs task-1 'random fill' spec - disclosed in data_manifest.md (with random-fill-only control MRR 0.9486) and approved by Lead.",
+      "impact": "none on verdict; both are transparency items.",
+      "recommendation": "(a) quote a range or mark nonce-dependent; (b) keep the deviation note in the final report (already F13 in docs/FINDINGS.md)."
+    }
+  ],
+  "findings_affecting_verdict": [],
+  "artifacts_checked": [
+    "results/exp2_retrieval.json",
+    "results/exp2_retrieval.csv",
+    "results/gate_M0_data.json",
+    "results/gate_M14_phase1.json",
+    "results/gate_M15_phase2.json",
+    "results/gate_M16_phase3.json",
+    "results/gate_M18_retrieval.json",
+    "figures/fig_retrieval.png",
+    "notes/exp2_retrieval.md",
+    "notes/data_manifest.md",
+    "experiments/exp2_retrieval.py",
+    "gates/gate_m0_data.py",
+    "gates/gate_m14_phase1.py",
+    "gates/gate_m15_phase2.py",
+    "gates/gate_m16_phase3.py",
+    "gates/gate_m18_retrieval.py",
+    "scripts/prepare_data.py"
+  ],
+  "review_commands": [
+    "cd 'code/CAPRISE复现' && MPLCONFIGDIR=$PWD/.cache/mpl .venv/bin/python -m gates.run_gates --from M0 --to M0  # observed PASS",
+    "... --from M14 --to M16  # observed PASS (M14/M15/M16)",
+    "... --from M18 --to M18  # observed PASS",
+    "# independent recompute: own code with src/caprise primitives only (1000 queries, m=50000, k=10); see independent_recompute"
+  ],
+  "runtime_s": null,
+  "timestamp": "2026-11-03T16:38:23+0800"
+}

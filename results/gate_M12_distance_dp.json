@@ -138,8 +138,8 @@
     "Two modes implemented: radius='gamma' + eps (actual DP mechanism) and fixed radius (Table III / ablations).",
     "Perturbed query is NOT re-normalised, matching RemoteRAG and Eq. 21's e~_q = e_q + noise."
   ],
-  "duration_s": 0.042,
-  "timestamp": "2026-11-03T16:19:31+0800",
+  "duration_s": 0.077,
+  "timestamp": "2026-11-03T16:35:12+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

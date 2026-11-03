@@ -146,8 +146,8 @@
     "MC also measures the minimal k' a real retrieval needs (~k): Eq.21 is a sufficient but very loose bound (A10b).",
     "Paper Table III requires Delta alpha/r ~1.21 (range 1.15-1.30), inconsistent with RemoteRAG's Delta alpha ~ r (A10)."
   ],
-  "duration_s": 2.674,
-  "timestamp": "2026-11-03T16:19:34+0800",
+  "duration_s": 5.009,
+  "timestamp": "2026-11-03T16:35:04+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",
