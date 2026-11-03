@@ -658,7 +658,15 @@ def run_experiment(cfg: dict) -> dict:
                 "asr10_adcpe": [results["real_m_sweep"][str(mm)]["ADCPE"]["asr@10"] for mm in mvals],
                 "asr10_caprise": [results["real_m_sweep"][str(mm)]["CAPRISE"]["asr@10"] for mm in mvals],
                 "nn_distance": [results["real_m_sweep"][str(mm)]["plaintext_gap_stats"]["nn_distance_mean"] for mm in mvals],
-                "interpretation": "ASR drops as the database grows denser (smaller NN gaps): the paper does not report m for Fig. 5, so its absolute ASR level is not identifiable from the text.",
+                "interpretation": (
+                    "ASR@10 is essentially invariant to m on real GTR in [2000, 50000] (ADCPE 0.956-0.964, "
+                    "CAPRISE 0.935-0.947) although the mean plaintext NN distance falls from 0.80 to 0.65; "
+                    "database density therefore does not explain the residual gap between our real-GTR ASR "
+                    "and the paper's digitised 87.5% / 83.1% at d=768.  Our controlled synthetic d=768 point "
+                    "(88.2 / 83.2) matches the paper's 768 bar almost exactly, so the difference is a "
+                    "real-vs-synthetic embedding geometry effect, not a database-size effect.  The paper "
+                    "does not state m for Fig. 5, so its absolute ASR level is not identifiable (A12/A13)."
+                ),
             }
         )
     # normalisation control outcome

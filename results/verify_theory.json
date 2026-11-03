@@ -1,0 +1,833 @@
+{
+  "meta": {
+    "task": "task-6 (cross-verification of theory-efficiency M12/M13/M17)",
+    "verifier": "data-retrieval",
+    "subject": "theory-efficiency gate results, experiments/exp5_query_dp.py, experiments/exp1_efficiency.py",
+    "workspace": "/Users/yin/Documents/RAG/code/CAPRISE复现",
+    "date": "2026-11-03T16:23:11+0800",
+    "hardware": {
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "machine": "arm64",
+      "python": "3.12.13",
+      "numpy": "2.5.4"
+    },
+    "commands": [
+      ".venv/bin/python -m gates.run_gates --from M12 --to M13",
+      ".venv/bin/python -m gates.run_gates --from M17 --to M17",
+      "independent scipy betainc/betaincinv + brentq recomputation (this report)",
+      "independent Monte-Carlo m=20000 nq=20 n=768 r=0.033 k=5 (seed 424242)",
+      "hand recomputation from raw runs_s / elapsed values in results/exp1_efficiency.json"
+    ],
+    "method_note": "all independent recomputations were implemented from scratch (scipy.special.betainc/betaincinv, scipy.optimize.brentq, numpy MC); no import of experiments/exp5_query_dp.py or experiments/exp1_efficiency.py, and caprise.theorem was not used for the independent numbers."
+  },
+  "gate_reruns": {
+    "M12": {
+      "gate_file": "results/gate_M12_distance_dp.json",
+      "label": "M12 / DistanceDP protocol",
+      "pass": true,
+      "n_checks": 18,
+      "all_checks_pass": true,
+      "timestamp": "2026-11-03T16:19:31+0800",
+      "duration_s": 0.042,
+      "failed_checks": [],
+      "key_observations": {
+        "gamma_mean_equals_n_over_eps": "n=768, eps=7680: sample mean=0.099989, expected=0.1, rel_err=0.00011 (<0.02), N=5000",
+        "gamma_ks_test_p_gt_0.01": "KS D=0.00580, p=0.99567 vs Gamma(shape=768, scale=1/7680)",
+        "norm_shift_equals_realised_radius_fixed": "max | ||e~-e|| - r | = 6.939e-18 over 200 draws (radius=0.033, tol 1e-12)"
+      }
+    },
+    "M13": {
+      "gate_file": "results/gate_M13_theorem1.json",
+      "label": "M13 / Theorem 1 + Table III",
+      "pass": true,
+      "n_checks": 19,
+      "all_checks_pass": true,
+      "timestamp": "2026-11-03T16:19:34+0800",
+      "duration_s": 2.674,
+      "failed_checks": [],
+      "key_observations": {
+        "beta_roundtrip_n768_1536_4096": "max |F(alpha_for_fraction(f))-f|/f = 4.551e-12 over f in (1e-05, 5e-05, 0.0001, 0.0002, 0.0005, 0.001, 0.5, 0.9), n in (768,1536,4096); tol 1e-9",
+        "m_times_F_alpha_k_equals_k": "max |m*F(alpha_k)-k| = 2.203e-12 over all 16 Table III cells (alpha_k := F^-1(k/m))",
+        "mc_widened_cap_matches_formula_within_5pct": "max |MC cap count - Eq.21|/Eq.21 = 0.0238 over all 16 cells (m=100,000, nq=200, fixed DB; population alpha_k from F(alpha_k)=k/m); tol 5%",
+        "mc_coverage_topk_sufficiency": "retrieving ceil(Eq.21) candidates under the perturbed query contains the plaintext top-k for every one of 200 queries x 16 cells",
+        "reverse_dalpha_converges_to_stable_value": "implied Delta alpha/r: mean=1.21285, std=0.0435, range=[1.15373, 1.29769] over 16 cells (stable ~1.21; RemoteRAG claims ~1.0); all cells > 1 => Table III inconsistent with Delta alpha = r (finding A10)"
+      }
+    },
+    "M17": {
+      "gate_file": "results/gate_M17_efficiency.json",
+      "label": "M17 / efficiency (Fig.4 + Phase-1/2)",
+      "pass": true,
+      "n_checks": 18,
+      "all_checks_pass": true,
+      "timestamp": "2026-11-03T16:19:35+0800",
+      "duration_s": 0.034,
+      "failed_checks": [],
+      "key_observations": {
+        "independent_recheck_d768": "gate re-measurement 87233 emb/s vs stored 86492 emb/s (ratio 1.01, must be >1000 emb/s and within [0.33,3] of stored)",
+        "phase1_caprise_encryption_measured": "EncQ n=128, d=768, median=1.471 ms, vectors/s=87035.3",
+        "phase1_overhead_below_19pct_all_configs": "2 measured embedding configs + 1 paper reference; overheads=[0.691, 0.233, 1.85]% (all < 19.0% paper bound)",
+        "phase2_caprise_measured": "CAPRISE d=768: 78566.8 vectors/s (12.728 us/vector, n=2000 single-vector EncQ calls)",
+        "phase2_paillier_baseline_measured": "phe baselines: [(1024, 2.1852), (2048, 0.2966)]; pure-pow baselines: [(1024, 0.1552), (2048, 0.0204)]"
+      }
+    }
+  },
+  "independent_table3": {
+    "method": "F(alpha)=1-I_{(1+cos alpha)/2}((n-1)/2,(n-1)/2) via scipy.special.betainc; alpha_k from F(alpha_k)=k/m via betaincinv; k'=k+m*(F(alpha_k+r)-F(alpha_k)); paper-value inversion via scipy.optimize.brentq on Delta alpha",
+    "required_cells": [
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 5,
+        "json_formula_kprime": 147.2509613773437,
+        "independent_kprime": 147.2509613773437,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 20,
+        "json_formula_kprime": 293.1408633265597,
+        "independent_kprime": 293.1408633265597,
+        "abs_diff": 0.0
+      }
+    ],
+    "all_16_cells": [
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 5,
+        "json_formula_kprime": 147.2509613773437,
+        "independent_kprime": 147.2509613773437,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 10,
+        "json_formula_kprime": 253.7865331150757,
+        "independent_kprime": 253.7865331150757,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 15,
+        "json_formula_kprime": 348.0850907242944,
+        "independent_kprime": 348.0850907242944,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 20,
+        "json_formula_kprime": 435.03585418171116,
+        "independent_kprime": 435.03585418171116,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 5,
+        "json_formula_kprime": 42.725471348104556,
+        "independent_kprime": 42.725471348104556,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 10,
+        "json_formula_kprime": 78.0356902175383,
+        "independent_kprime": 78.0356902175383,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 15,
+        "json_formula_kprime": 110.83037410297868,
+        "independent_kprime": 110.83037410297868,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 20,
+        "json_formula_kprime": 142.05073957389789,
+        "independent_kprime": 142.05073957389789,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 5,
+        "json_formula_kprime": 472.0680524480275,
+        "independent_kprime": 472.0680524480275,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 10,
+        "json_formula_kprime": 766.9004569725201,
+        "independent_kprime": 766.9004569725201,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 15,
+        "json_formula_kprime": 1015.1146995870181,
+        "independent_kprime": 1015.1146995870181,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 20,
+        "json_formula_kprime": 1236.5120249923334,
+        "independent_kprime": 1236.5120249923334,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 5,
+        "json_formula_kprime": 94.95739832393656,
+        "independent_kprime": 94.95739832393656,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 10,
+        "json_formula_kprime": 167.23602029074078,
+        "independent_kprime": 167.23602029074078,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 15,
+        "json_formula_kprime": 232.36810617770664,
+        "independent_kprime": 232.36810617770664,
+        "abs_diff": 0.0
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 20,
+        "json_formula_kprime": 293.1408633265597,
+        "independent_kprime": 293.1408633265597,
+        "abs_diff": 0.0
+      }
+    ],
+    "max_abs_diff_all_16_cells": 0.0,
+    "reverse_delta_alpha_cells": [
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 5,
+        "paper_kprime": 258,
+        "my_delta_alpha_rad": 0.03935951897012907,
+        "my_delta_alpha_over_r": 1.1927126960645171,
+        "json_delta_alpha_rad": 0.03935952,
+        "json_delta_alpha_over_r": 1.19271,
+        "abs_diff_rad": 1.0298709315903487e-09,
+        "abs_diff_ratio": 2.6960645171936193e-06
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 10,
+        "paper_kprime": 571,
+        "my_delta_alpha_rad": 0.04282376160963441,
+        "my_delta_alpha_over_r": 1.297689745746497,
+        "json_delta_alpha_rad": 0.04282376,
+        "json_delta_alpha_over_r": 1.29769,
+        "abs_diff_rad": 1.609634404931004e-09,
+        "abs_diff_ratio": 2.5425350291818916e-07
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 15,
+        "paper_kprime": 673,
+        "my_delta_alpha_rad": 0.04119246202513384,
+        "my_delta_alpha_over_r": 1.2482564250040558,
+        "json_delta_alpha_rad": 0.04119246,
+        "json_delta_alpha_over_r": 1.24826,
+        "abs_diff_rad": 2.025133838401416e-09,
+        "abs_diff_ratio": 3.574995944166659e-06
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 20,
+        "paper_kprime": 928,
+        "my_delta_alpha_rad": 0.04270889099994695,
+        "my_delta_alpha_over_r": 1.2942088181802105,
+        "json_delta_alpha_rad": 0.04270889,
+        "json_delta_alpha_over_r": 1.29421,
+        "abs_diff_rad": 9.999469516297488e-10,
+        "abs_diff_ratio": 1.1818197895863136e-06
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 5,
+        "paper_kprime": 58,
+        "my_delta_alpha_rad": 0.02309420506147668,
+        "my_delta_alpha_over_r": 1.154710253073834,
+        "json_delta_alpha_rad": 0.02309421,
+        "json_delta_alpha_over_r": 1.15471,
+        "abs_diff_rad": 4.938523319453214e-09,
+        "abs_diff_ratio": 2.5307383411110607e-07
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 10,
+        "paper_kprime": 108,
+        "my_delta_alpha_rad": 0.02345105139697747,
+        "my_delta_alpha_over_r": 1.1725525698488735,
+        "json_delta_alpha_rad": 0.02345105,
+        "json_delta_alpha_over_r": 1.17255,
+        "abs_diff_rad": 1.3969774677324853e-09,
+        "abs_diff_ratio": 2.56984887347933e-06
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 15,
+        "paper_kprime": 170,
+        "my_delta_alpha_rad": 0.024700282841184956,
+        "my_delta_alpha_over_r": 1.2350141420592478,
+        "json_delta_alpha_rad": 0.02470028,
+        "json_delta_alpha_over_r": 1.23501,
+        "abs_diff_rad": 2.841184953972231e-09,
+        "abs_diff_ratio": 4.142059247813634e-06
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 20,
+        "paper_kprime": 203,
+        "my_delta_alpha_rad": 0.023997138107207033,
+        "my_delta_alpha_over_r": 1.1998569053603516,
+        "json_delta_alpha_rad": 0.02399714,
+        "json_delta_alpha_over_r": 1.19986,
+        "abs_diff_rad": 1.892792967500556e-09,
+        "abs_diff_ratio": 3.094639648315578e-06
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 5,
+        "paper_kprime": 982,
+        "my_delta_alpha_rad": 0.03969419378524886,
+        "my_delta_alpha_over_r": 1.2028543571287533,
+        "json_delta_alpha_rad": 0.03969419,
+        "json_delta_alpha_over_r": 1.20285,
+        "abs_diff_rad": 3.785248864351942e-09,
+        "abs_diff_ratio": 4.357128753351702e-06
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 10,
+        "paper_kprime": 1492,
+        "my_delta_alpha_rad": 0.039429816617785204,
+        "my_delta_alpha_over_r": 1.1948429278116728,
+        "json_delta_alpha_rad": 0.03942982,
+        "json_delta_alpha_over_r": 1.19484,
+        "abs_diff_rad": 3.3822147929574164e-09,
+        "abs_diff_ratio": 2.927811672881475e-06
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 15,
+        "paper_kprime": 2077,
+        "my_delta_alpha_rad": 0.04020898777359193,
+        "my_delta_alpha_over_r": 1.218454174957331,
+        "json_delta_alpha_rad": 0.04020899,
+        "json_delta_alpha_over_r": 1.21845,
+        "abs_diff_rad": 2.2264080717926404e-09,
+        "abs_diff_ratio": 4.174957330960183e-06
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 20,
+        "paper_kprime": 2603,
+        "my_delta_alpha_rad": 0.04072825382471301,
+        "my_delta_alpha_over_r": 1.2341895098397881,
+        "json_delta_alpha_rad": 0.04072825,
+        "json_delta_alpha_over_r": 1.23419,
+        "abs_diff_rad": 3.824713011579828e-09,
+        "abs_diff_ratio": 4.901602117524106e-07
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 5,
+        "paper_kprime": 145,
+        "my_delta_alpha_rad": 0.023247948469993587,
+        "my_delta_alpha_over_r": 1.1623974234996792,
+        "json_delta_alpha_rad": 0.02324795,
+        "json_delta_alpha_over_r": 1.1624,
+        "abs_diff_rad": 1.5300064132306446e-09,
+        "abs_diff_ratio": 2.5765003208721993e-06
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 10,
+        "paper_kprime": 245,
+        "my_delta_alpha_rad": 0.023074680944187433,
+        "my_delta_alpha_over_r": 1.1537340472093716,
+        "json_delta_alpha_rad": 0.02307468,
+        "json_delta_alpha_over_r": 1.15373,
+        "abs_diff_rad": 9.441874330995415e-10,
+        "abs_diff_ratio": 4.047209371638161e-06
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 15,
+        "paper_kprime": 388,
+        "my_delta_alpha_rad": 0.024287866502456262,
+        "my_delta_alpha_over_r": 1.2143933251228132,
+        "json_delta_alpha_rad": 0.02428787,
+        "json_delta_alpha_over_r": 1.21439,
+        "abs_diff_rad": 3.497543737268627e-09,
+        "abs_diff_ratio": 3.3251228130914967e-06
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 20,
+        "paper_kprime": 501,
+        "my_delta_alpha_rad": 0.024595286448260617,
+        "my_delta_alpha_over_r": 1.2297643224130308,
+        "json_delta_alpha_rad": 0.02459529,
+        "json_delta_alpha_over_r": 1.22976,
+        "abs_diff_rad": 3.5517393817685594e-09,
+        "abs_diff_ratio": 4.322413030832806e-06
+      }
+    ],
+    "reverse_summary": {
+      "mean": 1.2128519777075017,
+      "std": 0.04349707413232869,
+      "min": 1.1537340472093716,
+      "max": 1.297689745746497
+    },
+    "max_abs_diff_delta_alpha_rad": 4.938523319453214e-09,
+    "max_abs_diff_delta_alpha_over_r": 4.357128753351702e-06,
+    "conclusions": [
+      "Eq.21 formula table in results/exp5_query_dp.json is exactly reproducible (max abs diff 0.0 over all 16 cells).",
+      "The two required cells: n=768,r=0.033,k=5 -> k'=147.250961377344 (identical to JSON); n=1536,r=0.02,k=20 -> k'=293.140863326560 (identical to JSON).",
+      "Reverse-engineered Delta alpha/r is confirmed: mean=1.212852, std=0.043497, range [1.153734,1.297690] vs JSON 1.21285/0.0435/[1.15373,1.29769] (diff <= 4.4e-6 = JSON 5-decimal rounding).",
+      "Therefore finding A10 (paper Table III needs Delta alpha ~= 1.21 r, inconsistent with RemoteRAG's Delta alpha~r) is independently reproduced."
+    ]
+  },
+  "independent_monte_carlo": {
+    "setup": {
+      "m": 20000,
+      "nq": 20,
+      "n": 768,
+      "r": 0.033,
+      "k": 5,
+      "seed": 424242
+    },
+    "alpha_k_population": 1.4452381174028484,
+    "alpha_k_empirical_mean": 1.4441785018413518,
+    "formula_kprime": 103.36149338726896,
+    "formula_kprime_ceil": 104,
+    "mc_cap_mean_population_alpha": 101.3,
+    "mc_cap_rel_err_population_alpha": -0.01994450079726578,
+    "mc_cap_mean_empirical_alpha": 97.3,
+    "mc_cap_rel_err_empirical_alpha": -0.05864363205897296,
+    "coverage_rate": 1.0,
+    "min_kprime_real_retrieval": {
+      "mean": 5.25,
+      "median": 5.0,
+      "max": 7,
+      "p95": 6.050000000000001
+    },
+    "pass_deviation_lt_10pct": true,
+    "runtime_s": 0.21
+  },
+  "exp1_recompute": {
+    "throughput_recompute": [
+      {
+        "d": 384,
+        "batch": 1000,
+        "runs_s": [
+          0.009575,
+          0.009843,
+          0.009915
+        ],
+        "median_s_recomputed": 0.009843,
+        "median_s_stored": 0.009843,
+        "embeddings_per_s_recomputed": 101595.0421619425,
+        "embeddings_per_s_stored": 101595.0,
+        "rel_diff_emb": 4.1500017228503997e-07,
+        "elements_per_s_recomputed": 39012496.19018592,
+        "elements_per_s_stored": 39012496.0,
+        "rel_diff_elem": 4.875000035989234e-09,
+        "n_runs": 3,
+        "all_runs_positive": true
+      },
+      {
+        "d": 768,
+        "batch": 1000,
+        "runs_s": [
+          0.011562,
+          0.011225,
+          0.011694
+        ],
+        "median_s_recomputed": 0.011562,
+        "median_s_stored": 0.011562,
+        "embeddings_per_s_recomputed": 86490.22660439371,
+        "embeddings_per_s_stored": 86491.5,
+        "rel_diff_emb": -1.4722783236358743e-05,
+        "elements_per_s_recomputed": 66424494.03217437,
+        "elements_per_s_stored": 66425453.0,
+        "rel_diff_elem": -1.4436752514564215e-05,
+        "n_runs": 3,
+        "all_runs_positive": true
+      },
+      {
+        "d": 1536,
+        "batch": 1000,
+        "runs_s": [
+          0.017904,
+          0.01792,
+          0.017584
+        ],
+        "median_s_recomputed": 0.017904,
+        "median_s_stored": 0.017904,
+        "embeddings_per_s_recomputed": 55853.44057193923,
+        "embeddings_per_s_stored": 55853.4,
+        "rel_diff_emb": 7.264005276181345e-07,
+        "elements_per_s_recomputed": 85790884.71849866,
+        "elements_per_s_stored": 85790885.0,
+        "rel_diff_elem": -3.281249958965415e-09,
+        "n_runs": 3,
+        "all_runs_positive": true
+      },
+      {
+        "d": 2048,
+        "batch": 1000,
+        "runs_s": [
+          0.02024,
+          0.02027,
+          0.020342
+        ],
+        "median_s_recomputed": 0.02027,
+        "median_s_stored": 0.02027,
+        "embeddings_per_s_recomputed": 49333.9911198816,
+        "embeddings_per_s_stored": 49333.4,
+        "rel_diff_emb": 1.1982143569988275e-05,
+        "elements_per_s_recomputed": 101036013.81351751,
+        "elements_per_s_stored": 101034768.0,
+        "rel_diff_elem": 1.2330542665381199e-05,
+        "n_runs": 3,
+        "all_runs_positive": true
+      },
+      {
+        "d": 3072,
+        "batch": 1000,
+        "runs_s": [
+          0.025237,
+          0.025109,
+          0.025288
+        ],
+        "median_s_recomputed": 0.025237,
+        "median_s_stored": 0.025237,
+        "embeddings_per_s_recomputed": 39624.36105717796,
+        "embeddings_per_s_stored": 39624.4,
+        "rel_diff_emb": -9.827990340343682e-07,
+        "elements_per_s_recomputed": 121726037.16765068,
+        "elements_per_s_stored": 121726037.0,
+        "rel_diff_elem": 1.3772787551961239e-09,
+        "n_runs": 3,
+        "all_runs_positive": true
+      },
+      {
+        "d": 4096,
+        "batch": 1000,
+        "runs_s": [
+          0.029529,
+          0.02964,
+          0.029299
+        ],
+        "median_s_recomputed": 0.029529,
+        "median_s_stored": 0.029529,
+        "embeddings_per_s_recomputed": 33865.014053980834,
+        "embeddings_per_s_stored": 33864.9,
+        "rel_diff_emb": 3.3679113428056095e-06,
+        "elements_per_s_recomputed": 138711097.5651055,
+        "elements_per_s_stored": 138710703.0,
+        "rel_diff_elem": 2.844518101085805e-06,
+        "n_runs": 3,
+        "all_runs_positive": true
+      }
+    ],
+    "phase1_recompute": {
+      "enc_median_recomputed_ms": 1.471,
+      "rows": [
+        {
+          "embedding_source": "mps",
+          "embedding_ms_128q": 212.8,
+          "caprise_enc_ms_128q": 1.471,
+          "overhead_pct_recomputed": 0.6912593984962406,
+          "overhead_pct_stored": 0.691,
+          "abs_diff_pct": 0.00025939849624068145
+        },
+        {
+          "embedding_source": "cpu",
+          "embedding_ms_128q": 632.105,
+          "caprise_enc_ms_128q": 1.471,
+          "overhead_pct_recomputed": 0.2327145015464203,
+          "overhead_pct_stored": 0.233,
+          "abs_diff_pct": 0.0002854984535797245
+        },
+        {
+          "embedding_source": "paper (A100 GPU)",
+          "embedding_ms_128q": 79.52,
+          "caprise_enc_ms_128q": 1.471,
+          "overhead_pct_recomputed": 1.8498490945674044,
+          "overhead_pct_stored": 1.85,
+          "abs_diff_pct": 0.00015090543259566047
+        }
+      ],
+      "embedding_source": "measured_local_gtr_t5_base",
+      "embedding_raw": {
+        "mps": {
+          "device": "mps",
+          "dtype": "float16",
+          "batch_size": 128,
+          "n_queries": 128,
+          "runs_ms": [
+            332.365,
+            212.117,
+            212.8
+          ],
+          "median_ms": 212.8,
+          "per_query_ms": 1.6625,
+          "model_load_s": 0.63,
+          "model_path": "data/raw/gtr-t5-base"
+        },
+        "cpu": {
+          "device": "cpu",
+          "dtype": "float32",
+          "batch_size": 128,
+          "n_queries": 128,
+          "runs_ms": [
+            645.803,
+            632.105,
+            624.051
+          ],
+          "median_ms": 632.105,
+          "per_query_ms": 4.9383,
+          "model_load_s": 0.37,
+          "model_path": "data/raw/gtr-t5-base"
+        }
+      }
+    },
+    "phase2_recompute": {
+      "caprise_vectors_per_s_recomputed": 78554.59544383346,
+      "caprise_vectors_per_s_stored": 78566.8,
+      "paillier": [
+        {
+          "impl": "python-phe phe.paillier + gmpy2 (GMP backend)",
+          "n_bits": 1024,
+          "n_vectors_768": 5,
+          "n_elements": 3840,
+          "elapsed_s": 2.288,
+          "us_per_element_recomputed": 595.8333333333334,
+          "us_per_element_stored": 595.85,
+          "vectors_per_s_recomputed": 2.1853146853146854,
+          "vectors_per_s_stored": 2.1852,
+          "declared_note": "extrapolated from n_vectors x 768 element encryptions; CPU only, no batching in Paillier"
+        },
+        {
+          "impl": "python-phe phe.paillier + gmpy2 (GMP backend)",
+          "n_bits": 2048,
+          "n_vectors_768": 5,
+          "n_elements": 3840,
+          "elapsed_s": 16.855,
+          "us_per_element_recomputed": 4389.322916666667,
+          "us_per_element_stored": 4389.36,
+          "vectors_per_s_recomputed": 0.29664787896766537,
+          "vectors_per_s_stored": 0.2966,
+          "declared_note": "extrapolated from n_vectors x 768 element encryptions; CPU only, no batching in Paillier"
+        }
+      ],
+      "pure_python": [
+        {
+          "impl": "pure CPython builtin pow (no GMP)",
+          "n_bits": 1024,
+          "n_elements": 24,
+          "us_per_element": 8390.82,
+          "vector_768_elems_s": 6.444151,
+          "vectors_per_s": 0.1552
+        },
+        {
+          "impl": "pure CPython builtin pow (no GMP)",
+          "n_bits": 2048,
+          "n_elements": 8,
+          "us_per_element": 63923.64,
+          "vector_768_elems_s": 49.093352,
+          "vectors_per_s": 0.0204
+        }
+      ]
+    },
+    "m17_gate_checks": {
+      "throughput_grid_complete": {
+        "pass": true,
+        "detail": "6 dims [384, 768, 1536, 2048, 3072, 4096]; batch>=1000 and reps==3 in every row"
+      },
+      "embeddings_per_s_decreases_with_d": {
+        "pass": true,
+        "detail": "embeddings/s 101595 -> 33865 strictly decreasing=True, d=384/d=4096 ratio=3.00x (>2 required; paper Fig.4a trend)"
+      },
+      "elements_per_s_within_one_order_of_magnitude": {
+        "pass": true,
+        "detail": "elements/s range 39.0M - 138.7M (max/min=3.56 < 10; same ballpark as paper Fig.4b 'remains high')"
+      },
+      "elements_per_s_stable_1536_3072": {
+        "pass": true,
+        "detail": "d in [1536,3072]: elements/s 85.8M - 121.7M (max/min=1.42 < 2; paper Fig.4b high region)"
+      },
+      "independent_recheck_d768": {
+        "pass": true,
+        "detail": "gate re-measurement 87233 emb/s vs stored 86492 emb/s (ratio 1.01, must be >1000 emb/s and within [0.33,3] of stored)"
+      },
+      "phase1_caprise_encryption_measured": {
+        "pass": true,
+        "detail": "EncQ n=128, d=768, median=1.471 ms, vectors/s=87035.3"
+      },
+      "phase1_overhead_below_19pct_all_configs": {
+        "pass": true,
+        "detail": "2 measured embedding configs + 1 paper reference; overheads=[0.691, 0.233, 1.85]% (all < 19.0% paper bound)"
+      },
+      "paper_phase1_claim_reproduced": {
+        "pass": true,
+        "detail": "paper 15/79.52 = 18.86% < 19%; our measured encryption 1.471 ms vs paper 15 ms"
+      },
+      "phase1_embedding_dominates_encryption": {
+        "pass": true,
+        "detail": "min measured embedding 212.8 ms vs CAPRISE 1.47 ms (embedding is the Phase-1 bottleneck; A17c)"
+      },
+      "phase2_caprise_measured": {
+        "pass": true,
+        "detail": "CAPRISE d=768: 78566.8 vectors/s (12.728 us/vector, n=2000 single-vector EncQ calls)"
+      },
+      "phase2_paillier_baseline_measured": {
+        "pass": true,
+        "detail": "phe baselines: [(1024, 2.1852), (2048, 0.2966)]; pure-pow baselines: [(1024, 0.1552), (2048, 0.0204)]"
+      },
+      "phase2_speedups_positive": {
+        "pass": true,
+        "detail": "speedup vs measured Paillier: [35954.1, 264891.4]; vs paper RemoteRAG PHE 250-300: 314.3x-261.9x (absolute ratios are cross-hardware/implementation, see A17/A17b)"
+      },
+      "paper_9x_claim_internal_consistency": {
+        "pass": true,
+        "detail": "paper 2339/(250-300) = 7.80-9.36x (mid 8.51x) => the paper's '9x' is internally consistent"
+      },
+      "phase2_implementation_style_difference_reported": {
+        "pass": true,
+        "detail": "our CAPRISE / paper CAPRISE 2339 vec/s = 33.59x (finding A17)"
+      },
+      "per_element_style_probe_slower": {
+        "pass": true,
+        "detail": "vectorised 2.875 us vs per-element loop 98.334 us per vector (34.2x slower) -> explains paper's 2339 vec/s (A17)"
+      },
+      "artifact_results_json": {
+        "pass": true,
+        "detail": "results/exp1_efficiency.json (10872 bytes), sections=['description', 'experiment', 'findings', 'hardware', 'implementation_style_probe', 'module', 'paper_numbers', 'paper_ref', 'phase1_overhead', 'phase2', 'runtime_s', 'settings', 'throughput']"
+      },
+      "artifact_figure": {
+        "pass": true,
+        "detail": "figures/fig4_efficiency.png (227138 bytes)"
+      },
+      "artifact_notes_documents_A17": {
+        "pass": true,
+        "detail": "notes/exp1_efficiency.md exists=True, documents A17=True, documents PHE baseline=True"
+      }
+    }
+  },
+  "static_review": {
+    "files_read": [
+      "experiments/exp5_query_dp.py",
+      "experiments/exp1_efficiency.py",
+      "gates/gate_m13_theorem1.py",
+      "gates/gate_m17_efficiency.py",
+      "gates/gate_m12_distance_dp.py",
+      "src/caprise/theorem.py",
+      "notes/exp5_query_dp.md",
+      "notes/exp1_efficiency.md",
+      "results/exp5_query_dp.json",
+      "results/exp1_efficiency.json"
+    ],
+    "checks_performed": [
+      "hardcoded expected values: PAPER_TABLE (exp5) / PAPER_* constants (exp1) are paper references only; verified the Table III transcription against the paper LaTeX source (output/pdf/source/caprise/ppRAG_FLLM.tex lines 559-562) -> exact match",
+      "all measured quantities recomputed from raw runs_s / MC samples rather than trusting aggregates",
+      "paper-value reverse engineering (Delta alpha/r) is explicitly labelled as reverse-engineered finding A10, not presented as a measurement",
+      "sample sizes and seeds: exp5 MC m=100,000 nq=200 per dim with DB_SEED=20260118 and MC seed=7, per-query samples stored; exp1 batch=1000, reps=3, seeds fixed; M12 5000 draws seeded -> no shrinkage, no seed skipping"
+    ],
+    "issues_found": [
+      {
+        "id": "V1",
+        "severity": "minor-presentation",
+        "file": "results/exp1_efficiency.json -> findings[A17c]",
+        "issue": "finding text hardcodes '~224 ms (MPS fp16) / ~606 ms (CPU fp32) ... ~1.6 ms' and overhead '0.26-0.71%', which do not match the measured medians in the same JSON (212.8 ms / 632.105 ms / 1.471 ms; overhead 0.233-0.691%). The values look stale from an earlier run and are not formatted from the raw data.",
+        "impact": "does not change the conclusion (embedding 212.8-632.1 ms vs encryption 1.47 ms => encryption <1%; A17c 'embedding dominates' still true), but the text is internally inconsistent and should be fixed before it enters the report."
+      },
+      {
+        "id": "V2",
+        "severity": "minor-presentation",
+        "file": "results/exp1_efficiency.json -> findings[A17]",
+        "issue": "compares 86,492 embeddings/s (batch EncDB throughput) with the paper's 2,339 vec/s (Phase-2 single-vector EncQ throughput) and quotes '~37x'; the same JSON's like-for-like phase-2 comparison is 78,566.8/2,339 = 33.6x (our_over_paper).",
+        "impact": "both point the same way; the 37x figure mixes two different metrics and should be 33.6x or explicitly labelled as batch-vs-single-vector."
+      },
+      {
+        "id": "V3",
+        "severity": "minor-presentation",
+        "file": "experiments/exp1_efficiency.py -> style_probe(); results/exp1_efficiency.json -> implementation_style_probe",
+        "issue": "key 'per_element_scalar_loop_us' = 98.334 actually times 768 scalar draws (i.e. a per-vector cost; 1e6/98.334 = 10,169 vec/s shows the code treats it as per-vector). The prose claim that 'a per-element Python implementation does ~0.5-0.7 us/element' is an inference (paper 428 us/vector / 768 = 0.56 us/element), while the measured scalar-draw loop is ~0.128 us/element (4x lower, and it only covers the Gaussian draw, not PRF/scalar ops).",
+        "impact": "A17 (paper throughput reflects a per-element implementation style) remains a plausible hypothesis, not a measurement; wording should be softened/labelled and the key renamed."
+      },
+      {
+        "id": "V4",
+        "severity": "minor-transparency",
+        "file": "experiments/exp1_efficiency.py -> builtin_pow_paillier()",
+        "issue": "the pure-CPython 'Paillier' lower-bound baseline uses a synthetic timing-only modulus (_make_paillier_modulus, no primality) rather than a real Paillier key; this is stated in the code docstring but not in the JSON note / notes table.",
+        "impact": "baseline only (the headline Paillier numbers use real python-phe keys and are correctly labelled 'extrapolated from 5 vectors'); add one sentence to notes."
+      },
+      {
+        "id": "V5",
+        "severity": "minor-gate-design",
+        "file": "gates/gate_m17_efficiency.py / gate_m13_theorem1.py",
+        "issue": "gate_m17 'independent_recheck_d768' accepts a measured/stored ratio in [0.33, 3] (very wide); gate_m13 'paper_table_transcription_consistent' allows the k'/k ratio to be off by 1 after rounding; gate_m13's 'independent reduced MC' re-uses the exp5 module implementation (not implementation-independent).",
+        "impact": "actual values are far inside these windows (recheck ratio 1.01; transcription verified exactly against LaTeX by this review; my own MC implementation independently confirms the cap-count identity to -1.99%), so no bad data is being masked; tighten for presentation value."
+      },
+      {
+        "id": "V6",
+        "severity": "note",
+        "file": "results/exp5_query_dp.json -> reverse_delta_alpha",
+        "issue": "delta_alpha_rad is stored rounded to 8 decimals and delta_alpha_over_r to 5 decimals; a 1e-6 comparison tolerance on the ratio is below the JSON's rounding granularity.",
+        "impact": "independent recomputation differs by <=4.94e-9 rad in Delta alpha and <=4.36e-6 in the ratio, i.e. exactly the stored rounding; no numerical disagreement."
+      }
+    ]
+  },
+  "verdict": {
+    "result": "PASS",
+    "summary": "M12/M13/M17 gates independently re-run and observed PASS (18/19/18 checks). Independent scipy+brentq recomputation reproduces the Table III formula table exactly and the reverse Delta alpha/r to JSON rounding; independent MC confirms the widened-cap identity within 2.0% (<10% requested). exp1 throughput/overhead/phase-2 numbers are hand-recomputable from the stored raw runs (d=768: 86,490 emb/s vs stored 86,491.5; overhead 0.6913% vs 0.691%); Paillier numbers are real measurements of 3840 element encryptions extrapolated to vectors and are correctly declared as such.",
+    "issues_affecting_measured_values_or_conclusions": 0,
+    "minor_issues_found": 6
+  }
+}

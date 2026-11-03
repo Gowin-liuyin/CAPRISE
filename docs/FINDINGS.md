@@ -84,3 +84,44 @@
 - 现象: 复现验证的是机制正确性与经验泄漏（Vec2Text/ASR/距离重建），未重做密码学安全证明。
 - 处置: 报告中把 C9/C10 的判定标为 BLOCKED（超出范围），不得声称"安全性已验证"。
 - 状态: CONFIRMED（范围声明）
+
+---
+
+## 追加发现（实验完成后）
+
+## F11: 论文 Fig.5 的 ASR 趋势与受控维度实验不一致（A13 扩展）
+
+- 类型: 内部不一致/不可复现
+- 论文位置: Fig.5（ASR vs embedding size）
+- 证据: privacy-attacks 从论文 LaTeX 源图（`output/pdf/source/caprise/figures/exp_asr.png`）逐柱数字化 12 个尺寸点（64…2048）：CAPRISE 53.5→88.8%，ADCPE 65.8→94.6%，平均差 −2.7~−15.9pt（图上方法名误拼 CONPRISE）。我们的受控维度扫描（合成高斯 d=768/1536/3072）ASR@10 平坦 81.7–84.9%，因为近邻 gap ∝ 1/√d 与噪声 σ ∝ 1/√d 相互抵消；d=768 合成点与论文 768 点高度吻合（83.2/88.2 vs 83.1/87.5）。
+- 影响: 论文 12 个"尺寸"点不可能都来自 768 维 gtr-t5-base（A13）；趋势更可能来自不同数据集/邻域结构而非维度本身。
+- 证据: results/exp4_vector_analysis.json、notes/exp4_vector_analysis.md
+- 状态: CONFIRMED
+
+## F12: 效率倍数跨实现/跨硬件不可直接比较（A17b/A17c 扩展）
+
+- 类型: 可复现性/可比性
+- 论文位置: §V-1（2339 vec/s、PHE 250–300 vec/s、9×）
+- 证据: 本机 M5 CPU：CAPRISE 78.6k vec/s（向量化 numpy），Paillier 实测 2.19 vec/s(1024-bit)/0.30(2048-bit)；与论文引用 RemoteRAG 的比值为 262–314×，而论文 9× 是"同为优化实现"的比值。A17 探针：向量化 vs 逐元素实现 34× 差异 → 论文 2339 vec/s（428µs/vec ≈ 0.56µs/element）对应逐元素 Python 风格。
+- 处置: 报告只比较同环境相对趋势 + 明确声明实现风格差异；不宣称"我们比论文快 34×"。
+- 状态: CONFIRMED
+
+## F13: 加密噪声对自然语料 top-10 的影响极小（实验设计约束）
+
+- 类型: 声明强度/实验设计
+- 证据: data-retrieval 的 exp2 语料必须加入 18,544 条官方 BM25 硬负例才能让加密噪声改变 top-10（纯 qrels+随机填充时，明文与加密 top-10 几乎完全一致）。加入硬负例后 CAPRISE k'=k recall@10 才降到 0.9699；且 β=0.05 时 recall 0.9910。
+- 影响: 论文"high retrieval accuracy"声明在良性语料上几乎自动成立（加密噪声是 β 量级、远小于硬负例间的典型距离差时），该声明信息量有限；真实风险在对抗性/困难近邻场景。
+- 状态: CONFIRMED
+
+## F14: Vec2Text 攻击必须使用 vec2text 训练的嵌入约定（否则基线也失败）
+
+- 类型: 可实现性/攻击模型细节
+- 证据: 直接把 sentence-transformers 的 GTR 嵌入（含 Dense+归一化）喂给 vec2text gtr-base corrector：即使 num_steps=20/beam=4，重建也是完全无关文本（说明"无加密也重建失败"，不能作为基线）。改用 vec2text 自身约定（`corrector.inversion_trainer.call_embedding_model`，T5 encoder 均值池化、无 Dense）后，20 步 beam=4 的重建与原文高度接近（约 8.7s/text CPU/MPS 混合）。
+- 影响: 论文 Table II 的基线 BLEU 83 隐含使用 vec2text 约定嵌入；复现 M11 必须对齐该约定，并在报告中声明（这也是 A11 的一部分）。
+- 状态: CONFIRMED
+
+## F15: 论文 Table II 的绝对数值只能在相同攻击约定/数据规模下对齐
+
+- 类型: 可复现性
+- 证据: 见 F14 + Table II 缺样本量/步数/攻击者归一化细节（F6）。本复现固定 num_steps=20、sequence_beam_width=4、样本 20 条，报告 BLEU/P/R/F1/ROUGE 并与论文值并列，只主张趋势与量级。
+- 状态: CONFIRMED
