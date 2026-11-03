@@ -1,0 +1,109 @@
+{
+  "module": "P0",
+  "name": "skeleton",
+  "owner": "lead",
+  "paper_ref": "paper-reproduction skill Phase 0",
+  "pass": true,
+  "checks": [
+    {
+      "check": "required_artifacts_present",
+      "expected": [],
+      "actual": [],
+      "pass": true,
+      "detail": "10 required files"
+    },
+    {
+      "check": "module_plan_covers_all_modules",
+      "expected": [],
+      "actual": [],
+      "pass": true,
+      "detail": "20 module ids found in plan"
+    },
+    {
+      "check": "module_plan_has_executable_criteria",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "claims_checklist_has_verdict_column",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "failfast_stops_at_failing_module",
+      "expected": [
+        "S1",
+        "FAIL"
+      ],
+      "actual": [
+        "S1",
+        "FAIL"
+      ],
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "failfast_does_not_continue",
+      "expected": 1,
+      "actual": 1,
+      "pass": true,
+      "detail": "runner must stop after the failing module"
+    },
+    {
+      "check": "failing_gate_persists_pass_false",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "results/gate_S1_selftest_fail.json"
+    },
+    {
+      "check": "normal_path_completes",
+      "expected": null,
+      "actual": null,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "passing_gate_persists_pass_true",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "results/gate_S2_selftest_pass.json"
+    },
+    {
+      "check": "runner_order_starts_with_P0",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "first=P0"
+    },
+    {
+      "check": "runner_order_canonical",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "['P0', 'M0', 'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M18']"
+    }
+  ],
+  "notes": [
+    "Skeleton gate: artefacts, plan/claims coverage, fail-fast runner behaviour verified.",
+    "Fail-fast demonstration: S1 (deliberately failing) stops the run; S2 (passing) completes."
+  ],
+  "duration_s": 9.86,
+  "timestamp": "2026-11-03T15:37:05+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

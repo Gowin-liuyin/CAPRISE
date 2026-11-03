@@ -1,20 +1,14 @@
 {
   "range": [
-    "M8",
-    "M9"
+    "P0",
+    "P0"
   ],
   "modules": [
     {
-      "module": "M8",
-      "name": "eq3",
+      "module": "P0",
+      "name": "skeleton",
       "status": "PASS",
-      "result_file": "results/gate_M8_eq3.json"
-    },
-    {
-      "module": "M9",
-      "name": "adcpe",
-      "status": "PASS",
-      "result_file": "results/gate_M9_adcpe.json"
+      "result_file": "results/gate_P0_skeleton.json"
     }
   ],
   "failed_module": null,

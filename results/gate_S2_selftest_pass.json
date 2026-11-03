@@ -1,0 +1,30 @@
+{
+  "module": "S2",
+  "name": "selftest_pass",
+  "owner": "lead",
+  "paper_ref": "Phase-0 skeleton gate",
+  "pass": true,
+  "checks": [
+    {
+      "check": "always_passing_check",
+      "expected": 1,
+      "actual": 1,
+      "pass": true,
+      "detail": "this check must pass"
+    }
+  ],
+  "notes": [],
+  "duration_s": 0.0,
+  "timestamp": "2026-11-03T15:37:00+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

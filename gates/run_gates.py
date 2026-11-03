@@ -2,14 +2,18 @@
 
 Usage
 -----
+    .venv/bin/python -m gates.run_gates --all
     .venv/bin/python -m gates.run_gates --from M1 --to M9
     .venv/bin/python -m gates.run_gates --list
-    .venv/bin/python -m gates.run_gates --all
 
-Discipline (user requirement): modules run in order M0 -> M19; the runner stops
-at the first failing gate and reports the reason.  A missing gate script is
-reported as NOT_IMPLEMENTED and (by default) stops the run, because a module
-that has not been verified must not be considered passed.
+Discipline (user requirement + paper-reproduction skill):
+modules run in order P0 -> M0 -> M1 -> ...; the runner stops at the first
+failing gate and reports the reason.  A missing gate script is NOT_IMPLEMENTED
+and (unless --allow-missing) stops the run: a module that has not been verified
+must not be considered passed.
+
+``run_sequence`` is exposed separately so the Phase-0 skeleton gate can verify
+the fail-fast behaviour of the real runner with a deliberately failing gate.
 """
 
 from __future__ import annotations
@@ -25,6 +29,7 @@ RESULTS = ROOT / "results"
 
 # canonical order: (module id, gate name, module path)
 GATES = [
+    ("P0", "skeleton", "gates.gate_p0_skeleton"),
     ("M0", "data", "gates.gate_m0_data"),
     ("M1", "prf", "gates.gate_m1_prf"),
     ("M2", "keygen", "gates.gate_m2_keygen"),
@@ -47,6 +52,49 @@ GATES = [
 ]
 
 ORDER = [g[0] for g in GATES]
+
+
+def run_sequence(entries: list[tuple[str, str, str]], allow_missing: bool = False) -> tuple[list[dict], tuple[str, str] | None]:
+    """Run ``(module_id, gate_name, module_path)`` entries in order, fail-fast.
+
+    Returns (summary, failed) where failed = (module_id, status) or None.
+    """
+    summary: list[dict] = []
+    failed: tuple[str, str] | None = None
+    for mid, name, mod in entries:
+        script = ROOT / "gates" / f"gate_{mid.lower()}_{name}.py"
+        if mod.startswith("gates._selftest."):
+            script = ROOT / (mod.replace(".", "/") + ".py")
+        res_path = RESULTS / f"gate_{mid}_{name}.json"
+        print(f"\n===== {mid} {name} =====")
+        if not script.exists():
+            status = "NOT_IMPLEMENTED"
+            print(f"  [{status}] {script.relative_to(ROOT)} does not exist")
+            summary.append({"module": mid, "name": name, "status": status})
+            if not allow_missing:
+                failed = (mid, status)
+                break
+            continue
+        proc = subprocess.run([sys.executable, "-m", mod], cwd=ROOT)
+        if not res_path.exists():
+            status = "FAIL_RUN"  # gate did not produce machine-readable evidence
+        else:
+            res = json.loads(res_path.read_text(encoding="utf-8"))
+            status = "PASS" if res.get("pass") else "FAIL"
+            if status == "PASS" and proc.returncode != 0:
+                status = "FAIL_RUN"  # gate claimed pass but exited non-zero: inconsistent
+        summary.append(
+            {
+                "module": mid,
+                "name": name,
+                "status": status,
+                "result_file": str(res_path.relative_to(ROOT)) if res_path.exists() else None,
+            }
+        )
+        if status != "PASS":
+            failed = (mid, status)
+            break
+    return summary, failed
 
 
 def _in_range(mid: str, start: str | None, stop: str | None) -> bool:
@@ -85,33 +133,8 @@ def main() -> int:
         start, stop = ORDER[0], ORDER[-1]
 
     RESULTS.mkdir(exist_ok=True)
-    summary = []
-    failed = None
-    for mid, name, mod in GATES:
-        if not _in_range(mid, start, stop):
-            continue
-        script = ROOT / "gates" / f"gate_{mid.lower()}_{name}.py"
-        res_path = RESULTS / f"gate_{mid}_{name}.json"
-        print(f"\n===== {mid} {name} =====")
-        if not script.exists():
-            status = "NOT_IMPLEMENTED"
-            print(f"  [{status}] {script.relative_to(ROOT)} does not exist")
-            summary.append({"module": mid, "name": name, "status": status})
-            if not args.allow_missing:
-                failed = (mid, status)
-                break
-            continue
-        proc = subprocess.run([sys.executable, "-m", mod], cwd=ROOT)
-        if proc.returncode != 0 or not res_path.exists():
-            status = "FAIL_RUN"
-        else:
-            res = json.loads(res_path.read_text(encoding="utf-8"))
-            status = "PASS" if res.get("pass") else "FAIL"
-        summary.append({"module": mid, "name": name, "status": status,
-                        "result_file": str(res_path.relative_to(ROOT)) if res_path.exists() else None})
-        if status != "PASS":
-            failed = (mid, status)
-            break
+    entries = [e for e in GATES if _in_range(e[0], start, stop)]
+    summary, failed = run_sequence(entries, allow_missing=args.allow_missing)
 
     out = {
         "range": [start, stop],
