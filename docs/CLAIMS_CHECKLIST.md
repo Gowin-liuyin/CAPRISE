@@ -30,10 +30,10 @@
 
 | id | 论文出处 | 论文值 / 命题 | 复现值 | 判定 | 证据 |
 |---|---|---|---|---|---|
-| E1 | Fig.4a, §V-1 | 加密吞吐（embeddings/s）随嵌入维度上升而下降 | d=384→4096: 101,595→33,865 embeddings/s（单调下降 3.0×） | VERIFIED | results/gate_M17_efficiency.json, results/exp1_efficiency.json |
-| E2 | Fig.4b, §V-1 | 元素级吞吐在 1536–3072 维震荡/维持高位 | elements/s: 39.0M(d=384)→138.7M(d=4096)，单调上升；1536–3072 区间仅 1.42× 变化（"高位"成立；"震荡"未复现，A17 实现风格） | VERIFIED（趋势方向部分，见 F12） | results/exp1_efficiency.json |
-| E3 | §V-1 | 128 query：嵌入 79.52ms + CAPRISE 加密 15ms，开销 <19% | 本机 128 真实 query：MPS fp16 嵌入 212.80ms + 加密 1.47ms → 0.69%；CPU fp32 632.11ms → 0.23%；加密 1.47ms vs 论文 15ms | VERIFIED（<19% 成立且更优；绝对值跨硬件不可比） | results/exp1_efficiency.json |
-| E4 | §V-1 | d=768：CAPRISE 2339 vec/s vs RemoteRAG PHE 250–300 vec/s（9×） | CAPRISE 78,567 vec/s（向量化）；Paillier 实测 2.19 vec/s(1024-bit)、0.30(2048-bit)；论文 9× 内部自洽（2339/250–300=7.8–9.4×）；本机比值 262–314× 属实现/硬件差异（A17） | VERIFIED（方向+论文内部自洽；绝对倍数不可跨实现比，见 F12） | results/exp1_efficiency.json |
+| E1 | Fig.4a, §V-1 | 加密吞吐（embeddings/s）随嵌入维度上升而下降 | d=384→4096: 69,838→24,813 embeddings/s（单调下降 2.8×；负载敏感，空闲时 d=768 可达 86.5k） | VERIFIED | results/gate_M17_efficiency.json, results/exp1_efficiency.json |
+| E2 | Fig.4b, §V-1 | 元素级吞吐在 1536–3072 维震荡/维持高位 | elements/s: 26.8M(d=384)→113.9M(d=3072)→101.6M(d=4096)，同数量级；1536–3072 为 73.3M→113.9M（"高位"成立；精确"震荡"形态受负载影响，A17/F12） | VERIFIED（趋势方向部分，见 F12） | results/exp1_efficiency.json |
+| E3 | §V-1 | 128 query：嵌入 79.52ms + CAPRISE 加密 15ms，开销 <19% | 本机 128 真实 query：MPS fp16 224.68ms + 加密 2.281ms → 1.015%；CPU fp32 747.82ms → 0.305%；论文嵌入混合参照 2.87%；加密 2.281ms vs 论文 15ms | VERIFIED（<19% 成立且更优；绝对值跨硬件不可比） | results/exp1_efficiency.json |
+| E4 | §V-1 | d=768：CAPRISE 2339 vec/s vs RemoteRAG PHE 250–300 vec/s（9×） | CAPRISE 67,996 vec/s（单向量同口径，向量化）；Paillier 实测 1.6254 vec/s(1024-bit)、0.2513(2048-bit)；论文 9× 内部自洽（2339/250–300=7.8–9.4×）；本机比值 227–272× 属实现/硬件差异（A17/F12） | VERIFIED（方向+论文内部自洽；绝对倍数不可跨实现比） | results/exp1_efficiency.json |
 
 ## D. 隐私实验声明 (Table II, Fig.5)
 

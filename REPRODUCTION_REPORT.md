@@ -170,8 +170,8 @@ ADCPE 保留库内距离（β-DCP），CAPRISE 故意把库侧噪声放大到 `3
 | CAPRISE k'=k | 0.9699 | 0.7230 | 10 | 2.35 |
 | CAPRISE k'=15 | 0.9999 | 0.7230 | 15 | 2.39 |
 | CAPRISE k'=2k | 1.0000 | 0.7230 | 20 | 2.56 |
-| CAPRISE+DP r=0.02（k'=Theorem1） | 1.0000 | 0.7230 | 72 | 3.11 |
-| CAPRISE+DP r=0.05（k'=Theorem1） | 1.0000 | 0.7230 | 785 | 11.81 |
+| CAPRISE+DP r=0.02（固定半径，k'=Theorem1） | 1.0000 | 0.7230 | 72 | 3.11 |
+| CAPRISE+DP r=0.05（固定半径，k'=Theorem1） | 1.0000 | 0.7230 | 785 | 11.81 |
 | ADCPE k'=k | 0.9724 | 0.7232 | 10 | 2.34 |
 | ADCPE k'=2k | 1.0000 | 0.7230 | 20 | 2.44 |
 
@@ -180,7 +180,7 @@ ADCPE 保留库内距离（β-DCP），CAPRISE 故意把库侧噪声放大到 `3
 Phase-1（EncDB+AES，m=50k）：0.71 s ≈ 70,140 vec/s。
 
 **结论**：论文 "high retrieval accuracy" 在本设置下成立，但**严格 `k'=k` 会损失 ~3%**；
-实用部署应做小 oversampling（k'=15 即恢复 0.9999）。DP 的 k' 由 Theorem 1 给出时召回无损，
+实用部署应做小 oversampling（k'=15 即恢复 0.9999）。DP 使用固定半径（r=0.02 → 每 query k'=72；若按论文 Gamma(mean=r) 抽样，E[⌈k'⌉]≈71.68，结论相同）；DP 的 k' 由 Theorem 1 给出时召回无损，
 代价是候选解密量（r=0.05 → 785 个候选 → 11.81ms/query）。
 ADCPE 在同 k' 下略高（0.9724 vs 0.9699）：CAPRISE 把库侧噪声加大 1.5× 换库内距离不可区分，
 这是**为隐私付出的真实小精度代价**（论文核心 trade-off 的量化）。
@@ -203,34 +203,39 @@ ADCPE 在同 k' 下略高（0.9724 vs 0.9699）：CAPRISE 把库侧噪声加大 
 
 ### 4.4 效率（M17）
 
-**A. 加密吞吐 vs 维度（EncDB，batch=1000，3 次中位数，M5 CPU）**
+**A. 加密吞吐 vs 维度（EncDB，batch=1000，3 次中位数，M5 CPU；wall-clock）**
 
 | d | 384 | 768 | 1536 | 2048 | 3072 | 4096 |
 |---|---|---|---|---|---|---|
-| embeddings/s | 101,595 | 86,492 | 55,853 | 49,333 | 39,624 | 33,865 |
-| elements/s | 39.0M | 66.4M | 85.8M | 101.0M | 121.7M | 138.7M |
+| embeddings/s | 69,838 | 68,660 | 47,705 | 39,790 | 37,080 | 24,813 |
+| elements/s | 26.8M | 52.7M | 73.3M | 81.5M | 113.9M | 101.6M |
 
-趋势：embeddings/s 单调下降 **3.0×**（Fig.4a ✓）；elements/s 同数量级、1536–3072 区间仅 1.42× 变化
-（"高位"✓，"震荡"未复现，A17 实现风格）。
+趋势：embeddings/s 单调下降 **2.8×**（Fig.4a ✓）；elements/s 同一数量级。
+> 绝对吞吐受同机并发负载影响（wall≈CPU time 表明是资源竞争），空闲时 d=768 可达 86.5k emb/s；
+> JSON 同时保存 wall/CPU time 与原始 runs，M17 门禁的内部一致性检查用 raw runs 精确复算（tol 1e-4）。
+> 该数字为联调/负载下测量，**只看趋势与同 session 相对关系**（A17/F12）。
 
 **B. Phase-1 overhead（128 条真实 query，本地 gtr-t5-base + EncQ 实测）**
 
 | 设备 | 嵌入 | CAPRISE 加密 | overhead | 论文 |
 |---|---|---|---|---|
-| MPS fp16 | 212.80 ms | 1.47 ms | **0.69%** | 79.52 ms + 15 ms = 18.9% |
-| CPU fp32 | 632.11 ms | 1.47 ms | **0.23%** | — |
+| MPS fp16 | 224.68 ms | 2.281 ms | **1.015%** | 79.52 ms + 15 ms = 18.9% |
+| CPU fp32 | 747.82 ms | 2.281 ms | **0.305%** | — |
+| 论文嵌入混合参照 | 79.52 ms | 2.281 ms | **2.87%** | — |
 
-加密耗时 1.47ms 低于论文 15ms；overhead 远小于 19%（结论方向一致且更优）。
+加密耗时 2.281ms 低于论文 15ms；overhead 远小于 19%（结论方向一致且更优）。
 
 **C. Phase-2（d=768）**
 
-- CAPRISE：**78,567 vectors/s**（12.73 µs/vector，单向量 EncQ）；批量 EncDB 86,492 emb/s。
-- Paillier PHE 基线（本机实测，5 向量×768 元素外推）：1024-bit **2.185 vec/s**、2048-bit **0.297 vec/s**。
-- 加速比：vs 本机 Paillier 1024-bit ≈ **3.6×10⁴**；vs 论文引用 RemoteRAG PHE(250–300) ≈ **262–314×**；
-  vs 论文 CAPRISE(2339) = **33.6×**（实现风格差异）。
+- CAPRISE：**67,996 vectors/s**（14.71 µs/vector，单向量 EncQ，与论文 Phase-2 同口径）。
+- Paillier PHE 基线（本机实测，5 向量×768=3840 元素后外推，已声明）：1024-bit **1.6254 vec/s**
+  （801.1 µs/element）、2048-bit **0.2513 vec/s**（5180.7 µs/element）。
+- 加速比：vs 本机实测 Paillier 1024-bit ≈ **4.2×10⁴**（2048-bit ≈ 2.7×10⁵）；
+  vs 论文引用 RemoteRAG PHE(250–300) ≈ **227–272×**；vs 论文 CAPRISE(2339) = **29.1×**（同口径单向量）。
 - 论文 9× 内部自洽：2339/(250–300) = 7.8–9.4×（mid 8.51）。
-- A17 探针：向量化高斯 2.875 µs/vec vs 逐元素 Python 循环 98.3 µs/vec（**34.2×**）→
-  论文 2339 vec/s（428 µs/vec ≈ 0.56 µs/element）正是逐元素实现风格。
+- A17 探针：向量化高斯 2.916 µs/vec vs 逐元素 Python 循环 98.438 µs/vec（**33.75×**；标量 draw
+  实测 0.128 µs/element）→ 论文 2339 vec/s（428 µs/vec ≈ 0.56 µs/element）与"逐元素实现风格"
+  合理吻合，但这是**对论文实现的合理重建，不是对论文代码的测量**。
 
 **结论**：效率方向性结论成立（CAPRISE 加密极快、显著优于 PHE），但**绝对值/倍数跨实现、
 跨硬件不可直接比较**（F5/F12）。
@@ -338,7 +343,7 @@ CAPRISE raw≈6.6、CAPRISE 去缩放≈27.7 —— 方向正确（加密使重�
 | 验收对象 | 验收人 | 方式 | 结果 |
 |---|---|---|---|
 | M12/M13/M17 | data-retrieval | 独立重跑门禁 + **从零实现** Table III 复算（diff=0.0、反推 Δα/r 一致）+ 独立 MC（−1.99%）+ exp1 手算（86,490 emb/s、overhead 0.6913%）+ 逐行读 diff | **PASS**；0 个影响结论的问题；6 条 minor（V1–V6，V1/V2 已修） |
-| M0/M14–M18 | theory-efficiency | 独立重跑门禁（M0 15/15、M14 12/12、M15 11/11、M16 11/11、M18 19/19）+ 独立复算 exp2（CAPRISE k'=k Recall@10=0.9704 vs 报告 0.9699；明文 MRR=0.722997 vs 0.7230；DP k'=72、recall=1.0000；ADCPE=0.9746 vs 0.9724）+ 数据完整性核对 + 读 diff | **PASS**；0 个影响测量值/结论的问题（见 `results/verify_retrieval.json`、`notes/verify_retrieval.md`） |
+| M0/M14–M18 | theory-efficiency | 独立重跑门禁（M0 15/15、M14 12/12、M15 11/11、M16 11/11、M18 19/19）+ 独立复算 exp2（CAPRISE k'=k Recall@10=0.9704 vs 报告 0.9699；明文 MRR=0.722997 vs 0.7230；DP k'=72、recall=1.0000；ADCPE=0.9746 vs 0.9724）+ 数据完整性核对 + 读 diff | **PASS**；0 个影响测量值/结论的问题；7 条 minor（M15 gate 两条断言偏弱、M18 阈值偏松、M14 明文抽查 200/8000、latency 负载敏感等，见 `results/verify_retrieval.json`） |
 | M1–M9 | Lead + 全部门禁 | 核心协议门禁 + M7/M8 构造式验证 | PASS |
 | M10/M11 | Lead + privacy-attacks | 门禁 + 论文 LaTeX 源图数字化对照 | PASS（M10）；M11 运行中 |
 
