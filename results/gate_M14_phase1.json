@@ -59,14 +59,14 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "max|E_hat-E|=9.79e-09 (<1e-5), relative=2.54e-08, 0.09s for m=8000 (87353 vec/s)"
+      "detail": "max|E_hat-E|=9.47e-09 (<1e-5), relative=2.54e-08, 0.09s for m=8000 (92519 vec/s)"
     },
     {
       "check": "08_aes_roundtrip_exact",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "8000/8000 documents recovered exactly (1535883 docs/s)"
+      "detail": "8000/8000 documents recovered exactly (1854861 docs/s)"
     },
     {
       "check": "09_db_noise_bound",
@@ -91,12 +91,12 @@
     }
   ],
   "notes": [
-    "Phase-1 on real data: m=8000, d=768, EncDB+AES upload 0.12s (68590 docs/s end-to-end); DecDB 87353 vec/s; AES decrypt 1535883 docs/s",
+    "Phase-1 on real data: m=8000, d=768, EncDB+AES upload 0.11s (70320 docs/s end-to-end); DecDB 92519 vec/s; AES decrypt 1854861 docs/s",
     "The paper does not report Phase-1 absolute timings beyond the 128-query embedding batch; hardware here is Apple M5 CPU (no GPU).",
     "encryption key: s=3, beta=0.2, dim=768 (paper secure setting)"
   ],
-  "duration_s": 0.318,
-  "timestamp": "2026-11-03T16:12:41+0800",
+  "duration_s": 0.305,
+  "timestamp": "2026-11-03T16:19:43+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

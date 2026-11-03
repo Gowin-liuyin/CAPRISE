@@ -1,0 +1,154 @@
+{
+  "module": "M17",
+  "name": "efficiency",
+  "owner": "theory-efficiency",
+  "paper_ref": "arXiv:2601.12331 Sec. V-1 / Fig.4 / Phase-1 / Phase-2",
+  "pass": true,
+  "checks": [
+    {
+      "check": "throughput_grid_complete",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "6 dims [384, 768, 1536, 2048, 3072, 4096]; batch>=1000 and reps==3 in every row"
+    },
+    {
+      "check": "embeddings_per_s_decreases_with_d",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "embeddings/s 101595 -> 33865 strictly decreasing=True, d=384/d=4096 ratio=3.00x (>2 required; paper Fig.4a trend)"
+    },
+    {
+      "check": "elements_per_s_within_one_order_of_magnitude",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "elements/s range 39.0M - 138.7M (max/min=3.56 < 10; same ballpark as paper Fig.4b 'remains high')"
+    },
+    {
+      "check": "elements_per_s_stable_1536_3072",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "d in [1536,3072]: elements/s 85.8M - 121.7M (max/min=1.42 < 2; paper Fig.4b high region)"
+    },
+    {
+      "check": "independent_recheck_d768",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "gate re-measurement 87233 emb/s vs stored 86492 emb/s (ratio 1.01, must be >1000 emb/s and within [0.33,3] of stored)"
+    },
+    {
+      "check": "phase1_caprise_encryption_measured",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "EncQ n=128, d=768, median=1.471 ms, vectors/s=87035.3"
+    },
+    {
+      "check": "phase1_overhead_below_19pct_all_configs",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "2 measured embedding configs + 1 paper reference; overheads=[0.691, 0.233, 1.85]% (all < 19.0% paper bound)"
+    },
+    {
+      "check": "paper_phase1_claim_reproduced",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "paper 15/79.52 = 18.86% < 19%; our measured encryption 1.471 ms vs paper 15 ms"
+    },
+    {
+      "check": "phase1_embedding_dominates_encryption",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "min measured embedding 212.8 ms vs CAPRISE 1.47 ms (embedding is the Phase-1 bottleneck; A17c)"
+    },
+    {
+      "check": "phase2_caprise_measured",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "CAPRISE d=768: 78566.8 vectors/s (12.728 us/vector, n=2000 single-vector EncQ calls)"
+    },
+    {
+      "check": "phase2_paillier_baseline_measured",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "phe baselines: [(1024, 2.1852), (2048, 0.2966)]; pure-pow baselines: [(1024, 0.1552), (2048, 0.0204)]"
+    },
+    {
+      "check": "phase2_speedups_positive",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "speedup vs measured Paillier: [35954.1, 264891.4]; vs paper RemoteRAG PHE 250-300: 314.3x-261.9x (absolute ratios are cross-hardware/implementation, see A17/A17b)"
+    },
+    {
+      "check": "paper_9x_claim_internal_consistency",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "paper 2339/(250-300) = 7.80-9.36x (mid 8.51x) => the paper's '9x' is internally consistent"
+    },
+    {
+      "check": "phase2_implementation_style_difference_reported",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "our CAPRISE / paper CAPRISE 2339 vec/s = 33.59x (finding A17)"
+    },
+    {
+      "check": "per_element_style_probe_slower",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "vectorised 2.875 us vs per-element loop 98.334 us per vector (34.2x slower) -> explains paper's 2339 vec/s (A17)"
+    },
+    {
+      "check": "artifact_results_json",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "results/exp1_efficiency.json (10872 bytes), sections=['description', 'experiment', 'findings', 'hardware', 'implementation_style_probe', 'module', 'paper_numbers', 'paper_ref', 'phase1_overhead', 'phase2', 'runtime_s', 'settings', 'throughput']"
+    },
+    {
+      "check": "artifact_figure",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "figures/fig4_efficiency.png (227138 bytes)"
+    },
+    {
+      "check": "artifact_notes_documents_A17",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "notes/exp1_efficiency.md exists=True, documents A17=True, documents PHE baseline=True"
+    }
+  ],
+  "notes": [
+    "exp1 artifacts found; gate does not rerun the full experiment",
+    "Throughput measured on Apple M5 CPU (numpy vectorised CAPRISE); paper numbers are A100 GPU + per-element Python.",
+    "Phase-1: embedding dominates (128 queries: ~0.21-0.63 s vs CAPRISE ~1.5 ms); overhead 0.23-0.69% < 19% paper bound.",
+    "Phase-2: CAPRISE ~78.6k vectors/s (d=768) vs measured Paillier 2.19 vec/s (1024-bit) / 0.30 vec/s (2048-bit); paper 9x internal-consistent, cross-hardware ratios reported but not asserted (A17/A17b)."
+  ],
+  "duration_s": 0.034,
+  "timestamp": "2026-11-03T16:19:35+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

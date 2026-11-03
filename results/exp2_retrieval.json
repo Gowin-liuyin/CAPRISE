@@ -1,0 +1,614 @@
+{
+  "meta": {
+    "experiment": "exp2_retrieval (M18): retrieval accuracy of ppRAG / CAPRISE on MS MARCO",
+    "paper_ref": "§V Experimental evaluation (accuracy claim; paper gives no retrieval table)",
+    "dataset": "MS MARCO passage dev small + gtr-t5-base (data/, m=50000)",
+    "m": 50000,
+    "n_queries": 1000,
+    "k": 10,
+    "dim": 768,
+    "s": 3,
+    "beta_default": 0.2,
+    "seed": 20260101,
+    "rerank": "local DecDB + exact plaintext L2 distance to the original query (SPEC.md §3)",
+    "metrics": [
+      "Recall@10 vs plaintext top-10",
+      "qrels MRR@10/Recall@10/nDCG@10",
+      "mean k'",
+      "per-query end-to-end latency",
+      "Phase-1 upload throughput"
+    ],
+    "theorem_k_prime": {
+      "r=0.02": 72,
+      "r=0.05": 785,
+      "formula": "ceil(k_prime(k, m, n, r)) with delta_alpha_ratio=1.0"
+    },
+    "hardware": {
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "machine": "arm64",
+      "cpu_count": 10,
+      "python": "3.12.13",
+      "numpy": "2.5.4",
+      "device": "CPU (Apple M5, no CUDA); embeddings precomputed on MPS fp16"
+    },
+    "note_crypto_nondeterminism": "fresh 128-bit nonces per encryption (os.urandom); numbers vary by ~1e-3 across runs; key generation seeded",
+    "total_wall_s": 45.3,
+    "command": "/Users/yin/Documents/RAG/code/CAPRISE复现/.venv/bin/python experiments/exp2_retrieval.py",
+    "timestamp": "2026-11-03T16:16:59+0800"
+  },
+  "plaintext": {
+    "config": "plaintext",
+    "method": "plaintext",
+    "beta": null,
+    "dp_radius": 0.0,
+    "k_prime_setting": "k'=k=10",
+    "k_prime_mean": 10.0,
+    "recall@10_vs_plaintext": 1.0,
+    "qrels": {
+      "n_queries_with_qrels": 1000,
+      "MRR@10": 0.7229972222222223,
+      "Recall@10": 0.97,
+      "nDCG@10": 0.7835778358821227
+    },
+    "latency_ms": {
+      "mean": 2.4523947713314556,
+      "median": 2.35322950175032,
+      "p95": 3.1763455030159093,
+      "total_s": 2.4523947713314556,
+      "n": 1000
+    },
+    "latency_ms_float64": {
+      "mean": 4.261350033310009,
+      "median": 4.1805835062405095,
+      "p95": 4.823137489438522,
+      "total_s": 4.261350033310009,
+      "n": 1000
+    },
+    "server_search_ms": {
+      "mean": 2.4523947713314556,
+      "median": 2.35322950175032,
+      "p95": 3.1763455030159093,
+      "total_s": 2.4523947713314556,
+      "n": 1000
+    },
+    "upload_s": 0.0,
+    "enc_throughput_vec_s": null,
+    "note": "latency_ms = float32 Gram-trick top-k kernel (identical to the encrypted server's search kernel, fair comparison); latency_ms_float64 = exact float64 PlaintextDB reference"
+  },
+  "configs": [
+    {
+      "config": "plaintext",
+      "method": "plaintext",
+      "beta": null,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=k=10",
+      "k_prime_mean": 10.0,
+      "recall@10_vs_plaintext": 1.0,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7229972222222223,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835778358821227
+      },
+      "latency_ms": {
+        "mean": 2.4523947713314556,
+        "median": 2.35322950175032,
+        "p95": 3.1763455030159093,
+        "total_s": 2.4523947713314556,
+        "n": 1000
+      },
+      "latency_ms_float64": {
+        "mean": 4.261350033310009,
+        "median": 4.1805835062405095,
+        "p95": 4.823137489438522,
+        "total_s": 4.261350033310009,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.4523947713314556,
+        "median": 2.35322950175032,
+        "p95": 3.1763455030159093,
+        "total_s": 2.4523947713314556,
+        "n": 1000
+      },
+      "upload_s": 0.0,
+      "enc_throughput_vec_s": null,
+      "note": "latency_ms = float32 Gram-trick top-k kernel (identical to the encrypted server's search kernel, fair comparison); latency_ms_float64 = exact float64 PlaintextDB reference"
+    },
+    {
+      "config": "caprise_kp=k",
+      "method": "CAPRISE",
+      "beta": 0.2,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=k=10",
+      "k_prime_mean": 10.0,
+      "k_prime_set": [
+        10
+      ],
+      "recall@10_vs_plaintext": 0.9699000000000001,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.723011111111111,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835922707632444
+      },
+      "latency_ms": {
+        "mean": 2.34586062390008,
+        "median": 2.322937492863275,
+        "p95": 2.6549336631433107,
+        "total_s": 2.34586062390008,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.173952217475744,
+        "median": 2.1570414974121377,
+        "p95": 2.4663003045134246,
+        "total_s": 2.173952217475744,
+        "n": 1000
+      },
+      "upload_s": 0.7128558158874512,
+      "enc_throughput_vec_s": 70140.41112613188,
+      "note": "strict Algorithm 2, no DP"
+    },
+    {
+      "config": "caprise_kp=15",
+      "method": "CAPRISE",
+      "beta": 0.2,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=15",
+      "k_prime_mean": 15.0,
+      "k_prime_set": [
+        15
+      ],
+      "recall@10_vs_plaintext": 0.9999,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7229972222222223,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835778358821227
+      },
+      "latency_ms": {
+        "mean": 2.3894992808636744,
+        "median": 2.3807919933460653,
+        "p95": 2.649343750090338,
+        "total_s": 2.3894992808636744,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.1609879423631355,
+        "median": 2.154979491024278,
+        "p95": 2.4111958729918115,
+        "total_s": 2.1609879423631355,
+        "n": 1000
+      },
+      "upload_s": 0.0,
+      "enc_throughput_vec_s": null,
+      "note": "oversampling"
+    },
+    {
+      "config": "caprise_kp=2k",
+      "method": "CAPRISE",
+      "beta": 0.2,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=2k=20",
+      "k_prime_mean": 20.0,
+      "k_prime_set": [
+        20
+      ],
+      "recall@10_vs_plaintext": 1.0,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7229972222222223,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835778358821227
+      },
+      "latency_ms": {
+        "mean": 2.55560087817139,
+        "median": 2.5189790030708537,
+        "p95": 3.0253624863689765,
+        "total_s": 2.55560087817139,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.256850259786006,
+        "median": 2.2222289990168065,
+        "p95": 2.6931920132483356,
+        "total_s": 2.256850259786006,
+        "n": 1000
+      },
+      "upload_s": 0.0,
+      "enc_throughput_vec_s": null,
+      "note": "oversampling"
+    },
+    {
+      "config": "caprise_dp_r0.02_theorem-kp",
+      "method": "CAPRISE",
+      "beta": 0.2,
+      "dp_radius": 0.02,
+      "k_prime_setting": "k'=Theorem1",
+      "k_prime_mean": 72.0,
+      "k_prime_set": [
+        72
+      ],
+      "recall@10_vs_plaintext": 1.0,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7229972222222223,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835778358821227
+      },
+      "latency_ms": {
+        "mean": 3.1103114603320137,
+        "median": 3.0952499946579337,
+        "p95": 3.4231190860737115,
+        "total_s": 3.1103114603320137,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.1856051841168664,
+        "median": 2.1704999962821603,
+        "p95": 2.46481185167795,
+        "total_s": 2.1856051841168664,
+        "n": 1000
+      },
+      "upload_s": 0.0,
+      "enc_throughput_vec_s": null,
+      "note": "DistanceDP r=0.02; k'=ceil(Theorem1)=72"
+    },
+    {
+      "config": "caprise_dp_r0.05_theorem-kp",
+      "method": "CAPRISE",
+      "beta": 0.2,
+      "dp_radius": 0.05,
+      "k_prime_setting": "k'=Theorem1",
+      "k_prime_mean": 785.0,
+      "k_prime_set": [
+        785
+      ],
+      "recall@10_vs_plaintext": 1.0,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7229972222222223,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835778358821227
+      },
+      "latency_ms": {
+        "mean": 11.808437053667149,
+        "median": 11.689229504554532,
+        "p95": 12.61833987373393,
+        "total_s": 11.808437053667149,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.3379855028761085,
+        "median": 2.323083012015559,
+        "p95": 2.625110097869765,
+        "total_s": 2.3379855028761085,
+        "n": 1000
+      },
+      "upload_s": 0.0,
+      "enc_throughput_vec_s": null,
+      "note": "DistanceDP r=0.05; k'=ceil(Theorem1)=785"
+    },
+    {
+      "config": "adcpe_kp=k",
+      "method": "ADCPE",
+      "beta": 0.2,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=k=10",
+      "k_prime_mean": 10.0,
+      "k_prime_set": [
+        10
+      ],
+      "recall@10_vs_plaintext": 0.9724,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7231972222222223,
+        "Recall@10": 0.972,
+        "nDCG@10": 0.7841559655347585
+      },
+      "latency_ms": {
+        "mean": 2.343036314996425,
+        "median": 2.319187988177873,
+        "p95": 2.6558458397630598,
+        "total_s": 2.343036314996425,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "note": "not separately instrumented for ADCPE"
+      },
+      "upload_s": 0.743398904800415,
+      "enc_throughput_vec_s": 78251.06435375723,
+      "note": "SAP baseline (uniform noise radius s*beta/4)"
+    },
+    {
+      "config": "adcpe_kp=2k",
+      "method": "ADCPE",
+      "beta": 0.2,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=2k=20",
+      "k_prime_mean": 20.0,
+      "k_prime_set": [
+        20
+      ],
+      "recall@10_vs_plaintext": 1.0,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7229972222222223,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835778358821227
+      },
+      "latency_ms": {
+        "mean": 2.4377304406662006,
+        "median": 2.4227710091508925,
+        "p95": 2.7275910455500707,
+        "total_s": 2.4377304406662006,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "note": "not separately instrumented for ADCPE"
+      },
+      "upload_s": 0.7083239555358887,
+      "enc_throughput_vec_s": 82378.97316179951
+    },
+    {
+      "config": "caprise_beta0.05_kp=k",
+      "method": "CAPRISE",
+      "beta": 0.05,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=k=10",
+      "k_prime_mean": 10.0,
+      "k_prime_set": [
+        10
+      ],
+      "recall@10_vs_plaintext": 0.991,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7229972222222223,
+        "Recall@10": 0.97,
+        "nDCG@10": 0.7835778358821227
+      },
+      "latency_ms": {
+        "mean": 2.438766659644898,
+        "median": 2.380437494139187,
+        "p95": 2.9664339948794805,
+        "total_s": 2.438766659644898,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.2603608788340352,
+        "median": 2.2113955055829138,
+        "p95": 2.758050334523432,
+        "total_s": 2.2603608788340352,
+        "n": 1000
+      },
+      "upload_s": 0.656998872756958,
+      "enc_throughput_vec_s": 76103.63133529513,
+      "note": "beta sensitivity (smaller beta -> less noise -> more accurate)"
+    },
+    {
+      "config": "caprise_beta0.1_kp=k",
+      "method": "CAPRISE",
+      "beta": 0.1,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=k=10",
+      "k_prime_mean": 10.0,
+      "k_prime_set": [
+        10
+      ],
+      "recall@10_vs_plaintext": 0.9854,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7230972222222222,
+        "Recall@10": 0.971,
+        "nDCG@10": 0.7838669007084406
+      },
+      "latency_ms": {
+        "mean": 2.3265930455818307,
+        "median": 2.3112500057322904,
+        "p95": 2.591037790989503,
+        "total_s": 2.3265930455818307,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.1579092613828834,
+        "median": 2.1471249929163605,
+        "p95": 2.4105083677568473,
+        "total_s": 2.1579092613828834,
+        "n": 1000
+      },
+      "upload_s": 0.7020277976989746,
+      "enc_throughput_vec_s": 71222.2509762209,
+      "note": "beta sensitivity (smaller beta -> less noise -> more accurate)"
+    },
+    {
+      "config": "caprise_beta0.4_kp=k",
+      "method": "CAPRISE",
+      "beta": 0.4,
+      "dp_radius": 0.0,
+      "k_prime_setting": "k'=k=10",
+      "k_prime_mean": 10.0,
+      "k_prime_set": [
+        10
+      ],
+      "recall@10_vs_plaintext": 0.9401000000000002,
+      "qrels": {
+        "n_queries_with_qrels": 1000,
+        "MRR@10": 0.7231972222222222,
+        "Recall@10": 0.972,
+        "nDCG@10": 0.7841559655347584
+      },
+      "latency_ms": {
+        "mean": 2.4295988804660738,
+        "median": 2.3789795086486265,
+        "p95": 2.8889972512843087,
+        "total_s": 2.4295988804660738,
+        "n": 1000
+      },
+      "server_search_ms": {
+        "mean": 2.2520183493033983,
+        "median": 2.2076669993111864,
+        "p95": 2.693899648147635,
+        "total_s": 2.2520183493033983,
+        "n": 1000
+      },
+      "upload_s": 0.6756730079650879,
+      "enc_throughput_vec_s": 74000.29216881712,
+      "note": "beta sensitivity (smaller beta -> less noise -> more accurate)"
+    }
+  ],
+  "beta_sensitivity": [
+    [
+      0.05,
+      {
+        "config": "caprise_beta0.05_kp=k",
+        "method": "CAPRISE",
+        "beta": 0.05,
+        "dp_radius": 0.0,
+        "k_prime_setting": "k'=k=10",
+        "k_prime_mean": 10.0,
+        "k_prime_set": [
+          10
+        ],
+        "recall@10_vs_plaintext": 0.991,
+        "qrels": {
+          "n_queries_with_qrels": 1000,
+          "MRR@10": 0.7229972222222223,
+          "Recall@10": 0.97,
+          "nDCG@10": 0.7835778358821227
+        },
+        "latency_ms": {
+          "mean": 2.438766659644898,
+          "median": 2.380437494139187,
+          "p95": 2.9664339948794805,
+          "total_s": 2.438766659644898,
+          "n": 1000
+        },
+        "server_search_ms": {
+          "mean": 2.2603608788340352,
+          "median": 2.2113955055829138,
+          "p95": 2.758050334523432,
+          "total_s": 2.2603608788340352,
+          "n": 1000
+        },
+        "upload_s": 0.656998872756958,
+        "enc_throughput_vec_s": 76103.63133529513,
+        "note": "beta sensitivity (smaller beta -> less noise -> more accurate)"
+      }
+    ],
+    [
+      0.1,
+      {
+        "config": "caprise_beta0.1_kp=k",
+        "method": "CAPRISE",
+        "beta": 0.1,
+        "dp_radius": 0.0,
+        "k_prime_setting": "k'=k=10",
+        "k_prime_mean": 10.0,
+        "k_prime_set": [
+          10
+        ],
+        "recall@10_vs_plaintext": 0.9854,
+        "qrels": {
+          "n_queries_with_qrels": 1000,
+          "MRR@10": 0.7230972222222222,
+          "Recall@10": 0.971,
+          "nDCG@10": 0.7838669007084406
+        },
+        "latency_ms": {
+          "mean": 2.3265930455818307,
+          "median": 2.3112500057322904,
+          "p95": 2.591037790989503,
+          "total_s": 2.3265930455818307,
+          "n": 1000
+        },
+        "server_search_ms": {
+          "mean": 2.1579092613828834,
+          "median": 2.1471249929163605,
+          "p95": 2.4105083677568473,
+          "total_s": 2.1579092613828834,
+          "n": 1000
+        },
+        "upload_s": 0.7020277976989746,
+        "enc_throughput_vec_s": 71222.2509762209,
+        "note": "beta sensitivity (smaller beta -> less noise -> more accurate)"
+      }
+    ],
+    [
+      0.2,
+      {
+        "config": "caprise_kp=k",
+        "method": "CAPRISE",
+        "beta": 0.2,
+        "dp_radius": 0.0,
+        "k_prime_setting": "k'=k=10",
+        "k_prime_mean": 10.0,
+        "k_prime_set": [
+          10
+        ],
+        "recall@10_vs_plaintext": 0.9699000000000001,
+        "qrels": {
+          "n_queries_with_qrels": 1000,
+          "MRR@10": 0.723011111111111,
+          "Recall@10": 0.97,
+          "nDCG@10": 0.7835922707632444
+        },
+        "latency_ms": {
+          "mean": 2.34586062390008,
+          "median": 2.322937492863275,
+          "p95": 2.6549336631433107,
+          "total_s": 2.34586062390008,
+          "n": 1000
+        },
+        "server_search_ms": {
+          "mean": 2.173952217475744,
+          "median": 2.1570414974121377,
+          "p95": 2.4663003045134246,
+          "total_s": 2.173952217475744,
+          "n": 1000
+        },
+        "upload_s": 0.7128558158874512,
+        "enc_throughput_vec_s": 70140.41112613188,
+        "note": "strict Algorithm 2, no DP"
+      }
+    ],
+    [
+      0.4,
+      {
+        "config": "caprise_beta0.4_kp=k",
+        "method": "CAPRISE",
+        "beta": 0.4,
+        "dp_radius": 0.0,
+        "k_prime_setting": "k'=k=10",
+        "k_prime_mean": 10.0,
+        "k_prime_set": [
+          10
+        ],
+        "recall@10_vs_plaintext": 0.9401000000000002,
+        "qrels": {
+          "n_queries_with_qrels": 1000,
+          "MRR@10": 0.7231972222222222,
+          "Recall@10": 0.972,
+          "nDCG@10": 0.7841559655347584
+        },
+        "latency_ms": {
+          "mean": 2.4295988804660738,
+          "median": 2.3789795086486265,
+          "p95": 2.8889972512843087,
+          "total_s": 2.4295988804660738,
+          "n": 1000
+        },
+        "server_search_ms": {
+          "mean": 2.2520183493033983,
+          "median": 2.2076669993111864,
+          "p95": 2.693899648147635,
+          "total_s": 2.2520183493033983,
+          "n": 1000
+        },
+        "upload_s": 0.6756730079650879,
+        "enc_throughput_vec_s": 74000.29216881712,
+        "note": "beta sensitivity (smaller beta -> less noise -> more accurate)"
+      }
+    ]
+  ]
+}

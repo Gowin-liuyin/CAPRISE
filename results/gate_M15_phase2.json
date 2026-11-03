@@ -10,7 +10,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "100 retrievals x k=10; recall@10 vs plaintext = 0.9560"
+      "detail": "100 retrievals x k=10; recall@10 vs plaintext = 0.9630"
     },
     {
       "check": "02_no_dp_uses_k_prime_equal_k",
@@ -24,7 +24,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "k'=20 requested; recall@10 = 1.0000 (vs 0.9560 at k'=k)"
+      "detail": "k'=20 requested; recall@10 = 1.0000 (vs 0.9630 at k'=k)"
     },
     {
       "check": "04_dp_k_prime_from_theorem1",
@@ -45,7 +45,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "server received q' (d=768), | ||q'|| - s||q|| | <= sβ/8=0.0750; ||q'||=3.0044, s||q||=3.0012"
+      "detail": "server received q' (d=768), | ||q'|| - s||q|| | <= sβ/8=0.0750; ||q'||=3.0035, s||q||=3.0012"
     },
     {
       "check": "07_all_search_calls_are_ciphertext",
@@ -66,14 +66,14 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "CAPRISE k'=k recall@10 vs plaintext = 0.9560 (encryption-noise boundary flips)"
+      "detail": "CAPRISE k'=k recall@10 vs plaintext = 0.9630 (encryption-noise boundary flips)"
     },
     {
       "check": "10_oversampling_helps",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "recall: k'=10 -> 0.9560; k'=20 -> 1.0000"
+      "detail": "recall: k'=10 -> 0.9630; k'=20 -> 1.0000"
     },
     {
       "check": "11_dp_recall_high",
@@ -84,12 +84,12 @@
     }
   ],
   "notes": [
-    "Phase-2 on real data (m=8000, d=768, k=10, 100 queries): plaintext search 0.696 ms/query; encrypted pipeline (EncQ+search+DecDB+rerank): k'=k 0.584 ms, k'=20 0.723 ms, DP(r=0.02, k'=55) 1.132 ms",
-    "recall@10 vs plaintext: CAPRISE(k'=k)=0.9560, CAPRISE(k'=20)=1.0000, CAPRISE+DP(r=0.02, k'=55)=1.0000",
-    "Phase-1 upload (re-used from protocol): m=8000, 0.12s"
+    "Phase-2 on real data (m=8000, d=768, k=10, 100 queries): plaintext search 0.670 ms/query; encrypted pipeline (EncQ+search+DecDB+rerank): k'=k 0.515 ms, k'=20 0.633 ms, DP(r=0.02, k'=55) 1.070 ms",
+    "recall@10 vs plaintext: CAPRISE(k'=k)=0.9630, CAPRISE(k'=20)=1.0000, CAPRISE+DP(r=0.02, k'=55)=1.0000",
+    "Phase-1 upload (re-used from protocol): m=8000, 0.11s"
   ],
-  "duration_s": 0.575,
-  "timestamp": "2026-11-03T16:12:42+0800",
+  "duration_s": 0.531,
+  "timestamp": "2026-11-03T16:19:44+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

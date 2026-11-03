@@ -3,7 +3,7 @@
 更新时间: 2026-11-03 15:40 (+08:00)
 论文: *Efficient Privacy-Preserving Retrieval Augmented Generation with Distance-Preserving Encryption* (arXiv:2601.12331v1, 2026-01-18, NTU/DTC)
 论文源: `doc/References/CAPRISE_2026_Privacy_Preserving_RAG_DPE.pdf`（LaTeX 源 `output/pdf/source/caprise/ppRAG_FLLM.tex`）；代码源: 论文未公开，本仓库独立复现
-当前阶段: Phase 3（核心协议 M1–M9 已完成并 PASS；M0/M12/M14 PASS；正在做 M10/M11/M13/M15-M18）
+当前阶段: Phase 5（除 M11 外全部模块 PASS；M11 Vec2Text 环境已打通，正在跑；交叉验收进行中）
 当前目标: 完成 M13（Theorem 1/Table III）与 M10/M11（隐私实验），并行推进 M0 数据 → M14–M18
 本轮门禁: P0 skeleton — PASS（见 results/gate_P0_skeleton.json）
 证据: results/gate_summary.json, results/gate_*.json
@@ -30,8 +30,8 @@
 | M16 Phase3 | M15 | PASS | results/gate_M16_phase3.json | 11/11；prompt 精确、无未检索文档泄漏 |
 | M15 Phase2 | M6,M12,M13,M14 | PENDING | — | 等待上游 |
 | M16 Phase3 | M15 | PENDING | — | 等待上游 |
-| M17 效率 | M4,M6,M1 | IN_PROGRESS | — | theory-efficiency 正在做 |
-| M18 检索精度 | M15,M0 | IN_PROGRESS | — | data-retrieval 正在做 exp2 |
+| M17 效率 | M4,M6,M1 | PASS | results/gate_M17_efficiency.json | 18/18；emb/s 101.6k→33.9k；overhead 0.23–0.69%；78.6k vec/s vs Paillier 2.19/0.30 vec/s |
+| M18 检索精度 | M15,M0 | PASS | results/gate_M18_retrieval.json | 19/19；CAPRISE k'=k recall@10=0.9699；k'=15→0.9999；DP r=0.02 recall=1.0，k'=72；β 单调 |
 | M19 报告 | 全部 | PENDING | — | Lead 收尾 |
 
 下一动作:

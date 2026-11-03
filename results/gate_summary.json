@@ -1,26 +1,14 @@
 {
   "range": [
-    "M14",
-    "M16"
+    "M18",
+    "M18"
   ],
   "modules": [
     {
-      "module": "M14",
-      "name": "phase1",
+      "module": "M18",
+      "name": "retrieval",
       "status": "PASS",
-      "result_file": "results/gate_M14_phase1.json"
-    },
-    {
-      "module": "M15",
-      "name": "phase2",
-      "status": "PASS",
-      "result_file": "results/gate_M15_phase2.json"
-    },
-    {
-      "module": "M16",
-      "name": "phase3",
-      "status": "PASS",
-      "result_file": "results/gate_M16_phase3.json"
+      "result_file": "results/gate_M18_retrieval.json"
     }
   ],
   "failed_module": null,

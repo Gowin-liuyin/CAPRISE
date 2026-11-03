@@ -69,7 +69,8 @@ gate.finish()   # 写 results/gate_M1_prf.json，pass = all checks pass
 | M8 Eq.(3) | ✅ PASS（含 finding A19） | results/gate_M8_eq3.json |
 | M9 ADCPE | ✅ PASS | results/gate_M9_adcpe.json |
 | M0 | 🚧 进行中（data-retrieval） | — |
-| M10, M11 | 🚧 进行中（privacy-attacks，按 M10→M11） | — |
-| M12, M13, M17 | 🚧 进行中（theory-efficiency，按 M12→M13→M17） | — |
-| M14–M16, M18 | ⏳ 等待 M0 与核心模块（data-retrieval） | — |
+| M10 | ✅ PASS | results/gate_M10_vector_analysis.json（29/29） |
+| M12, M13, M17 | ✅ PASS | results/gate_M12/M13/M17*.json |
+| M14–M16, M18 | ✅ PASS | results/gate_M14/M15/M16/M18*.json |
+| M11 | 🚧 环境已打通，正在跑 | — |
 | M19 | ⏳ 报告收尾（Lead） | — |

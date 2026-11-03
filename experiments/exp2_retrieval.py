@@ -244,6 +244,21 @@ def main() -> int:
         plain_lat.append((time.perf_counter() - t) * 1000.0)
         plain_ids.append([int(x) for x in res.ids])
     plain_metrics = qrels_metrics(plain_ids, qids, rel_by_q)
+    # Fair latency comparison: the encrypted server stores ciphertext in float32
+    # (EncryptedVectorDB default), while PlaintextDB always stores float64.  Time
+    # the *same* float32 Gram-trick top-k kernel the encrypted server runs.
+    M32 = np.asarray(E, dtype=np.float32)
+    rn32 = np.einsum("ij,ij->i", M32, M32, dtype=np.float64)
+    plain_lat_f32: list[float] = []
+    for q in Q:
+        t = time.perf_counter()
+        q32 = np.asarray(q, dtype=np.float32)
+        scores = rn32 - 2.0 * (M32 @ q32)
+        idx = np.argpartition(scores, K - 1)[:K]
+        idx = idx[np.argsort(scores[idx], kind="stable")]
+        d2 = scores[idx] + float(q32 @ q32)
+        plain_lat_f32.append((time.perf_counter() - t) * 1000.0)
+    del M32, rn32
     plaintext_record = {
         "config": "plaintext",
         "method": "plaintext",
@@ -253,10 +268,13 @@ def main() -> int:
         "k_prime_mean": float(K),
         "recall@10_vs_plaintext": 1.0,
         "qrels": plain_metrics,
-        "latency_ms": latency_stats(plain_lat),
-        "server_search_ms": latency_stats(plain_lat),
+        "latency_ms": latency_stats(plain_lat_f32),
+        "latency_ms_float64": latency_stats(plain_lat),
+        "server_search_ms": latency_stats(plain_lat_f32),
         "upload_s": 0.0,
         "enc_throughput_vec_s": None,
+        "note": "latency_ms = float32 Gram-trick top-k kernel (identical to the encrypted server's "
+                "search kernel, fair comparison); latency_ms_float64 = exact float64 PlaintextDB reference",
     }
     print(f"[exp2] plaintext: qrels MRR@10={plain_metrics['MRR@10']:.4f}, "
           f"Recall@10={plain_metrics['Recall@10']:.4f}, {np.mean(plain_lat):.3f} ms/query", flush=True)
@@ -436,8 +454,7 @@ def make_figure(configs: list[dict], beta_sweep: dict, path: Path) -> None:
     ax = axes[0]
     rec = [c["recall@10_vs_plaintext"] for c in enc]
     bars = ax.bar(x, rec, color="#4C72B0")
-    ax.set_yscale("log")
-    ax.set_ylim(0.3, 1.02)
+    ax.set_ylim(max(0.0, min(rec) - 0.05), 1.01)
     ax.set_xticks(x, labels, rotation=45, ha="right", fontsize=7)
     ax.set_ylabel("Recall@10 vs plaintext top-10")
     ax.set_title("(a) encrypted retrieval fidelity")
@@ -450,14 +467,19 @@ def make_figure(configs: list[dict], beta_sweep: dict, path: Path) -> None:
     mrr = [c["qrels"]["MRR@10"] for c in enc]
     pmrr = next(c["qrels"]["MRR@10"] for c in configs if c["method"] == "plaintext")
     bars = ax.bar(x, mrr, color="#DD8452")
-    ax.axhline(pmrr, color="black", ls="--", lw=1, label=f"plaintext {pmrr:.3f}")
+    ax.axhline(pmrr, color="black", ls="--", lw=1, label=f"plaintext {pmrr:.4f}")
     ax.set_xticks(x, labels, rotation=45, ha="right", fontsize=7)
     ax.set_ylabel("qrels MRR@10")
+    spread = max(abs(v - pmrr) for v in mrr + [pmrr])
+    pad = max(0.001, 1.5 * spread)
+    ax.set_ylim(pmrr - pad, pmrr + pad)
     ax.set_title("(b) end-to-end retrieval quality (qrels)")
-    ax.legend(fontsize=7)
+    ax.legend(fontsize=7, loc="lower right")
     ax.grid(axis="y", alpha=0.3)
-    for b, v in zip(bars, mrr):
-        ax.text(b.get_x() + b.get_width() / 2, v + 0.005, f"{v:.3f}", ha="center", fontsize=6)
+    ax.text(0.02, 0.95, f"all encrypted configs within ±{spread:.4f} of plaintext\n"
+                        f"(local decryption + exact re-rank restores ordering)",
+            transform=ax.transAxes, fontsize=7, va="top",
+            bbox=dict(boxstyle="round", fc="white", alpha=0.8))
 
     # (c) beta sensitivity
     ax = axes[2]

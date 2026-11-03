@@ -118,8 +118,8 @@
     "embedding: sentence-transformers/gtr-t5-base dim=768, device=mps:0, dtype=float16",
     "embedding latency: 222.36 ms / batch=128 queries (paper: 79.52 ms on A100 GPU)"
   ],
-  "duration_s": 0.459,
-  "timestamp": "2026-11-03T16:11:47+0800",
+  "duration_s": 0.449,
+  "timestamp": "2026-11-03T16:19:42+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",
