@@ -2,7 +2,7 @@
   "experiment": "exp5_query_dp",
   "module": "M13",
   "paper_ref": "arXiv:2601.12331 Theorem 1 (Eq.21), Table III; RemoteRAG arXiv:2412.12775 Sec. 3.2.1",
-  "description": "Theorem 1 (Eq.21) / Table III reproduction: analytical values with Delta alpha = r and Delta alpha = 1.2 r, reverse-engineered Delta alpha/r from the paper table, Monte-Carlo validation of Eq.21's widened-cap expectation and measurement of the minimal k' a real retrieval requires.",
+  "description": "Theorem 1 (Eq.21) / Table III reproduction: analytical values with Delta alpha = r and Delta alpha = 1.2 r, reverse-engineered Delta alpha/r from the paper table, four Delta-alpha conventions enumerated per cell (r / chord / Euclidean expansion / per-cell inversion), a cross-check against the cited RemoteRAG implementation, Monte-Carlo validation of Eq.21's widened-cap expectation and measurement of the minimal k' a real retrieval requires.",
   "settings": {
     "m": 100000,
     "dims": [
@@ -591,6 +591,548 @@
         "n_cells": 16
       }
     }
+  },
+  "delta_alpha_conventions": {
+    "definitions": {
+      "a_dalpha_eq_r": "Delta alpha_k = r (RemoteRAG arXiv:2412.12775 Sec. 3.2.2: 'the perturbed angle Delta alpha_k between e_k and e_k' can be approximately by r')",
+      "b_dalpha_chord": "Delta alpha_k = 2*asin(r/2): a Euclidean displacement of norm r on the unit sphere maps to this angular deviation (equals r + r^3/24 + ...)",
+      "c_alpha_euclid_expansion": "alpha_k' = 2*asin((2*sin(alpha_k/2)+r)/2): the chord distance of the k-th nearest neighbour (2 sin(alpha_k/2)) grows by the Euclidean radius r; Delta alpha_k = alpha_k' - alpha_k",
+      "d_inverse_paper": "Delta alpha_k solved per cell from Eq.21 so that the formula equals the paper's top-k' (the convention the paper's table would require; it is NOT stated in the paper or in RemoteRAG)"
+    },
+    "rows": [
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 5,
+        "paper_kprime": 258,
+        "alpha_k_rad": 1.4305006180918611,
+        "chord_k": 1.3116128056504668,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 147.2509613773437,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 147.27091325841323,
+        "alpha_c_rad": 1.474640016390369,
+        "delta_alpha_c_rad": 0.04413939829850788,
+        "kprime_c_euclid_expansion": 385.841471355875,
+        "delta_alpha_d_rad": 0.03935951897012893,
+        "kprime_d_inverse_paper": 258.0000000000032,
+        "delta_alpha_over_r_c": 1.3375575241972084,
+        "delta_alpha_over_r_d": 1.1927126960645131,
+        "rel_err_a": -0.42925983962269876,
+        "rel_err_b": -0.4291825067503363,
+        "rel_err_c": 0.49550957889874025,
+        "rel_err_d": 1.2434497875801753e-14
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 10,
+        "paper_kprime": 571,
+        "alpha_k_rad": 1.4366686139752032,
+        "chord_k": 1.3162629605174374,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 253.7865331150757,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 253.8192365163405,
+        "alpha_c_rad": 1.480930687286957,
+        "delta_alpha_c_rad": 0.0442620733117538,
+        "kprime_c_euclid_expansion": 639.3003949292108,
+        "delta_alpha_d_rad": 0.04282376160963431,
+        "kprime_d_inverse_paper": 570.9999999999893,
+        "delta_alpha_over_r_c": 1.3412749488410243,
+        "delta_alpha_over_r_d": 1.2976897457464942,
+        "rel_err_a": -0.555540222215279,
+        "rel_err_b": -0.5554829483076349,
+        "rel_err_c": 0.11961540267812754,
+        "rel_err_d": -1.8762769116165146e-14
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 15,
+        "paper_kprime": 673,
+        "alpha_k_rad": 1.4403983939168201,
+        "chord_k": 1.319068832606079,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 348.0850907242944,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 348.1285579575294,
+        "alpha_c_rad": 1.484735194621278,
+        "delta_alpha_c_rad": 0.04433680070445778,
+        "kprime_c_euclid_expansion": 855.9553146438542,
+        "delta_alpha_d_rad": 0.04119246202513373,
+        "kprime_d_inverse_paper": 673.0000000000031,
+        "delta_alpha_over_r_c": 1.3435394152865994,
+        "delta_alpha_over_r_d": 1.2482564250040522,
+        "rel_err_a": -0.48278589788366366,
+        "rel_err_b": -0.4827213106128835,
+        "rel_err_c": 0.2718503932300953,
+        "rel_err_d": 4.6629367034256575e-15
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 20,
+        "paper_kprime": 928,
+        "alpha_k_rad": 1.44310384099959,
+        "chord_k": 1.3211012403526303,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 435.03585418171116,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 435.08892683000954,
+        "alpha_c_rad": 1.487495105617258,
+        "delta_alpha_c_rad": 0.04439126461766807,
+        "kprime_c_euclid_expansion": 1051.0919138704521,
+        "delta_alpha_d_rad": 0.04270889099994545,
+        "kprime_d_inverse_paper": 928.0000000000421,
+        "delta_alpha_over_r_c": 1.3451898368990323,
+        "delta_alpha_over_r_d": 1.2942088181801652,
+        "rel_err_a": -0.5312113640283285,
+        "rel_err_b": -0.5311541736745586,
+        "rel_err_c": 0.1326421485672975,
+        "rel_err_d": 4.529709940470639e-14
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 5,
+        "paper_kprime": 58,
+        "alpha_k_rad": 1.4305006180918611,
+        "chord_k": 1.3116128056504668,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 42.725471348104556,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 42.72689434191623,
+        "alpha_c_rad": 1.4571481720643733,
+        "delta_alpha_c_rad": 0.026647553972512172,
+        "kprime_c_euclid_expansion": 81.6825340545063,
+        "delta_alpha_d_rad": 0.023094205061477347,
+        "kprime_d_inverse_paper": 58.00000000000304,
+        "delta_alpha_over_r_c": 1.3323776986256086,
+        "delta_alpha_over_r_d": 1.1547102530738673,
+        "rel_err_a": -0.2633539422740594,
+        "rel_err_b": -0.2633294078979961,
+        "rel_err_c": 0.40831955266390185,
+        "rel_err_d": 5.240252676230739e-14
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 10,
+        "paper_kprime": 108,
+        "alpha_k_rad": 1.4366686139752032,
+        "chord_k": 1.3162629605174374,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 78.0356902175383,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 78.03817231129105,
+        "alpha_c_rad": 1.4633892828753923,
+        "delta_alpha_c_rad": 0.026720668900189093,
+        "kprime_c_euclid_expansion": 145.77453444935105,
+        "delta_alpha_d_rad": 0.023451051396977275,
+        "kprime_d_inverse_paper": 107.9999999999981,
+        "delta_alpha_over_r_c": 1.3360334450094546,
+        "delta_alpha_over_r_d": 1.1725525698488637,
+        "rel_err_a": -0.2774473128005712,
+        "rel_err_b": -0.2774243304510088,
+        "rel_err_c": 0.3497642078643617,
+        "rel_err_d": -1.765254609153999e-14
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 15,
+        "paper_kprime": 170,
+        "alpha_k_rad": 1.4403983939168201,
+        "chord_k": 1.319068832606079,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 110.83037410297868,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 110.83379941565661,
+        "alpha_c_rad": 1.4671635974686104,
+        "delta_alpha_c_rad": 0.02676520355179024,
+        "kprime_c_euclid_expansion": 204.119915614544,
+        "delta_alpha_d_rad": 0.024700282841184525,
+        "kprime_d_inverse_paper": 169.99999999999403,
+        "delta_alpha_over_r_c": 1.338260177589512,
+        "delta_alpha_over_r_d": 1.2350141420592262,
+        "rel_err_a": -0.3480566229236548,
+        "rel_err_b": -0.3480364740255494,
+        "rel_err_c": 0.20070538596790577,
+        "rel_err_d": -3.5083047578154947e-14
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 20,
+        "paper_kprime": 203,
+        "alpha_k_rad": 1.44310384099959,
+        "chord_k": 1.3211012403526303,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 142.05073957389789,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 142.05503725168933,
+        "alpha_c_rad": 1.4699015013918384,
+        "delta_alpha_c_rad": 0.0267976603922484,
+        "kprime_c_euclid_expansion": 258.91826052211405,
+        "delta_alpha_d_rad": 0.023997138107206495,
+        "kprime_d_inverse_paper": 202.99999999998872,
+        "delta_alpha_over_r_c": 1.33988301961242,
+        "delta_alpha_over_r_d": 1.1998569053603247,
+        "rel_err_a": -0.30024266219754736,
+        "rel_err_b": -0.3002214913709885,
+        "rel_err_c": 0.27545941143898545,
+        "rel_err_d": -5.562217353372034e-14
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 5,
+        "paper_kprime": 982,
+        "alpha_k_rad": 1.4715589895176675,
+        "chord_k": 1.342330410070292,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 472.0680524480275,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 472.14873611519715,
+        "alpha_c_rad": 1.5165365746026342,
+        "delta_alpha_c_rad": 0.04497758508496674,
+        "kprime_c_euclid_expansion": 1675.0686196452707,
+        "delta_alpha_d_rad": 0.03969419378524885,
+        "kprime_d_inverse_paper": 981.9999999999945,
+        "delta_alpha_over_r_c": 1.362957123786871,
+        "delta_alpha_over_r_d": 1.2028543571287529,
+        "rel_err_a": -0.519278968993862,
+        "rel_err_b": -0.5191968064000029,
+        "rel_err_c": 0.705772525097017,
+        "rel_err_d": -5.551115123125783e-15
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 10,
+        "paper_kprime": 1492,
+        "alpha_k_rad": 1.4759286342752205,
+        "chord_k": 1.3455664555026736,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 766.9004569725201,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 767.0244798685067,
+        "alpha_c_rad": 1.5209984838079174,
+        "delta_alpha_c_rad": 0.04506984953269688,
+        "kprime_c_euclid_expansion": 2552.143650291895,
+        "delta_alpha_d_rad": 0.03942981661778522,
+        "kprime_d_inverse_paper": 1491.9999999999611,
+        "delta_alpha_over_r_c": 1.3657530161423297,
+        "delta_alpha_over_r_d": 1.1948429278116732,
+        "rel_err_a": -0.4859916508227077,
+        "rel_err_b": -0.48590852555730113,
+        "rel_err_c": 0.7105520444315649,
+        "rel_err_d": -2.609024107869118e-14
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 15,
+        "paper_kprime": 2077,
+        "alpha_k_rad": 1.4785705068982684,
+        "chord_k": 1.3475198431671387,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 1015.1146995870181,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 1015.2732602622743,
+        "alpha_c_rad": 1.5236964330148297,
+        "delta_alpha_c_rad": 0.0451259261165613,
+        "kprime_c_euclid_expansion": 3249.1786151393494,
+        "delta_alpha_d_rad": 0.040208987773591984,
+        "kprime_d_inverse_paper": 2077.0000000000305,
+        "delta_alpha_over_r_c": 1.3674523065624635,
+        "delta_alpha_over_r_d": 1.2184541749573328,
+        "rel_err_a": -0.5112591720813586,
+        "rel_err_b": -0.5111828308799835,
+        "rel_err_c": 0.564361393904357,
+        "rel_err_d": 1.4654943925052066e-14
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 20,
+        "paper_kprime": 2603,
+        "alpha_k_rad": 1.48048662162617,
+        "chord_k": 1.3489351381057224,
+        "delta_alpha_a_rad": 0.033,
+        "kprime_a_dalpha_eq_r": 1236.5120249923334,
+        "delta_alpha_b_rad": 0.03300149755847689,
+        "kprime_b_dalpha_chord": 1236.7002422387664,
+        "alpha_c_rad": 1.5256533586071044,
+        "delta_alpha_c_rad": 0.04516673698093432,
+        "kprime_c_euclid_expansion": 3847.429287552697,
+        "delta_alpha_d_rad": 0.04072825382471288,
+        "kprime_d_inverse_paper": 2602.9999999999795,
+        "delta_alpha_over_r_c": 1.368688999422252,
+        "delta_alpha_over_r_d": 1.2341895098397841,
+        "rel_err_a": -0.5249665674251505,
+        "rel_err_b": -0.5248942596086184,
+        "rel_err_c": 0.47807502403100166,
+        "rel_err_d": -7.882583474838611e-15
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 5,
+        "paper_kprime": 145,
+        "alpha_k_rad": 1.4715589895176675,
+        "chord_k": 1.342330410070292,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 94.95739832393656,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 94.9615978211088,
+        "alpha_c_rad": 1.4987059736303558,
+        "delta_alpha_c_rad": 0.027146984112688344,
+        "kprime_c_euclid_expansion": 236.2569530325992,
+        "delta_alpha_d_rad": 0.023247948469994156,
+        "kprime_d_inverse_paper": 145.0000000000068,
+        "delta_alpha_over_r_c": 1.3573492056344172,
+        "delta_alpha_over_r_d": 1.1623974234997076,
+        "rel_err_a": -0.3451213908694031,
+        "rel_err_b": -0.3450924288199393,
+        "rel_err_c": 0.6293582967765463,
+        "rel_err_d": 4.6851411639181606e-14
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 10,
+        "paper_kprime": 245,
+        "alpha_k_rad": 1.4759286342752205,
+        "chord_k": 1.3455664555026736,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 167.23602029074078,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 167.24306639434138,
+        "alpha_c_rad": 1.5031305744669006,
+        "delta_alpha_c_rad": 0.027201940191680096,
+        "kprime_c_euclid_expansion": 400.4828068553301,
+        "delta_alpha_d_rad": 0.023074680944187187,
+        "kprime_d_inverse_paper": 244.99999999999633,
+        "delta_alpha_over_r_c": 1.3600970095840048,
+        "delta_alpha_over_r_d": 1.1537340472093593,
+        "rel_err_a": -0.31740399881330295,
+        "rel_err_b": -0.3173752392067699,
+        "rel_err_c": 0.6346237014503271,
+        "rel_err_d": -1.4988010832439613e-14
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 15,
+        "paper_kprime": 388,
+        "alpha_k_rad": 1.4785705068982684,
+        "chord_k": 1.3475198431671387,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 232.36810617770664,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 232.37760407880558,
+        "alpha_c_rad": 1.5058058464578825,
+        "delta_alpha_c_rad": 0.027235339559614102,
+        "kprime_c_euclid_expansion": 543.6574346031969,
+        "delta_alpha_d_rad": 0.024287866502456547,
+        "kprime_d_inverse_paper": 388.00000000000114,
+        "delta_alpha_over_r_c": 1.3617669779807051,
+        "delta_alpha_over_r_d": 1.2143933251228274,
+        "rel_err_a": -0.40111312840797264,
+        "rel_err_b": -0.40108864928142896,
+        "rel_err_c": 0.4011789551628786,
+        "rel_err_d": 2.886579864025407e-15
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 20,
+        "paper_kprime": 501,
+        "alpha_k_rad": 1.48048662162617,
+        "chord_k": 1.3489351381057224,
+        "delta_alpha_a_rad": 0.02,
+        "kprime_a_dalpha_eq_r": 293.1408633265597,
+        "delta_alpha_b_rad": 0.020000333348334228,
+        "kprime_b_dalpha_chord": 293.1525787304068,
+        "alpha_c_rad": 1.5077462673456565,
+        "delta_alpha_c_rad": 0.02725964571948647,
+        "kprime_c_euclid_expansion": 674.3201472813843,
+        "delta_alpha_d_rad": 0.024595286448260596,
+        "kprime_d_inverse_paper": 500.99999999999807,
+        "delta_alpha_over_r_c": 1.3629822859743235,
+        "delta_alpha_over_r_d": 1.2297643224130297,
+        "rel_err_a": -0.41488849635417224,
+        "rel_err_b": -0.41486511231455736,
+        "rel_err_c": 0.34594839776723396,
+        "rel_err_d": -3.885780586188048e-15
+      }
+    ],
+    "summary": {
+      "rel_err": {
+        "a": {
+          "mean": -0.41924507735710825,
+          "mean_abs": 0.41924507735710825,
+          "max_abs": 0.555540222215279,
+          "min": -0.555540222215279,
+          "max": -0.2633539422740594
+        },
+        "b": {
+          "mean": -0.41919728094747233,
+          "mean_abs": 0.41919728094747233,
+          "max_abs": 0.5554829483076349,
+          "min": -0.5554829483076349,
+          "max": -0.2633294078979961
+        },
+        "c": {
+          "mean": 0.42023352624564636,
+          "mean_abs": 0.42023352624564636,
+          "max_abs": 0.7105520444315649,
+          "min": 0.11961540267812754,
+          "max": 0.7105520444315649
+        },
+        "d": {
+          "mean": -3.95516952522712e-16,
+          "mean_abs": 2.2794266474335245e-14,
+          "max_abs": 5.562217353372034e-14,
+          "min": -5.562217353372034e-14,
+          "max": 5.240252676230739e-14
+        }
+      },
+      "inverse": {
+        "min": 1.1537340472093593,
+        "max": 1.2976897457464942,
+        "mean": 1.2128519777074982,
+        "std": 0.04349707413231883,
+        "n_cells": 16
+      },
+      "inverse_per_group": {
+        "n=768,r=0.033": {
+          "min": 1.1927126960645131,
+          "max": 1.2976897457464942,
+          "mean": 1.2582169212488061,
+          "std": 0.04913768248835504,
+          "n_cells": 4
+        },
+        "n=768,r=0.02": {
+          "min": 1.1547102530738673,
+          "max": 1.2350141420592262,
+          "mean": 1.1905334675855705,
+          "std": 0.034986055674322836,
+          "n_cells": 4
+        },
+        "n=1536,r=0.033": {
+          "min": 1.1948429278116732,
+          "max": 1.2341895098397841,
+          "mean": 1.2125852424343857,
+          "std": 0.017422864250610126,
+          "n_cells": 4
+        },
+        "n=1536,r=0.02": {
+          "min": 1.1537340472093593,
+          "max": 1.2297643224130297,
+          "mean": 1.190072279561231,
+          "std": 0.037653403172634645,
+          "n_cells": 4
+        }
+      },
+      "euclid_effective": {
+        "min": 1.3323776986256086,
+        "max": 1.368688999422252,
+        "mean": 1.351322686946764,
+        "std": 0.013029406852922244,
+        "n_cells": 16
+      },
+      "best_derivable_convention_abs_rel_err": {
+        "min": 0.11961540267812754,
+        "mean": 0.33587980555783836,
+        "max": 0.5191968064000029,
+        "description": "per cell: min |rel err| over the three conventions derivable from the stated DP mechanism (a, b, c); even the best one never reproduces the paper's table"
+      },
+      "only_inverse_reproduces_paper": "the paper's Table III is reproduced exactly (|rel err| < 1e-9) only by convention (d), Delta alpha = 1.15-1.30 r, which is derivable neither from Eq.21 nor from RemoteRAG's 'Delta alpha ~ r'; 1.2 r is a fitted convention implicit in the table, not a correct value"
+    }
+  },
+  "remoterag_reference": {
+    "reference": {
+      "paper": "RemoteRAG: A Privacy-Preserving LLM Cloud RAG Service (arXiv:2412.12775v1)",
+      "formula": "Same Lemma 1 / Theorem 1 as Eq.21 (Sec. 3.2.2): Delta k = N * (Omega_{n-1}(pi)/Omega_n(pi)) * int_{alpha_k}^{alpha_k'} sin^{n-2} theta dtheta, alpha_k' = alpha_k + Delta alpha_k, with 'the perturbed angle Delta alpha_k ... can be approximately by r'.",
+      "highlight": "Sec. 5.4 Efficiency Study: 'We highlight k'=160, r=0.03 in Fig. 5(c)'; Fig. 5(c) caption 'Cost breakdown (k'=160)'.",
+      "default_setting": "Appendix B.4: 'Unless otherwise specified, our experiments used the following hyperparameter settings: N=10^5, k=5, k'=160, and T5 as the embedding model.'",
+      "reference_point": {
+        "k": 5,
+        "r": 0.03,
+        "n": 768,
+        "kprime": 160
+      },
+      "source_url": "https://arxiv.org/abs/2412.12775 (TeX source e-print, files 5_experiments.tex, 12_experiments_appendix.tex)",
+      "caveats": [
+        "Sec. 5.4 does not restate N for the highlighted point; k'=160 with k=5, n=768 and Delta alpha=r is reached at N=10^6 (the headline total-document count), while N=10^5 gives 111.89 (30% below).",
+        "r is quoted to two decimals (0.03 -> [0.025,0.035)), so the (N, r) pair yielding k'=160 is not unique: (N=10^6, r=0.02941) or (N=10^5, r=0.03392)."
+      ]
+    },
+    "implied_ratio_used": 1.2128519777074982,
+    "evaluations": [
+      {
+        "N": 10000,
+        "alpha_k_rad": 1.4520834649119931,
+        "kprime_a_dalpha_eq_r": 69.91587282442701,
+        "kprime_b_dalpha_chord": 69.92194869623825,
+        "kprime_c_euclid_expansion": 151.19828905639176,
+        "kprime_dalpha_at_implied_ratio": 112.8659653011993,
+        "rel_err_a_vs_reference": -0.5630257948473312,
+        "rel_err_b_vs_reference": -0.5629878206485109,
+        "rel_err_c_vs_reference": -0.05501069339755149,
+        "rel_err_dalpha_at_implied_ratio_vs_reference": -0.2945877168675044
+      },
+      {
+        "N": 100000,
+        "alpha_k_rad": 1.4305006180918611,
+        "kprime_a_dalpha_eq_r": 111.88533165054137,
+        "kprime_b_dalpha_chord": 111.89699386076113,
+        "kprime_c_euclid_expansion": 274.6696742192639,
+        "kprime_dalpha_at_implied_ratio": 199.20054264766006,
+        "rel_err_a_vs_reference": -0.30071667718411643,
+        "rel_err_b_vs_reference": -0.30064378837024297,
+        "rel_err_c_vs_reference": 0.7166854638703994,
+        "rel_err_dalpha_at_implied_ratio_vs_reference": 0.24500339154787532
+      },
+      {
+        "N": 1000000,
+        "alpha_k_rad": 1.4115877788034201,
+        "kprime_a_dalpha_eq_r": 170.33592716516665,
+        "kprime_b_dalpha_chord": 170.35633004910454,
+        "kprime_c_euclid_expansion": 464.6929211496681,
+        "kprime_dalpha_at_implied_ratio": 331.1402306098393,
+        "rel_err_a_vs_reference": 0.06459954478229157,
+        "rel_err_b_vs_reference": 0.06472706280690343,
+        "rel_err_c_vs_reference": 1.9043307571854258,
+        "rel_err_dalpha_at_implied_ratio_vs_reference": 1.0696264413114958
+      }
+    ],
+    "primary": {
+      "N": 1000000,
+      "note": "N=10^6 is the only N among {1e4,1e5,1e6} that lands near k'=160; Sec. 5.4 itself does not state N, and Appendix B.4's default N=10^5 gives 111.89.",
+      "kprime_a_dalpha_eq_r": 170.33592716516665,
+      "kprime_c_euclid_expansion": 464.6929211496681,
+      "kprime_at_implied_ratio": 331.1402306098393,
+      "rel_err_vs_reference": 0.06459954478229157,
+      "abs_rel_err_vs_reference": 0.06459954478229157
+    },
+    "secondary_N1e5": {
+      "kprime_a_dalpha_eq_r": 111.88533165054137,
+      "rel_err_vs_reference": -0.30071667718411643,
+      "note": "documents why N=10^6 (not the appendix default 10^5) is the N consistent with k'=160"
+    },
+    "inversions": {
+      "delta_alpha_rad_at_N1e6": 0.029413160912826468,
+      "delta_alpha_over_quoted_r_at_N1e6": 0.9804386970942156,
+      "r_at_N1e6": 0.029413160912826187,
+      "r_at_N1e5": 0.03392117999211741,
+      "note": "both (N=1e6, r=0.02941) and (N=1e5, r=0.03392) reproduce k'=160; r=0.03 is only quoted to two decimals, so the reference point cannot distinguish them"
+    },
+    "conclusion": "Delta alpha = r agrees with the cited implementation's highlighted point (k=5, r=0.03, n=768, k'=160) to 6.46% (170.34 vs 160 at N=10^6); with Delta alpha = 1.213 r it would be 331.14 (2.07x) and with the Euclidean-expansion convention 464.69 (2.90x), both excluded. The agreement is only as precise as the reference's 2-decimal r and the inferred N: the point-wise inversion gives Delta alpha/r = 0.9804 at N=10^6 (and N=10^5 would need r=0.03392).",
+    "verdict": "the cited implementation is consistent with Delta alpha = r (6.46% at N=10^6, 1.96% at the inverted r), NOT with the implied Delta alpha ~ 1.2 r nor with the Euclidean-expansion convention"
   },
   "convention_probe": {
     "angle_dalpha_eq_r": {
@@ -2734,7 +3276,7 @@
             ]
           }
         ],
-        "runtime_s": 2.12
+        "runtime_s": 16.66
       },
       {
         "n": 1536,
@@ -4536,7 +5078,7 @@
             ]
           }
         ],
-        "runtime_s": 2.98
+        "runtime_s": 22.2
       }
     ],
     "rows": [
@@ -8113,14 +8655,22 @@
   "findings": [
     {
       "id": "A10",
-      "statement": "The paper's Table III cannot be reproduced from Theorem 1 with RemoteRAG's Delta alpha ~ r: Eq.21 gives 0.44-0.74x the paper values; inverting the table requires Delta alpha/r = 1.21285 (range 1.15373-1.29769) instead of ~1. This is an internal inconsistency between the paper's table and its stated DP convention (RemoteRAG: 'Delta alpha_k can be approximately by r')."
+      "statement": "The paper's Table III cannot be reproduced from Theorem 1 with RemoteRAG's Delta alpha ~ r: Eq.21 gives 0.44-0.74x the paper values (paper/formula = 1.357-2.250); inverting the table requires Delta alpha/r = 1.213 (range 1.154-1.298) instead of ~1. The paper's Table III can therefore only be reproduced with an UNDECLARED Delta alpha ~ 1.2 r; neither the paper's text nor Eq.21 yields that convention. 1.2 r is NOT a 'correct' value -- it is the fitted convention implicit in the table."
     },
     {
       "id": "A10b",
       "statement": "Eq.21 is a sufficient worst-case upper bound, not the minimal retrieval expansion: on uniform-sphere data the minimal k' measured by MC is ~k (k=5 -> ~5-6), while Eq.21 with Delta alpha=r predicts m*F(alpha_k+r) (k=5 -> 147 for n=768, r=0.033) and the paper's table 258. The widening is driven by the worst-case azimuthal alignment of each DB point with the perturbation direction; typical distance changes are O(r/sqrt(n))."
+    },
+    {
+      "id": "A10c",
+      "statement": "Four Delta-alpha conventions were enumerated on all 16 Table III cells: (a) Delta alpha = r; (b) Delta alpha = 2 asin(r/2); (c) Euclidean query shift alpha' = 2 asin((2 sin(alpha_k/2)+r)/2); (d) per-cell inversion of the paper's k'. (a) and (b) agree to <0.02%. None of the three derivable conventions reproduces the table: the best of (a,b,c) is still off by >= 12.0% in every cell ((a) -56%..-26%, (c) +12%..+71%), while (d) requires Delta alpha/r = 1.154-1.298 (mean 1.213, std 0.043). The paper's Table III is reproduced exactly only by the undeclared (d) ~1.2 r convention."
+    },
+    {
+      "id": "A10d",
+      "statement": "Cross-check against the cited implementation (RemoteRAG arXiv:2412.12775 Sec. 5.4 / Fig. 5(c): highlighted k'=160, r=0.03, n=768): Eq.21 with Delta alpha=r gives 170.34 at N=10^6 (+6.46%), consistent with the reference within its 2-decimal r and the N inferred from the result (N=10^5 gives 111.89, 30% below). The same reference point excludes the paper-implied convention: Delta alpha = 1.213 r gives 331.14 (2.07x) and the Euclidean-expansion convention 464.69 (2.90x). The cited implementation therefore supports Delta alpha = r, while the paper's Table III remains inconsistent with it."
     }
   ],
-  "runtime_s": 5.1,
+  "runtime_s": 38.9,
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

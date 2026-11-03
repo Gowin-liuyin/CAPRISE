@@ -26,9 +26,21 @@ Acceptance criteria (docs/MODULE_PLAN.md M13; SPEC.md Sec. 5; task brief):
    stable (~1.21, range 1.15-1.30, std <0.1) => paper table is inconsistent with
    RemoteRAG's "Delta alpha ~ r" (finding A10).  The paper mismatch is NOT a
    gate failure condition -- only that the finding is measured and documented.
-5. Artifacts exist: results/exp5_query_dp.json, figures/fig6_table3.png,
+5. Four Delta-alpha conventions are enumerated for every Table III cell and can be
+   recomputed from the JSON primitives (task-3):
+   (a) Delta alpha = r; (b) Delta alpha = 2 asin(r/2); (c) Euclidean expansion
+   alpha' = 2 asin((2 sin(alpha_k/2)+r)/2); (d) per-cell inversion of the paper's
+   k'.  (a)/(b)/(c) must be reproducible from the stored JSON values and none of
+   them may reproduce the paper's table within 10% in any cell; (d) must match the
+   paper exactly and its Delta alpha/r ratio must stay in (1.1, 1.4).
+6. Cross-check against the cited implementation (RemoteRAG arXiv:2412.12775
+   Sec. 5.4 / Fig. 5(c): k=5, r=0.03, n=768, k'=160): Eq.21 with Delta alpha=r
+   must agree within 10% at N=10^6, N=10^5 must be far below (documents the N
+   inference), and the reference point must exclude the paper-implied ~1.21 r and
+   the Euclidean-expansion convention.
+7. Artifacts exist: results/exp5_query_dp.json, figures/fig6_table3.png,
    notes/exp5_query_dp.md (the experiment is run by the gate if artifacts are
-   missing).
+   missing), and the notes' key numbers match the JSON.
 
 Run:  .venv/bin/python -m gates.gate_m13_theorem1
 """
@@ -44,6 +56,7 @@ from pathlib import Path
 
 import numpy as np
 from scipy.integrate import quad
+from scipy.optimize import brentq
 from scipy.special import gammaln
 
 from gates.common import Gate, add_src_to_path
@@ -290,6 +303,153 @@ def main() -> int:
     )
 
     # ================================================================== #
+    # 3b. Four Delta-alpha conventions (task-3): (a) r, (b) chord,
+    #     (c) Euclidean expansion, (d) per-cell inversion of the paper's k'
+    # ================================================================== #
+    note_required: list[str] = []
+    conv = res.get("delta_alpha_conventions") or {}
+    conv_rows = conv.get("rows", [])
+    conv_keys = ("kprime_a_dalpha_eq_r", "kprime_b_dalpha_chord", "kprime_c_euclid_expansion",
+                 "delta_alpha_d_rad", "kprime_d_inverse_paper", "delta_alpha_over_r_d")
+    g.check_true(
+        "delta_alpha_conventions_present",
+        isinstance(conv, dict) and len(conv_rows) == 16
+        and all(all(key in row for key in conv_keys) for row in conv_rows),
+        detail=f"{len(conv_rows)} cells, keys {list(conv_keys)} present in every row "
+        f"(conventions: {list(conv.get('definitions', {}))})",
+    )
+    if len(conv_rows) == 16:
+        recon_err = 0.0
+        inv_err = 0.0
+        inv_ratio_err = 0.0
+        inv_kp_err = 0.0
+        for row in conv_rows:
+            n, r, k = row["n"], row["r"], row["k"]
+            paper_kp = PAPER[(n, r)][k][0]
+            alpha_k = alpha_for_fraction(k / M, n)
+            fk = cap_fraction(alpha_k, n)
+            chord_k = 2.0 * math.sin(alpha_k / 2.0)
+            alpha_c = 2.0 * math.asin(min((chord_k + r) / 2.0, 1.0))
+            recomputed = {
+                "kprime_a_dalpha_eq_r": k + M * (cap_fraction(alpha_k + r, n) - fk),
+                "kprime_b_dalpha_chord": k
+                + M * (cap_fraction(alpha_k + 2.0 * math.asin(r / 2.0), n) - fk),
+                "kprime_c_euclid_expansion": k + M * (cap_fraction(alpha_c, n) - fk),
+            }
+            for key, val in recomputed.items():
+                recon_err = max(recon_err, abs(row[key] - val))
+            target = (paper_kp - k) / M
+            da_d = brentq(
+                lambda x: cap_fraction(alpha_k + x, n) - fk - target, -0.5, 0.5, xtol=1e-14
+            )
+            inv_err = max(inv_err, abs(row["delta_alpha_d_rad"] - da_d))
+            inv_ratio_err = max(inv_ratio_err, abs(row["delta_alpha_over_r_d"] - da_d / r))
+            inv_kp_err = max(inv_kp_err, abs(row["kprime_d_inverse_paper"] - paper_kp))
+        g.check_true(
+            "four_conventions_recomputed_from_json",
+            recon_err < 1e-6,
+            detail=f"(a) Delta alpha=r, (b) chord 2asin(r/2), (c) Euclidean expansion recomputed from the JSON "
+            f"primitives: max |JSON - Eq.21| = {recon_err:.3e} over 16 cells x 3 conventions (tol 1e-6)",
+        )
+        g.check_true(
+            "inverse_convention_matches_json_and_paper",
+            inv_err < 1e-9 and inv_ratio_err < 1e-9 and inv_kp_err < 1e-6,
+            detail=f"per-cell inverted Delta alpha re-solved with brentq: max |Delta alpha - JSON| = {inv_err:.3e} rad, "
+            f"max |Delta alpha/r - JSON| = {inv_ratio_err:.3e}, max |k'(d) - paper k'| = {inv_kp_err:.3e}",
+        )
+        best_per_cell = [
+            min(abs(x["rel_err_a"]), abs(x["rel_err_b"]), abs(x["rel_err_c"])) for x in conv_rows
+        ]
+        a_errs = [x["rel_err_a"] for x in conv_rows]
+        c_errs = [x["rel_err_c"] for x in conv_rows]
+        g.check_true(
+            "no_derivable_convention_reproduces_paper_table",
+            min(best_per_cell) >= 0.10,
+            detail=f"best of (a,b,c) per cell: min |rel err| = {min(best_per_cell):.4f} (>= 0.10); "
+            f"(a) rel err [{min(a_errs):+.3f}, {max(a_errs):+.3f}], (c) [{min(c_errs):+.3f}, {max(c_errs):+.3f}] "
+            "=> only the undeclared per-cell inversion reproduces Table III",
+        )
+        inv_sum = conv["summary"]["inverse"]
+        vals = [x["delta_alpha_over_r_d"] for x in conv_rows]
+        g.check_true(
+            "inverse_delta_alpha_ratio_interval",
+            abs(inv_sum["min"] - min(vals)) < 1e-12
+            and abs(inv_sum["mean"] - float(np.mean(vals))) < 1e-9
+            and abs(inv_sum["max"] - max(vals)) < 1e-12
+            and min(vals) > 1.1
+            and max(vals) < 1.4,
+            detail=f"Delta alpha/r implied by the paper table: min={inv_sum['min']:.4f} "
+            f"mean={inv_sum['mean']:.4f} max={inv_sum['max']:.4f} over 16 cells "
+            f"(all > 1.1 => more than Delta alpha = r; all < 1.4 => below the Euclidean-expansion "
+            f"effective ratio {conv['summary']['euclid_effective']['mean']:.3f})",
+        )
+        legacy = res["reverse_delta_alpha"]["summary"]["overall"]
+        g.check_true(
+            "reverse_delta_alpha_sections_consistent",
+            abs(legacy["mean"] - inv_sum["mean"]) < 1e-3
+            and abs(legacy["min"] - inv_sum["min"]) < 1e-3
+            and abs(legacy["max"] - inv_sum["max"]) < 1e-3,
+            detail=f"legacy (5-dp rounded) summary mean={legacy['mean']}, min={legacy['min']}, "
+            f"max={legacy['max']} vs full-precision conventions summary "
+            f"{inv_sum['mean']:.6f}/{inv_sum['min']:.6f}/{inv_sum['max']:.6f}: diff < 1e-3 (JSON rounding only)",
+        )
+        note_required.append(f"{inv_sum['mean']:.4f}")
+
+    # ================================================================== #
+    # 3c. Cross-check against the cited implementation (RemoteRAG Sec. 5.4)
+    # ================================================================== #
+    ref = res.get("remoterag_reference") or {}
+    g.check_true(
+        "remoterag_reference_present",
+        isinstance(ref, dict) and len(ref.get("evaluations", [])) == 3,
+        detail=f"RemoteRAG cross-check present (N=10^4/10^5/10^6 evaluations: {len(ref.get('evaluations', []))})",
+    )
+    if ref:
+        rp = ref["reference"]["reference_point"]
+        g.check_true(
+            "remoterag_reference_point_k5_r003_n768_kprime160",
+            (rp["k"], rp["r"], rp["n"], rp["kprime"]) == (5, 0.03, 768, 160),
+            detail=f"reference point {rp} (RemoteRAG Sec. 5.4 / Fig. 5(c) highlighted example)",
+        )
+        primary = next(x for x in ref["evaluations"] if x["N"] == 10**6)
+        alpha_ref = alpha_for_fraction(rp["k"] / 10**6, rp["n"])
+        kp_a_ref = rp["k"] + 10**6 * (cap_fraction(alpha_ref + rp["r"], rp["n"]) - cap_fraction(alpha_ref, rp["n"]))
+        rel_ref = abs(kp_a_ref - rp["kprime"]) / rp["kprime"]
+        g.check_true(
+            "remoterag_crosscheck_dalpha_eq_r_within_10pct",
+            rel_ref <= 0.10 and abs(kp_a_ref - primary["kprime_a_dalpha_eq_r"]) < 1e-6,
+            detail=f"Eq.21 with Delta alpha=r at N=1e6: k'={kp_a_ref:.3f} vs RemoteRAG's {rp['kprime']} "
+            f"=> rel err {rel_ref * 100:.2f}% (tol <=10%); JSON value agrees to 1e-6",
+        )
+        secondary = next(x for x in ref["evaluations"] if x["N"] == 10**5)
+        g.check_true(
+            "remoterag_N1e5_cannot_produce_160",
+            secondary["kprime_a_dalpha_eq_r"] < 0.8 * rp["kprime"],
+            detail=f"N=10^5 (RemoteRAG appendix default) gives {secondary['kprime_a_dalpha_eq_r']:.2f}, far below "
+            f"160 => the N=10^6 used for the cross-check is inferred from the reference value itself",
+        )
+        g.check_true(
+            "remoterag_reference_excludes_implied_and_euclid_conventions",
+            primary["kprime_dalpha_at_implied_ratio"] > 1.5 * rp["kprime"]
+            and primary["kprime_c_euclid_expansion"] > 2.0 * rp["kprime"],
+            detail=f"at the reference point Delta alpha={ref['implied_ratio_used']:.3f} r gives "
+            f"{primary['kprime_dalpha_at_implied_ratio']:.2f} "
+            f"({primary['kprime_dalpha_at_implied_ratio'] / rp['kprime']:.2f}x) and the Euclidean expansion gives "
+            f"{primary['kprime_c_euclid_expansion']:.2f} "
+            f"({primary['kprime_c_euclid_expansion'] / rp['kprime']:.2f}x) => both excluded",
+        )
+        inv_ref = ref["inversions"]
+        g.check_true(
+            "remoterag_inverted_delta_alpha_ratio_near_1",
+            abs(inv_ref["delta_alpha_over_quoted_r_at_N1e6"] - 1.0) < 0.05,
+            detail=f"point-wise inversion of the reference: Delta alpha/r = "
+            f"{inv_ref['delta_alpha_over_quoted_r_at_N1e6']:.4f} at N=1e6 (r*={inv_ref['r_at_N1e6']:.5f}); "
+            "|ratio - 1| < 0.05 => the cited implementation is consistent with Delta alpha = r",
+        )
+        note_required.append(f"{primary['kprime_a_dalpha_eq_r']:.2f}")
+        note_required.append(f"{rel_ref * 100:.2f}")
+
+    # ================================================================== #
     # 4. Artifacts
     # ================================================================== #
     g.check_true(
@@ -309,6 +469,12 @@ def main() -> int:
         detail=f"{NOTES.relative_to(ROOT)} exists={NOTES.exists()}, "
         f"documents A10={'A10' in note_text}, mentions implied ratio={'1.21' in note_text or 'Δα' in note_text}",
     )
+    g.check_true(
+        "artifact_notes_numbers_match_json",
+        NOTES.exists() and bool(note_required) and all(s in note_text for s in note_required),
+        detail=f"notes contain the JSON-formatted numbers {note_required} "
+        f"(implied mean Delta alpha/r and RemoteRAG cross-check values)",
+    )
 
     # ================================================================== #
     # Summary
@@ -316,7 +482,10 @@ def main() -> int:
     g.note("Eq.21 is the expected widened-cap size: k' - k = m*(F(alpha_k+r)-F(alpha_k)) = m*F(alpha_k+r) - k.")
     g.note("MC validates that identity within 5% (widened-cap count) and shows ceil(Eq.21) always covers the plaintext top-k.")
     g.note("MC also measures the minimal k' a real retrieval needs (~k): Eq.21 is a sufficient but very loose bound (A10b).")
+    g.note("Four Delta-alpha conventions enumerated: (a) r, (b) 2asin(r/2), (c) Euclidean expansion, (d) per-cell inversion.")
+    g.note("(a)/(b)/(c) never reproduce Table III (best still >= 10% off); only (d) does, needing Delta alpha/r ~1.15-1.30 (A10c).")
     g.note("Paper Table III requires Delta alpha/r ~1.21 (range 1.15-1.30), inconsistent with RemoteRAG's Delta alpha ~ r (A10).")
+    g.note("RemoteRAG's highlighted point (k=5, r=0.03, n=768, k'=160) is consistent with Delta alpha = r to ~6% at N=1e6 (A10d).")
     res = g.finish()
     return 0 if res["pass"] else 1
 

@@ -1,0 +1,111 @@
+{
+  "n_query_triples": 4000,
+  "n_db_triples": 4000,
+  "query_chain": {
+    "eq7_eta_lt": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq7_lambda_lt": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq5_identity": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq6_identity": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq8": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq9": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq10": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq11": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq11b": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq12_as_printed_equals_cipher_dist": {
+      "n": 4000,
+      "violations": 4000
+    },
+    "eq12_corrected_plus_equals_cipher_dist": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq12_reverse_triangle_plus": {
+      "n": 4000,
+      "violations": 0
+    },
+    "conclusion": {
+      "n": 4000,
+      "violations": 0
+    }
+  },
+  "db_chain": {
+    "eq13": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq14": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq15_delta_positive": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq16_identity": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq17": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq18": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq19": {
+      "n": 4000,
+      "violations": 0
+    },
+    "eq20_delta_prime_positive": {
+      "n": 4000,
+      "violations": 0
+    },
+    "conclusion_condition_delta_sum_lt_half_sbeta": {
+      "n": 4000,
+      "violations": 4000
+    },
+    "conclusion_inverted": {
+      "n": 4000,
+      "violations": 4000
+    },
+    "n_delta_condition_fires": 0,
+    "n_inverted_when_condition_fires": 0
+  },
+  "pass": true,
+  "paper_ref": "arXiv:2601.12331v1 Eqs.(4)-(20); LaTeX ppRAG_FLLM.tex lines 288-367",
+  "settings": {
+    "dim": 768,
+    "beta": 0.2,
+    "s": 3,
+    "n_triples": 4000,
+    "seed": 20260118
+  }
+}

@@ -51,8 +51,8 @@
   "notes": [
     "ADCPE/SAP baseline verified; its noise radius sβ/4 < 3sβ/8 (CAPRISE DB) is exactly why ADCPE leaks stored-vector structure to vector analysis."
   ],
-  "duration_s": 1.061,
-  "timestamp": "2026-11-03T16:54:00+0800",
+  "duration_s": 2.079,
+  "timestamp": "2026-11-03T23:34:06+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

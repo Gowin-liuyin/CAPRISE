@@ -31,7 +31,15 @@ minimal k' needed by a real retrieval.  This script therefore reports:
       (rank of the worst true top-k member under the perturbed query): mean,
       median, p95, p99, and the slackness of Eq.21 relative to it;
   (5) numerical-stability evidence for the Beta implementation (no NaN/underflow
-      for n=1536 and beyond; Beta form vs direct quadrature for small n).
+      for n=1536 and beyond; Beta form vs direct quadrature for small n);
+  (6) an enumeration of four Delta-alpha conventions for all 16 Table III cells
+      -- (a) Delta alpha = r, (b) Delta alpha = 2 asin(r/2), (c) Euclidean query
+      shift alpha' = 2 asin((2 sin(alpha_k/2)+r)/2), (d) per-cell inversion of the
+      paper's k' -- showing that only the undeclared convention (d), Delta alpha ~
+      1.2 r, reproduces the paper's numbers;
+  (7) a cross-check of the same formula against the highlighted example of the
+      cited implementation (RemoteRAG arXiv:2412.12775 Sec. 5.4 / Fig. 5(c):
+      k=5, r=0.03, n=768 -> k'=160), which is consistent with Delta alpha = r.
 
 Outputs
 -------
@@ -216,6 +224,252 @@ def convention_probe() -> dict:
         v["paper_over_pred_min"] = round(float(np.min(v["paper_over_pred"])), 4)
         v["paper_over_pred_max"] = round(float(np.max(v["paper_over_pred"])), 4)
     return out
+
+
+# --------------------------------------------------------------------------- #
+# Delta-alpha conventions: enumerate every reading of Delta alpha and test which
+# one can reproduce the paper's Table III.
+# --------------------------------------------------------------------------- #
+DELTA_ALPHA_CONVENTIONS = {
+    "a_dalpha_eq_r": (
+        "Delta alpha_k = r (RemoteRAG arXiv:2412.12775 Sec. 3.2.2: 'the perturbed angle "
+        "Delta alpha_k between e_k and e_k' can be approximately by r')"
+    ),
+    "b_dalpha_chord": (
+        "Delta alpha_k = 2*asin(r/2): a Euclidean displacement of norm r on the unit sphere "
+        "maps to this angular deviation (equals r + r^3/24 + ...)"
+    ),
+    "c_alpha_euclid_expansion": (
+        "alpha_k' = 2*asin((2*sin(alpha_k/2)+r)/2): the chord distance of the k-th nearest "
+        "neighbour (2 sin(alpha_k/2)) grows by the Euclidean radius r; Delta alpha_k = alpha_k' - alpha_k"
+    ),
+    "d_inverse_paper": (
+        "Delta alpha_k solved per cell from Eq.21 so that the formula equals the paper's top-k' "
+        "(the convention the paper's table would require; it is NOT stated in the paper or in RemoteRAG)"
+    ),
+}
+
+
+def delta_alpha_conventions() -> dict:
+    """Enumerate four Delta-alpha conventions for all 16 Table III cells."""
+    rows: list[dict] = []
+    for n in DIMS:
+        for r in RADII:
+            for k in KS:
+                paper_kp = PAPER_TABLE[(n, r)][k][0]
+                alpha_k = alpha_for_fraction(k / M, n)
+                fk = cap_fraction(alpha_k, n)
+
+                # (a) Delta alpha = r
+                da_a = r
+                kp_a = k + M * (cap_fraction(alpha_k + da_a, n) - fk)
+
+                # (b) Delta alpha = 2 asin(r/2)
+                da_b = 2.0 * math.asin(r / 2.0)
+                kp_b = k + M * (cap_fraction(alpha_k + da_b, n) - fk)
+
+                # (c) Euclidean expansion: chord of the k-th NN grows by r
+                chord_k = 2.0 * math.sin(alpha_k / 2.0)
+                alpha_c = 2.0 * math.asin(min((chord_k + r) / 2.0, 1.0))
+                da_c = alpha_c - alpha_k
+                kp_c = k + M * (cap_fraction(alpha_c, n) - fk)
+
+                # (d) per-cell Delta alpha required by the paper's k'
+                target = (paper_kp - k) / M
+                da_d = brentq(
+                    lambda x: cap_fraction(alpha_k + x, n) - fk - target,
+                    -0.5,
+                    0.5,
+                    xtol=1e-14,
+                )
+                kp_d = k + M * (cap_fraction(alpha_k + da_d, n) - fk)
+
+                rows.append(
+                    {
+                        "n": n,
+                        "r": r,
+                        "k": k,
+                        "paper_kprime": paper_kp,
+                        "alpha_k_rad": alpha_k,
+                        "chord_k": chord_k,
+                        "delta_alpha_a_rad": da_a,
+                        "kprime_a_dalpha_eq_r": kp_a,
+                        "delta_alpha_b_rad": da_b,
+                        "kprime_b_dalpha_chord": kp_b,
+                        "alpha_c_rad": alpha_c,
+                        "delta_alpha_c_rad": da_c,
+                        "kprime_c_euclid_expansion": kp_c,
+                        "delta_alpha_d_rad": da_d,
+                        "kprime_d_inverse_paper": kp_d,
+                        "delta_alpha_over_r_c": da_c / r,
+                        "delta_alpha_over_r_d": da_d / r,
+                        "rel_err_a": kp_a / paper_kp - 1.0,
+                        "rel_err_b": kp_b / paper_kp - 1.0,
+                        "rel_err_c": kp_c / paper_kp - 1.0,
+                        "rel_err_d": kp_d / paper_kp - 1.0,
+                    }
+                )
+
+    def _stats(vals: list[float]) -> dict:
+        return {
+            "min": float(np.min(vals)),
+            "max": float(np.max(vals)),
+            "mean": float(np.mean(vals)),
+            "std": float(np.std(vals, ddof=1)),
+            "n_cells": len(vals),
+        }
+
+    summary: dict = {"rel_err": {}, "inverse": {}, "inverse_per_group": {}, "euclid_effective": {}}
+    for tag in ("a", "b", "c", "d"):
+        errs = [row[f"rel_err_{tag}"] for row in rows]
+        summary["rel_err"][tag] = {
+            "mean": float(np.mean(errs)),
+            "mean_abs": float(np.mean(np.abs(errs))),
+            "max_abs": float(np.max(np.abs(errs))),
+            "min": float(np.min(errs)),
+            "max": float(np.max(errs)),
+        }
+    summary["inverse"] = _stats([row["delta_alpha_over_r_d"] for row in rows])
+    for n in DIMS:
+        for r in RADII:
+            vals = [row["delta_alpha_over_r_d"] for row in rows if row["n"] == n and row["r"] == r]
+            summary["inverse_per_group"][f"n={n},r={r}"] = _stats(vals)
+    summary["euclid_effective"] = _stats([row["delta_alpha_over_r_c"] for row in rows])
+    best = [min(abs(row["rel_err_a"]), abs(row["rel_err_b"]), abs(row["rel_err_c"])) for row in rows]
+    summary["best_derivable_convention_abs_rel_err"] = {
+        "min": float(np.min(best)),
+        "mean": float(np.mean(best)),
+        "max": float(np.max(best)),
+        "description": (
+            "per cell: min |rel err| over the three conventions derivable from the stated DP "
+            "mechanism (a, b, c); even the best one never reproduces the paper's table"
+        ),
+    }
+    summary["only_inverse_reproduces_paper"] = (
+        "the paper's Table III is reproduced exactly (|rel err| < 1e-9) only by convention (d), "
+        "Delta alpha = 1.15-1.30 r, which is derivable neither from Eq.21 nor from RemoteRAG's "
+        "'Delta alpha ~ r'; 1.2 r is a fitted convention implicit in the table, not a correct value"
+    )
+    return {"definitions": DELTA_ALPHA_CONVENTIONS, "rows": rows, "summary": summary}
+
+
+# --------------------------------------------------------------------------- #
+# Cross-check against the cited implementation (RemoteRAG)
+# --------------------------------------------------------------------------- #
+REMOTERAG_REF = {
+    "paper": "RemoteRAG: A Privacy-Preserving LLM Cloud RAG Service (arXiv:2412.12775v1)",
+    "formula": (
+        "Same Lemma 1 / Theorem 1 as Eq.21 (Sec. 3.2.2): Delta k = N * (Omega_{n-1}(pi)/Omega_n(pi)) "
+        "* int_{alpha_k}^{alpha_k'} sin^{n-2} theta dtheta, alpha_k' = alpha_k + Delta alpha_k, "
+        "with 'the perturbed angle Delta alpha_k ... can be approximately by r'."
+    ),
+    "highlight": (
+        "Sec. 5.4 Efficiency Study: 'We highlight k'=160, r=0.03 in Fig. 5(c)'; "
+        "Fig. 5(c) caption 'Cost breakdown (k'=160)'."
+    ),
+    "default_setting": (
+        "Appendix B.4: 'Unless otherwise specified, our experiments used the following hyperparameter "
+        "settings: N=10^5, k=5, k'=160, and T5 as the embedding model.'"
+    ),
+    "reference_point": {"k": 5, "r": 0.03, "n": 768, "kprime": 160},
+    "source_url": "https://arxiv.org/abs/2412.12775 (TeX source e-print, files 5_experiments.tex, "
+    "12_experiments_appendix.tex)",
+    "caveats": [
+        "Sec. 5.4 does not restate N for the highlighted point; k'=160 with k=5, n=768 and Delta alpha=r "
+        "is reached at N=10^6 (the headline total-document count), while N=10^5 gives 111.89 (30% below).",
+        "r is quoted to two decimals (0.03 -> [0.025,0.035)), so the (N, r) pair yielding k'=160 is not "
+        "unique: (N=10^6, r=0.02941) or (N=10^5, r=0.03392).",
+    ],
+}
+
+
+def remoterag_reference_check(implied_ratio: float) -> dict:
+    """Recompute RemoteRAG's highlighted point (k=5, r=0.03, n=768, k'=160)."""
+    k, r, n, kp_ref = 5, 0.03, 768, 160
+
+    def _kp(N: int, da: float) -> float:
+        a = alpha_for_fraction(k / N, n)
+        return k + N * (cap_fraction(a + da, n) - cap_fraction(a, n))
+
+    evals = []
+    for N in (10**4, 10**5, 10**6):
+        alpha_k = alpha_for_fraction(k / N, n)
+        chord_k = 2.0 * math.sin(alpha_k / 2.0)
+        alpha_c = 2.0 * math.asin(min((chord_k + r) / 2.0, 1.0))
+        row = {
+            "N": N,
+            "alpha_k_rad": alpha_k,
+            "kprime_a_dalpha_eq_r": _kp(N, r),
+            "kprime_b_dalpha_chord": _kp(N, 2.0 * math.asin(r / 2.0)),
+            "kprime_c_euclid_expansion": k + N * (cap_fraction(alpha_c, n) - cap_fraction(alpha_k, n)),
+            "kprime_dalpha_at_implied_ratio": _kp(N, implied_ratio * r),
+        }
+        for tag, key in (
+            ("a", "kprime_a_dalpha_eq_r"),
+            ("b", "kprime_b_dalpha_chord"),
+            ("c", "kprime_c_euclid_expansion"),
+            ("dalpha_at_implied_ratio", "kprime_dalpha_at_implied_ratio"),
+        ):
+            row[f"rel_err_{tag}_vs_reference"] = row[key] / kp_ref - 1.0
+        evals.append(row)
+    primary = next(x for x in evals if x["N"] == 10**6)
+    secondary = next(x for x in evals if x["N"] == 10**5)
+
+    # invert the reference point: Delta alpha at N=1e6, r at N=1e5 / N=1e6
+    da_star = brentq(lambda x: _kp(10**6, x) - kp_ref, 0.0, 0.2, xtol=1e-15)
+    r_star_1e6 = brentq(lambda x: _kp(10**6, x) - kp_ref, 1e-6, 0.2, xtol=1e-15)
+    r_star_1e5 = brentq(lambda x: _kp(10**5, x) - kp_ref, 1e-6, 0.2, xtol=1e-15)
+
+    abs_rel = abs(primary["rel_err_a_vs_reference"])
+    conclusion = (
+        "Delta alpha = r agrees with the cited implementation's highlighted point "
+        f"(k=5, r=0.03, n=768, k'=160) to {abs_rel * 100:.2f}% "
+        f"({primary['kprime_a_dalpha_eq_r']:.2f} vs {kp_ref} at N=10^6); with Delta alpha = "
+        f"{implied_ratio:.3f} r it would be {primary['kprime_dalpha_at_implied_ratio']:.2f} "
+        f"({primary['kprime_dalpha_at_implied_ratio'] / kp_ref:.2f}x) and with the Euclidean-expansion "
+        f"convention {primary['kprime_c_euclid_expansion']:.2f} "
+        f"({primary['kprime_c_euclid_expansion'] / kp_ref:.2f}x), both excluded. The agreement is only "
+        f"as precise as the reference's 2-decimal r and the inferred N: the point-wise inversion gives "
+        f"Delta alpha/r = {da_star / r:.4f} at N=10^6 (and N=10^5 would need r={r_star_1e5:.5f})."
+    )
+    return {
+        "reference": REMOTERAG_REF,
+        "implied_ratio_used": implied_ratio,
+        "evaluations": evals,
+        "primary": {
+            "N": 10**6,
+            "note": (
+                "N=10^6 is the only N among {1e4,1e5,1e6} that lands near k'=160; Sec. 5.4 itself does "
+                "not state N, and Appendix B.4's default N=10^5 gives 111.89."
+            ),
+            "kprime_a_dalpha_eq_r": primary["kprime_a_dalpha_eq_r"],
+            "kprime_c_euclid_expansion": primary["kprime_c_euclid_expansion"],
+            "kprime_at_implied_ratio": primary["kprime_dalpha_at_implied_ratio"],
+            "rel_err_vs_reference": primary["rel_err_a_vs_reference"],
+            "abs_rel_err_vs_reference": abs_rel,
+        },
+        "secondary_N1e5": {
+            "kprime_a_dalpha_eq_r": secondary["kprime_a_dalpha_eq_r"],
+            "rel_err_vs_reference": secondary["rel_err_a_vs_reference"],
+            "note": "documents why N=10^6 (not the appendix default 10^5) is the N consistent with k'=160",
+        },
+        "inversions": {
+            "delta_alpha_rad_at_N1e6": da_star,
+            "delta_alpha_over_quoted_r_at_N1e6": da_star / r,
+            "r_at_N1e6": r_star_1e6,
+            "r_at_N1e5": r_star_1e5,
+            "note": (
+                "both (N=1e6, r=0.02941) and (N=1e5, r=0.03392) reproduce k'=160; r=0.03 is only "
+                "quoted to two decimals, so the reference point cannot distinguish them"
+            ),
+        },
+        "conclusion": conclusion,
+        "verdict": (
+            "the cited implementation is consistent with Delta alpha = r "
+            f"({abs_rel * 100:.2f}% at N=10^6, {abs(da_star / r - 1.0) * 100:.2f}% at the inverted r), "
+            "NOT with the implied Delta alpha ~ 1.2 r nor with the Euclidean-expansion convention"
+        ),
+    }
 
 
 def numerical_stability() -> dict:
@@ -464,11 +718,20 @@ def make_figure(res: dict, fig_path: Path) -> None:
 
     fig, axes = plt.subplots(2, 2, figsize=(13.5, 9.5))
 
-    colors = {"paper": "#b2182b", "r": "#2166ac", "1.2r": "#67a9cf", "mc": "#1b7837"}
+    colors = {
+        "paper": "#b2182b",
+        "r": "#2166ac",
+        "euclid": "#f4a582",
+        "inverse": "#1b7837",
+        "mc": "#1b7837",
+    }
+    conv_rows = res["delta_alpha_conventions"]["rows"]
+    conv_index = {(row["n"], row["r"], row["k"]): row for row in conv_rows}
 
-    # (a)(b): paper vs Eq.21(dalpha=r) vs Eq.21(dalpha=1.2r) for n=768 / n=1536
-    for ax, n in zip(axes[0], (768, 1536)):
-        width = 0.26
+    # (a)(b): paper vs Eq.21(Delta alpha=r) vs the Euclidean expansion (c) vs the
+    # per-cell inverted Delta alpha (d, which reproduces the paper exactly)
+    for ax, n, panel in zip(axes[0], (768, 1536), ("a", "b")):
+        width = 0.2
         x = np.arange(len(KS) * len(RADII))
         labels = []
         for idx_r, r in enumerate(RADII):
@@ -476,20 +739,32 @@ def make_figure(res: dict, fig_path: Path) -> None:
                 pos = idx_r * len(KS) + idx_k
                 labels.append(f"k={k}\nr={r}")
                 paper_kp = PAPER_TABLE[(n, r)][k][0]
-                f1 = k_prime(k, M, n, r, 1.0)
-                f12 = k_prime(k, M, n, r, 1.2)
-                ax.bar(pos - width, paper_kp, width, color=colors["paper"], label="paper Table III" if pos == 0 else None)
-                ax.bar(pos, f1, width, color=colors["r"], label="Eq.21, $\\Delta\\alpha=r$" if pos == 0 else None)
-                ax.bar(pos + width, f12, width, color=colors["1.2r"], label="Eq.21, $\\Delta\\alpha=1.2r$" if pos == 0 else None)
+                row = conv_index[(n, r, k)]
+                ax.bar(pos - 1.5 * width, paper_kp, width, color=colors["paper"],
+                       label="paper Table III" if pos == 0 else None)
+                ax.bar(pos - 0.5 * width, row["kprime_a_dalpha_eq_r"], width, color=colors["r"],
+                       label="Eq.21, $\\Delta\\alpha=r$" if pos == 0 else None)
+                ax.bar(pos + 0.5 * width, row["kprime_c_euclid_expansion"], width, color=colors["euclid"],
+                       label="Eq.21, Euclidean expansion (c)" if pos == 0 else None)
+                ax.bar(pos + 1.5 * width, row["kprime_d_inverse_paper"], width, color=colors["inverse"],
+                       label="Eq.21, inverted $\\Delta\\alpha$ (d) = paper" if pos == 0 else None)
         ax.set_yscale("log")
         ax.set_xticks(x)
         ax.set_xticklabels(labels, fontsize=7)
         ax.set_ylabel("top-$k'$ (log scale)")
-        ax.set_title(f"(a) n={n}: Table III vs Theorem 1" if n == 768 else f"(b) n={n}: Table III vs Theorem 1")
+        ax.set_title(f"({panel}) n={n}: Table III, $\\Delta\\alpha=r$, Euclidean (c), inverted (d)")
         ax.legend(fontsize=8, loc="upper left")
         ax.grid(axis="y", alpha=0.3)
+        if panel == "a":
+            ax.text(
+                0.02, 0.02,
+                "$\\Delta\\alpha=2\\,\\mathrm{asin}(r/2)$ differs from $r$ by <0.02% (not shown)",
+                transform=ax.transAxes, fontsize=7, color="0.35",
+                bbox=dict(facecolor="white", edgecolor="none", alpha=0.8),
+            )
 
-    # (c): implied Delta alpha / r per Table III cell
+    # (c): paper-implied Delta alpha / r per Table III cell (filled) vs the
+    # effective Delta alpha / r of the Euclidean convention (c) (hollow).
     ax = axes[1][0]
     rev = res["reverse_delta_alpha"]["rows"]
     markers = {(768, 0.033): "o", (768, 0.02): "s", (1536, 0.033): "^", (1536, 0.02): "D"}
@@ -497,17 +772,23 @@ def make_figure(res: dict, fig_path: Path) -> None:
     for (n, r), marker in markers.items():
         y = [x["delta_alpha_over_r"] for x in rev if x["n"] == n and x["r"] == r]
         xs = np.arange(len(KS)) + offsets[(n, r)]
-        ax.scatter(xs, y, marker=marker, label=f"n={n}, r={r}", s=45)
+        ax.scatter(xs, y, marker=marker, label=f"paper-implied (n={n}, r={r})", s=45)
+    for (n, r), marker in markers.items():
+        y = [conv_index[(n, r, k)]["delta_alpha_over_r_c"] for k in KS]
+        xs = np.arange(len(KS)) + offsets[(n, r)]
+        ax.scatter(xs, y, marker=marker, facecolors="none", edgecolors=colors["euclid"], s=40,
+                   label="Euclidean expansion (c): effective $\\Delta\\alpha/r$"
+                   if (n, r) == (768, 0.033) else None)
     overall = res["reverse_delta_alpha"]["summary"]["overall"]
     ax.axhline(1.0, color="black", ls=":", lw=1.2, label="RemoteRAG claim: $\\Delta\\alpha=r$")
     ax.axhline(overall["mean"], color=colors["paper"], ls="--", lw=1.2,
-               label=f"implied mean = {overall['mean']:.2f} r")
+               label=f"paper-implied mean = {overall['mean']:.2f} r")
     ax.set_xticks(np.arange(len(KS)))
     ax.set_xticklabels([f"k={k}" for k in KS])
-    ax.set_ylabel("implied $\\Delta\\alpha / r$ from paper Table III")
-    ax.set_title("(c) Paper table needs $\\Delta\\alpha \\approx 1.21\\,r$ (A10)")
-    ax.set_ylim(0.95, 1.4)
-    ax.legend(fontsize=7.5)
+    ax.set_ylabel("$\\Delta\\alpha / r$")
+    ax.set_title("(c) Only the inverted $\\Delta\\alpha \\approx 1.2\\,r$ reproduces Table III (A10)")
+    ax.set_ylim(0.95, 1.45)
+    ax.legend(fontsize=7, loc="upper left")
     ax.grid(alpha=0.3)
 
     # (d): MC validation: Eq.21 vs widened-cap MC vs paper vs minimal k'
@@ -556,6 +837,13 @@ def main() -> int:
     print("[exp5] convention probe ...", flush=True)
     probe = convention_probe()
 
+    print("[exp5] Delta-alpha conventions (four readings) ...", flush=True)
+    conventions = delta_alpha_conventions()
+    conv_summary = conventions["summary"]
+
+    print("[exp5] RemoteRAG reference-implementation cross-check ...", flush=True)
+    remoterag = remoterag_reference_check(conv_summary["inverse"]["mean"])
+
     print("[exp5] Monte Carlo (m=100,000; nq=200 per dimension; fixed DB) ...", flush=True)
     mc = [
         monte_carlo(768, nq=200, seed=7),
@@ -579,6 +867,39 @@ def main() -> int:
         f"range=[{overall['min']}, {overall['max']}] (RemoteRAG claims ~1.0)"
     )
 
+    print("\n=== Four Delta-alpha conventions (paper Table III, m=100,000) ===")
+    print(
+        f"{'n':>5} {'r':>6} {'k':>3} {'paper':>7} {'(a) da=r':>10} {'(b) chord':>10} "
+        f"{'(c) euclid':>11} {'(d) da/r':>9} {'err_a':>8} {'err_c':>8} {'err_d':>8}"
+    )
+    for row in conventions["rows"]:
+        print(
+            f"{row['n']:>5} {row['r']:>6} {row['k']:>3} {row['paper_kprime']:>7} "
+            f"{row['kprime_a_dalpha_eq_r']:>10.2f} {row['kprime_b_dalpha_chord']:>10.2f} "
+            f"{row['kprime_c_euclid_expansion']:>11.2f} {row['delta_alpha_over_r_d']:>9.4f} "
+            f"{row['rel_err_a']:>+8.3f} {row['rel_err_c']:>+8.3f} {row['rel_err_d']:>+8.1e}"
+        )
+    inv = conv_summary["inverse"]
+    best = conv_summary["best_derivable_convention_abs_rel_err"]
+    print(
+        f"\n(d) inverted Delta alpha/r: min={inv['min']:.4f} mean={inv['mean']:.4f} "
+        f"max={inv['max']:.4f} std={inv['std']:.4f} (16 cells)"
+    )
+    print(
+        f"best derivable convention (a/b/c) is still off by >= {best['min'] * 100:.1f}% per cell "
+        f"(mean {best['mean'] * 100:.1f}%, max {best['max'] * 100:.1f}%)"
+    )
+
+    print("\n=== RemoteRAG reference cross-check (k=5, r=0.03, n=768, k'=160) ===")
+    for ev in remoterag["evaluations"]:
+        print(
+            f"N={ev['N']:>9.0e}: (a) da=r {ev['kprime_a_dalpha_eq_r']:8.2f} "
+            f"({ev['rel_err_a_vs_reference']:+7.2%})  (b) chord {ev['kprime_b_dalpha_chord']:8.2f}  "
+            f"(c) euclid {ev['kprime_c_euclid_expansion']:8.2f}  "
+            f"da={remoterag['implied_ratio_used']:.3f}r {ev['kprime_dalpha_at_implied_ratio']:8.2f}"
+        )
+    print(remoterag["conclusion"])
+
     print("\n=== Monte-Carlo validation ===")
     print(f"{'n':>5} {'r':>6} {'k':>3} {'Eq.21':>9} {'MC cap':>9} {'rel err':>9} "
           f"{'MC min k´ mean':>15} {'p95':>6} {'p99':>6} {'slack':>7} {'cover':>6}")
@@ -597,6 +918,8 @@ def main() -> int:
         "description": (
             "Theorem 1 (Eq.21) / Table III reproduction: analytical values with Delta alpha = r "
             "and Delta alpha = 1.2 r, reverse-engineered Delta alpha/r from the paper table, "
+            "four Delta-alpha conventions enumerated per cell (r / chord / Euclidean expansion / "
+            "per-cell inversion), a cross-check against the cited RemoteRAG implementation, "
             "Monte-Carlo validation of Eq.21's widened-cap expectation and measurement of the "
             "minimal k' a real retrieval requires."
         ),
@@ -610,6 +933,8 @@ def main() -> int:
         "formula_table_dalpha_eq_1_2r": formula_table(1.2),
         "paper_vs_formula_dalpha_eq_r": pvf,
         "reverse_delta_alpha": {"rows": reverse, "summary": reverse_summary_},
+        "delta_alpha_conventions": conventions,
+        "remoterag_reference": remoterag,
         "convention_probe": probe,
         "numerical_stability": stability,
         "monte_carlo": {
@@ -632,10 +957,13 @@ def main() -> int:
                 "id": "A10",
                 "statement": (
                     "The paper's Table III cannot be reproduced from Theorem 1 with RemoteRAG's "
-                    f"Delta alpha ~ r: Eq.21 gives 0.44-0.74x the paper values; inverting the table "
-                    f"requires Delta alpha/r = {overall['mean']} (range {overall['min']}-{overall['max']}) "
-                    "instead of ~1. This is an internal inconsistency between the paper's table and "
-                    "its stated DP convention (RemoteRAG: 'Delta alpha_k can be approximately by r')."
+                    "Delta alpha ~ r: Eq.21 gives 0.44-0.74x the paper values "
+                    f"(paper/formula = {min(x['paper_over_formula'] for x in pvf):.3f}-"
+                    f"{max(x['paper_over_formula'] for x in pvf):.3f}); inverting the table requires "
+                    f"Delta alpha/r = {inv['mean']:.3f} (range {inv['min']:.3f}-{inv['max']:.3f}) instead "
+                    "of ~1. The paper's Table III can therefore only be reproduced with an UNDECLARED "
+                    "Delta alpha ~ 1.2 r; neither the paper's text nor Eq.21 yields that convention. "
+                    "1.2 r is NOT a 'correct' value -- it is the fitted convention implicit in the table."
                 ),
             },
             {
@@ -647,6 +975,41 @@ def main() -> int:
                     "and the paper's table 258. The widening is driven by the worst-case azimuthal "
                     "alignment of each DB point with the perturbation direction; typical distance "
                     "changes are O(r/sqrt(n))."
+                ),
+            },
+            {
+                "id": "A10c",
+                "statement": (
+                    "Four Delta-alpha conventions were enumerated on all 16 Table III cells: "
+                    "(a) Delta alpha = r; (b) Delta alpha = 2 asin(r/2); (c) Euclidean query shift "
+                    "alpha' = 2 asin((2 sin(alpha_k/2)+r)/2); (d) per-cell inversion of the paper's k'. "
+                    "(a) and (b) agree to <0.02%. None of the three derivable conventions reproduces the "
+                    f"table: the best of (a,b,c) is still off by >= {best['min'] * 100:.1f}% in every cell "
+                    f"((a) {conv_summary['rel_err']['a']['min'] * 100:+.0f}%..{conv_summary['rel_err']['a']['max'] * 100:+.0f}%, "
+                    f"(c) {conv_summary['rel_err']['c']['min'] * 100:+.0f}%..{conv_summary['rel_err']['c']['max'] * 100:+.0f}%), "
+                    f"while (d) requires Delta alpha/r = {inv['min']:.3f}-{inv['max']:.3f} "
+                    f"(mean {inv['mean']:.3f}, std {inv['std']:.3f}). The paper's Table III is reproduced "
+                    "exactly only by the undeclared (d) ~1.2 r convention."
+                ),
+            },
+            {
+                "id": "A10d",
+                "statement": (
+                    "Cross-check against the cited implementation (RemoteRAG arXiv:2412.12775 Sec. 5.4 / "
+                    "Fig. 5(c): highlighted k'=160, r=0.03, n=768): Eq.21 with Delta alpha=r gives "
+                    f"{remoterag['primary']['kprime_a_dalpha_eq_r']:.2f} at N=10^6 "
+                    f"({100 * remoterag['primary']['rel_err_vs_reference']:+.2f}%), consistent with the "
+                    "reference within its 2-decimal r and the N inferred from the result (N=10^5 gives "
+                    f"{remoterag['secondary_N1e5']['kprime_a_dalpha_eq_r']:.2f}, 30% below). The same "
+                    "reference point excludes the paper-implied convention: Delta alpha = "
+                    f"{remoterag['implied_ratio_used']:.3f} r gives "
+                    f"{remoterag['primary']['kprime_at_implied_ratio']:.2f} "
+                    f"({remoterag['primary']['kprime_at_implied_ratio'] / 160:.2f}x) and the "
+                    "Euclidean-expansion convention "
+                    f"{remoterag['primary']['kprime_c_euclid_expansion']:.2f} "
+                    f"({remoterag['primary']['kprime_c_euclid_expansion'] / 160:.2f}x). The cited "
+                    "implementation therefore supports Delta alpha = r, while the paper's Table III "
+                    "remains inconsistent with it."
                 ),
             },
         ],

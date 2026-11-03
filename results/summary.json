@@ -10,7 +10,7 @@
     },
     "M11": {
       "pass": true,
-      "n_checks": 45
+      "n_checks": 71
     },
     "M12": {
       "pass": true,
@@ -18,7 +18,7 @@
     },
     "M13": {
       "pass": true,
-      "n_checks": 19
+      "n_checks": 32
     },
     "M14": {
       "pass": true,
@@ -34,7 +34,7 @@
     },
     "M17": {
       "pass": true,
-      "n_checks": 19
+      "n_checks": 36
     },
     "M18": {
       "pass": true,

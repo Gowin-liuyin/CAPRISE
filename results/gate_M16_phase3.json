@@ -87,8 +87,8 @@
     "Phase-3 gate on real data: Phase-1 upload m=4000, Phase-2 k=10 over 20 queries, prompt template filled with decrypted documents only",
     "LLM generation is out of scope (SPEC.md §3); prompt assembly is the verifiable Phase-3 object."
   ],
-  "duration_s": 0.123,
-  "timestamp": "2026-11-03T16:54:10+0800",
+  "duration_s": 0.245,
+  "timestamp": "2026-11-03T23:34:35+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

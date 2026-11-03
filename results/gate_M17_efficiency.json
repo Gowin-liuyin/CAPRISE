@@ -10,91 +10,203 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "6 dims [384, 768, 1536, 2048, 3072, 4096]; batch>=1000 and reps==3 in every row"
+      "detail": "16 dims [64, 128, 256, 312, 384, 512, 768, 896, 1024, 1536, 1792, 2048, 2560, 3072, 3584, 4096]; batch>=1000 (per-dim batch = max(1000, ceil(4e6/d))) and reps==5 in every row (the protocol requires >=3; the artifact uses 5 interleaved rounds with a rotating start, i.e. strictly more repetitions)"
+    },
+    {
+      "check": "paper_dims_grid_alignment",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "paper-order grid on the 15 Fig.4 dims: [64, 128, 256, 312, 384, 512, 768, 896, 1024, 1536, 1792, 2048, 2560, 3072, 3584] (OK); extra dims flagged not_in_paper: [4096] (excluded from all paper-grid assertions)"
+    },
+    {
+      "check": "throughput_monotonicity_recomputable",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "14 adjacent pairs on the 15 paper dims are exactly recomputable from the stored raw per-round timings (paired and naive ratios); mismatches=[]"
+    },
+    {
+      "check": "paper_fig4a_tolerance_calibrated",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "the paper's own digitised Fig.4a rises +24.39% on [256, 312] and decreases on 13/14 steps -> the monotonicity tolerance 25% is calibrated on the paper's own curve (strict monotonicity would be stricter than the paper itself)"
     },
     {
       "check": "embeddings_per_s_decreases_with_d",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "embeddings/s 69838 -> 24813 strictly decreasing=True, d=384/d=4096 ratio=2.81x (>2 required; paper Fig.4a trend)"
+      "detail": "CPU-time rates (primary, load invariant): 65419 (d=64) -> 20854 (d=3584), drop=3.14x (>2.0 required, paper Fig.4a trend), Spearman rho=-1.000 (<= -0.9 required); assayed on the load-invariant round-paired CPU ratios with a <= 25% local-rise allowance (paper's own max local rise +24.4%) -> violations=[]; wall-clock (informational): drop=3.14x, rho=-1.000, paired violations=[], naive violations=[], largest local rise -0.65%"
     },
     {
-      "check": "elements_per_s_within_one_order_of_magnitude",
+      "check": "load_calibration_present_and_consistent",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "elements/s range 26.8M - 113.9M (max/min=4.25 < 10; same ballpark as paper Fig.4b 'remains high')"
+      "detail": "fixed-workload calibration (d=768, batch=2000, 3 reps): API-default 22.633 us/vector vs reference run 14.564 us/vector -> speed factor 1.554x (recomputed 1.554x); pre-generated nonces 21.196 us/vector; load average at calibration {'loadavg_1m': 7.07, 'loadavg_5m': 5.19, 'loadavg_15m': 4.66}. Absolute cross-machine rates are read together with this factor, ratios/shapes are load invariant"
     },
     {
       "check": "elements_per_s_stable_1536_3072",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "d in [1536,3072]: elements/s 73.3M - 113.9M (max/min=1.55 < 2; paper Fig.4b high region)"
+      "detail": "vectorised, d in [1536,3072]: elements/s 46.9M - 69.8M (max/min=1.49 < 2.0); note the vectorised element-level rate grows overall with d (max/min=17.8x over the whole paper grid, finding A17d), so the paper's 'remains high' claim is asserted on the paper-style probe below"
     },
     {
       "check": "throughput_internal_consistency",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "all 6 rows: median/emb-per-s/elements-per-s are exactly recomputable from the stored raw runs_s and runs_cpu_s arrays (rel tol 1e-4, i.e. JSON rounding only); inconsistencies=[]"
+      "detail": "all 16 rows: median / embeddings-per-s / elements-per-s are exactly recomputable from the stored raw runs_s and runs_cpu_s arrays (rel tol 1e-4 = JSON rounding only), and batch/in_paper follow the documented rules; inconsistencies=[]"
     },
     {
       "check": "independent_recheck_d768",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "gate re-measurement (CPU time, 5 interleaved rounds): d=768 86408 emb/s vs stored 69147 (load factor 1.25, absolute window [0.5,2.0]); per-vector cost ratio cost(768)/cost(1536): gate 0.658 vs stored 0.700 (dev 6.0% < 10%, load drift cancels within each round); ordering preserved (768 faster than 1536). Absolute rates are load-sensitive on this shared machine (observed 0.8-1.1x swings minutes apart; wall~=CPU time => resource contention), so the JSON is verified strictly by throughput_internal_consistency; see notes/exp1_efficiency.md."
+      "detail": "load-invariant re-check: artifact stored d=768 48225 emb/s with the fixed calibration workload (d=768, batch=1500, 3 reps) at 48657.1 emb/s -> normalised 0.991; gate re-measured the same two workloads in this process (46148 emb/s and 45769.3 emb/s) -> normalised 1.008; ratio of normalised rates 1.017 within [0.8, 1.25]. The absolute throughput differs between the runs (machine speed varies by several x), which is exactly what the normalisation removes"
+    },
+    {
+      "check": "paper_style_probe_grid_and_equivalence",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "paper-style probe on the same 15-dim paper grid, flagged as kind='implementation_style_probe', is_paper_code=False, is_src_core_implementation=False; per-element lambda equals caprise._noise up to float round-off (worst rel diff 7.90e-16 over 8 checks)"
+    },
+    {
+      "check": "paper_style_internal_consistency",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "all 16 paper-style rows: rates recomputable from the stored raw runs (rel tol 1e-4) and batch follows max(8, ceil(2e5/d)); inconsistencies=[]"
+    },
+    {
+      "check": "elements_per_s_within_one_order_of_magnitude",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "paper-style (per-element Python) elements/s over the 15 paper dims spans 1.86M - 2.48M (max/min=1.3315 < 10.0), matching the paper's flat/high Fig.4b; the vectorised implementation spans 17.8x (A17d) because it amortises a fixed per-vector cost, so this paper claim is asserted on the paper-style probe"
+    },
+    {
+      "check": "paper_style_elements_magnitude_matches_paper",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "paper-style probe / digitised paper, elements/s = 1.19-2.39x (median 1.36x) over the 15 paper dimensions -> a per-element Python implementation reproduces the paper's element-level order of magnitude on this machine (band [0.4, 3.0]x, median [0.6, 2.6]); digitisation accuracy +-2.0%, run speed factor 1.554x vs the fixed reference run"
+    },
+    {
+      "check": "paper_style_embeddings_magnitude_matches_paper",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "paper-style probe / digitised paper, embeddings/s = 1.18-2.38x (median 1.41x) over the 15 paper dimensions (band [0.4, 3.0]x, median [0.6, 2.6]) -> same-machine implementation-style check, NOT a fit to the paper's numbers"
+    },
+    {
+      "check": "paper_style_unreproduced_local_shape_recorded",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "local paper shapes NOT reproduced are recorded instead of hidden: Fig.4b dip at d=256 (paper -18.07% vs our +9.46% relative to d=128, reproduced=False); the vectorised element-level rate instead GROWS 17.826x from d=64 to d=3584 (paper: flat/high with local oscillations) -> A17/A17d"
+    },
+    {
+      "check": "paper_style_shape_matches_paper",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "d=64 -> d=3584 throughput drop: paper (digitised) 44.542x vs paper-style probe 42.059x, |log ratio|=0.057 <= 0.693 (within 2x) -> the per-element implementation style reproduces the paper's curve shape (load-invariant: both ends scale together)"
+    },
+    {
+      "check": "vectorised_shape_differs_from_paper",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "the vectorised curve is much flatter than the paper's: drop 3.142x vs paper 44.542x, |log ratio|=2.652 >= 0.693 (more than 2x apart) -> implementation-style effect (A17), not a scheme property"
+    },
+    {
+      "check": "vectorised_faster_than_paper_style_on_same_machine",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "vectorised / paper-style probe (same machine, same run), embeddings/s: d=64:2.2x, d=256:6.4x, d=768:15.1x, d=1536:19.0x, d=3072:28.1x (min over all 15 dims 2.25x > 1.5; load-invariant because both series are measured back-to-back)"
+    },
+    {
+      "check": "digitised_reference_present",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "15 digitised points on the 15 paper dims, uncertainty +-2.0%; sources=['fig4a', 'fig4b']"
+    },
+    {
+      "check": "digitised_reference_recomputable",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "stored digitised values reproduce from a fresh pixel digitisation of the paper PNGs within 0% (deterministic, rel tol 1e-3); mismatches=[]; gate re-digitised both panels from /Users/yin/Documents/RAG/output/pdf/source/caprise/figures: fig4a 15 markers/15 ticks, y-fit resid 0.0316 row(s), x-fit resid 0.446 px, fig4b 15 markers/15 ticks, y-fit resid 1.9217 row(s), x-fit resid 0.498 px"
+    },
+    {
+      "check": "digitised_cross_panel_consistency",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "elements/s(Fig.4b) vs embeddings/s(Fig.4a)*d: median |dev| 0.59% < 2.0% (max 6.11% at d=3584) -> both axis calibrations validated; the stored summary equals the gate recomputation"
+    },
+    {
+      "check": "digitised_paper_text_anchor",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "digitised Fig.4a at d=768 = 2306 emb/s vs the 2339 vectors/s quoted in the paper text (-1.39%); digitised Fig.4b at d=768 = 1795607 elements/s vs 2339*768 = 1796352 (-0.04%) (both within 5.0%)"
     },
     {
       "check": "phase1_caprise_encryption_measured",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "EncQ n=128, d=768, median=2.281 ms, vectors/s=56119.8"
+      "detail": "EncQ n=128, d=768, median=1.42 ms, vectors/s=90122.3"
     },
     {
       "check": "phase1_overhead_below_19pct_all_configs",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "2 measured embedding configs + 1 paper reference; overheads=[1.015, 0.305, 2.868]% (all < 19.0% paper bound)"
+      "detail": "2 measured embedding configs + 1 paper reference; overheads=[0.266, 0.188, 1.786]% (all < 19.0% paper bound)"
     },
     {
       "check": "paper_phase1_claim_reproduced",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "paper 15/79.52 = 18.86% < 19%; our measured encryption 2.281 ms vs paper 15 ms"
+      "detail": "paper 15/79.52 = 18.86% < 19%; our measured encryption 1.42 ms vs paper 15 ms"
     },
     {
       "check": "phase1_embedding_dominates_encryption",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "min measured embedding 224.7 ms vs CAPRISE 2.28 ms (embedding is the Phase-1 bottleneck; A17c)"
+      "detail": "min measured embedding 533.1 ms vs CAPRISE 1.42 ms (embedding is the Phase-1 bottleneck; A17c)"
     },
     {
       "check": "phase2_caprise_measured",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "CAPRISE d=768: 67996.4 vectors/s (14.707 us/vector, n=2000 single-vector EncQ calls)"
+      "detail": "CAPRISE d=768: 43467.6 vectors/s (23.006 us/vector, n=2000 single-vector EncQ calls)"
     },
     {
       "check": "phase2_paillier_baseline_measured",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "phe baselines: [(1024, 1.6254), (2048, 0.2513)]; pure-pow baselines: [(1024, 0.1423), (2048, 0.0192)]"
+      "detail": "phe baselines: [(1024, 1.1525), (2048, 0.1747)]; pure-pow baselines: [(1024, 0.0844), (2048, 0.011)]"
     },
     {
       "check": "phase2_speedups_positive",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "speedup vs measured Paillier: [41833.6, 270578.6]; vs paper RemoteRAG PHE 250-300: 272.0x-226.7x (absolute ratios are cross-hardware/implementation, see A17/A17b)"
+      "detail": "speedup vs measured Paillier: [37715.9, 248812.8]; vs paper RemoteRAG PHE 250-300: 173.9x-144.9x (absolute ratios are cross-hardware/implementation, see A17/A17b)"
     },
     {
       "check": "paper_9x_claim_internal_consistency",
@@ -108,28 +220,28 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "our CAPRISE / paper CAPRISE 2339 vec/s = 29.07x (finding A17)"
+      "detail": "our CAPRISE / paper CAPRISE 2339 vec/s = 18.58x (finding A17)"
     },
     {
       "check": "per_element_style_probe_slower",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "vectorised 2.916 us/vector vs per-element loop 98.438 us/vector (33.75x slower; scalar draw 0.1282 us/element) -> explains paper's 2339 vec/s (A17)"
+      "detail": "vectorised 5.521 us/vector vs per-element loop 199.812 us/vector (36.19x slower; scalar draw 0.2602 us/element) -> explains paper's 2339 vec/s (A17)"
     },
     {
       "check": "artifact_results_json",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "results/exp1_efficiency.json (13960 bytes), sections=['description', 'experiment', 'findings', 'hardware', 'implementation_style_probe', 'module', 'paper_numbers', 'paper_ref', 'phase1_overhead', 'phase2', 'runtime_s', 'settings', 'throughput']"
+      "detail": "results/exp1_efficiency.json (110162 bytes), sections=['description', 'experiment', 'findings', 'generated_at', 'hardware', 'implementation_style_probe', 'load_calibration', 'module', 'paper_comparison', 'paper_fig4_digitisation', 'paper_numbers', 'paper_ref', 'paper_style_probe', 'phase1_overhead', 'phase2', 'previous_runs', 'runtime_s', 'settings', 'throughput']"
     },
     {
       "check": "artifact_figure",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "figures/fig4_efficiency.png (238577 bytes)"
+      "detail": "figures/fig4_efficiency.png (380691 bytes)"
     },
     {
       "check": "artifact_notes_documents_A17",
@@ -137,16 +249,27 @@
       "actual": true,
       "pass": true,
       "detail": "notes/exp1_efficiency.md exists=True, documents A17=True, documents PHE baseline=True"
+    },
+    {
+      "check": "artifact_notes_document_15dims_two_styles_digitisation",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "notes document the 15-point paper grid (64..3584 incl. 312/2560), the paper-style per-element probe and the digitisation method/error"
     }
   ],
   "notes": [
     "exp1 artifacts found; gate does not rerun the full experiment",
-    "Throughput measured on Apple M5 CPU (numpy vectorised CAPRISE); paper numbers are A100 GPU + per-element Python.",
-    "Phase-1: embedding dominates (128 queries: ~0.21-0.63 s vs CAPRISE ~1.5 ms); overhead 0.23-0.69% < 19% paper bound.",
-    "Phase-2: CAPRISE ~78.6k vectors/s (d=768) vs measured Paillier 2.19 vec/s (1024-bit) / 0.30 vec/s (2048-bit); paper 9x internal-consistent, cross-hardware ratios reported but not asserted (A17/A17b)."
+    "informational: per-vector CPU-cost ratio cost(768)/cost(1536) with the artifact's batches (5209/2605) is 0.654 in this gate run vs 0.633 in the artifact (dev 3.3%); it is not asserted because the fixed per-vector cost and the memory-bound part of the work react differently to cache contention, so this ratio moves with the machine-load state -- the load-invariant normalised re-check above is the assertion.",
+    "Dimension grid = the 15 embedding sizes printed on the paper's Fig.4 x-axis (64, 128, 256, 312, 384, 512, 768, 896, 1024, 1536, 1792, 2048, 2560, 3072, 3584) + d=4096 flagged not_in_paper; vectorised EncDB, batch=max(1000, ceil(4e6/d))>=1000, 5 interleaved rounds with a rotating start, median, wall + CPU time; machine speed factor 1.554x vs the fixed reference run (indicative only; the load-invariant assertions normalise inside each run).",
+    "Vectorised throughput: 65417 emb/s at d=64 -> 20823 at d=3584 (3.1x drop, Spearman rho=-1.000, local rises <= 25% = the paper's own max local rise).",
+    "Digitised paper Fig.4: Fig.4a 21817 -> 490 embeddings_per_s, Fig.4b 1396435 -> 1869680 elements_per_s; digitisation accuracy +-2.0%, cross-panel median deviation 0.593%, text anchor -1.39% at d=768.",
+    "Paper-style probe (per-element Python, numerically identical to src noise): elements/s 1.19-2.39x the digitised paper (median 1.36x), embeddings/s 1.18-2.38x (median 1.41x), drop 42.059x vs the paper's 44.542x; the vectorised implementation is 3.0-42.5x faster than the paper and grows its element-level rate with d, i.e. it does not follow the paper's curve (A17/A17d); the paper's d=256 dip is NOT reproduced and is recorded as such.",
+    "Phase-1: embedding dominates (533.1-756.1 ms for 128 queries vs CAPRISE 1.42 ms); overhead 0.188-1.786% < 19.0% paper bound.",
+    "Phase-2: CAPRISE 43467.6 vectors/s (d=768) vs measured Paillier [(1024, 1.1525), (2048, 0.1747)]; paper 9x internal-consistent; cross-hardware ratios reported but not asserted (A17/A17b)."
   ],
-  "duration_s": 0.165,
-  "timestamp": "2026-11-03T16:54:10+0800",
+  "duration_s": 1.912,
+  "timestamp": "2026-11-03T23:38:18+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

@@ -49,8 +49,8 @@
     "DecDB replays PRF(K, r) to rebuild lambda; correctness needs (K, r).",
     "Measurement scale: wrong-nonce error 0.104 vs noise radius/s = 0.075."
   ],
-  "duration_s": 0.012,
-  "timestamp": "2026-11-03T16:53:51+0800",
+  "duration_s": 0.024,
+  "timestamp": "2026-11-03T23:33:47+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

@@ -146,7 +146,7 @@
     "beta sensitivity: 0.05:0.9910, 0.1:0.9854, 0.2:0.9699, 0.4:0.9401"
   ],
   "duration_s": 0.001,
-  "timestamp": "2026-11-03T16:54:11+0800",
+  "timestamp": "2026-11-03T23:34:39+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

@@ -24,7 +24,7 @@
 | 数据: MS MARCO 子集 + gtr-t5-base | §V setup | ✅ M0 PASS（m=50,000，1000 queries） |
 | 效率实验 (Fig.4) | §V-1 | ✅ M17 PASS |
 | 检索精度（补充） | §V（论文未给数字） | ✅ M18 PASS（CAPRISE k'=k recall@10=0.9699） |
-| Vec2Text 攻击 (Table II) | §V-2 | ✅ M11 PASS |
+| Vec2Text 攻击 (Table II, 50 条 + 95% CI) | §V-2 | ✅ M11 PASS |
 | 向量分析 ASR (Fig.5) | §V-3 | ✅ M10 PASS（论文图数字化对照） |
 | top-k' 扩张表 (Table III) | §V-4 | ✅ M13 PASS（论文表值与公式不一致） |
 
@@ -35,16 +35,17 @@
 | CAPRISE 加解密正确性 | Alg.1 | 往返 2.8e-17；噪声界严格；Eq.(2) 50,000 组 0 违反 | ✅ |
 | Eq.(3) 库内不保留 | §III-B1 | 存在性成立（构造反例）；真实采样 0/20,000 反转 → finding F2 | ⚠️ |
 | 检索精度（论文未给） | §V | CAPRISE k'=k Recall@10=0.9699；k'=15→0.9999；qrels MRR 与明文相同 0.7230 | ✅ 补充 |
-| Table III top-k' | Table III | 论文/公式(Δα=r)=1.36–2.25；反推 Δα/r=1.213±0.044 → 论文内部不一致 F1 | ❌ FALSIFIED |
+| Table III top-k' | Table III | 四约定枚举：论文/公式(Δα=r)=1.36–2.25；只有未声明的逐格反解 Δα/r=1.213±0.043 能复现；RemoteRAG 参照实现自洽于 Δα=r → 论文内部不一致 F1 | ❌ FALSIFIED |
 | Theorem 1 | Eq.21 | 公式 vs MC 偏差 ≤2.38%；实测最小 k'≈k → 定理为宽松上界 F9 | ❌ FALSIFIED |
-| Vec2Text (Table II) | 83.02→12.43 BLEU | 明文 63.73 → CAPRISE raw **9.26**（P/R/F1 接近）；rescaled 强攻击 30.29 | ✅ 加密后水平复现 |
+| Vec2Text (Table II) | 83.02→12.43 BLEU | 50 条 + 95% CI：明文 **69.88** [61.99,78.17] → CAPRISE raw **13.70** [9.72,17.48]（CI 覆盖论文 12.43）；rescaled 强攻击 34.58 | ✅ 加密后水平在 CI 内复现 |
 | 向量分析 ASR (Fig.5) | CAPRISE 更低 | 27/27 cell 更低；真实数据 −2.3pt；距离重建误差 2.16× | ✅ 趋势成立 |
-| 效率 (Fig.4) | 2339 vec/s、<19% overhead | 67,996 vec/s（向量化，29.1× 同口径）；overhead 1.0%；<19% 成立 | ✅ 趋势+量级 |
+| 效率 (Fig.4) | 15 维曲线、2339 vec/s、<19% overhead | 论文 15 维全部实测；paper-style 探针 1.18–2.38×（中位 1.41×）、drop 42.1× vs 论文 44.5×；向量化 43,468 vec/s（18.6×）；overhead 0.19–0.27% | ✅ 趋势+量级（A17/F5） |
 | ppRAG 三阶段 | Alg.2 | 服务器无密钥/无明文；只收 e'_q；prompt 0 泄漏 | ✅ |
 
-**论文问题清单（F1–F15，详见 docs/FINDINGS.md）**：两个 FALSIFIED（Table III 内部不一致、
-Theorem 1 过强）、三个实验设计/攻击模型缺失（Vec2Text 适配、β 校准、Fig.5 维度配置）、
-其余为实现细节缺失（PRF/keyspace/nonce/ReRank/AES/LLM 等 19 项歧义）。
+**论文问题清单（F1–F16，详见 docs/FINDINGS.md）**：两个 FALSIFIED（Table III 内部不一致、
+Theorem 1 过强）、一个证明符号笔误（F16）、若干实验设计/攻击模型缺失（Vec2Text 适配、β 校准、
+Fig.5 维度配置、Fig.4 实现风格）、其余为实现细节缺失（PRF/keyspace/nonce/ReRank/AES/LLM 等 19 项歧义）。
+逐要素对齐见 [`docs/PAPER_COVERAGE.md`](docs/PAPER_COVERAGE.md)。
 
 ## 环境
 
@@ -90,9 +91,10 @@ data/            数据产物（不入库，脚本重建）
 
 ## 重要复现发现
 
-1. **Table III 内部不一致**：论文 top-k' 数值无法用 RemoteRAG 的
-   `Δα_k ≈ r` 约定复现；反推需要 `Δα_k ≈ 1.2 r`。复现同时给出两种约定与
-   Monte Carlo 实测（详见 `notes/exp5_*.md`）。
+1. **Table III 内部不一致**：论文 top-k' 数值无法用被引用来源 RemoteRAG 的
+   `Δα_k ≈ r` 约定复现；四种约定枚举后，只有未声明的 `Δα_k ≈ 1.2 r`（逐格反解
+  1.1537–1.2977）能精确复现，而 RemoteRAG 自身高亮例却与 `Δα≈r` 自洽（+6.46%）。
+  详见 `notes/exp5_query_dp.md` §4–5。
 2. 论文未公开：PRF 实例化、keyspace、nonce 传输、ReRank 模型、AES 模式、
    LLM、ASR 定义、Vec2Text 对密文的攻击适配等 18 项歧义——每项的实现决策
    记录在 `SPEC.md` §2.2 与 `docs/PAPER_ANALYSIS.md` §12。

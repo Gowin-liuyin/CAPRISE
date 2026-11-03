@@ -4,15 +4,23 @@
 > 每条必须有可复跑证据；状态：CONFIRMED / PENDING（待证实）/ REJECTED。
 > 与 `docs/CLAIMS_CHECKLIST.md` 的判定（VERIFIED/FALSIFIED/BLOCKED/UNKNOWN）对应。
 
-## F1: Table III 的 top-k' 与正文 `Δα≈r` 约定不一致（A10）
+## F1: Table III 的 top-k' 与 `Δα≈r` 约定不一致（A10）
 
-- 类型: 数值不一致（论文内部矛盾）
-- 论文位置: Table III、Eq.(21)、§III-B2（"the perturbed angle Δα_k ... can be approximately by r"）
-- 现象: 用 `Δα_k = r`（RemoteRAG 约定）代入 Eq.(21)，本复现得到 n=768,r=0.033,k=5 时 k'≈147；论文表值为 258（约 1.75×）。反推每格所需 Δα/r 稳定在 ≈1.19–1.30（均值≈1.2）。
-- 影响: 论文 Table III 无法由论文自身公式+约定复现；若按 Δα≈1.2r，则表值可复现到几个百分点内。
-- 复现证据: `results/exp5_query_dp.json`、`notes/exp5_query_dp.md`（M13）
-- 状态: CONFIRMED（初验，M13 最终确认）
-- 处置: 报告中并列给出 [论文原值 | Δα=r 公式值 | 反推 Δα/r | 实测 MC 最小 k']，不修改论文值、不凑数。
+- 类型: 数值不一致（论文内部矛盾；且论文正文未定义 r→Δα_k 的换算）
+- 论文位置: Table III、Eq.(21)、§V-4（"we perturb the query embedding with r ... as described in Equation 21"）
+- 对照来源: `Δα_k ≈ r` 不是 CAPRISE 本文的陈述，而出自论文引用的 RemoteRAG（arXiv:2412.12775）§3.2.2 原文："Since the perturbation is small (r ≪ 1), the perturbed angle Δα_k between e_k and e_k′ can be approximately by r."。CAPRISE 本文既未复述该近似，也未给出 Δα_k 与 r 的任何换算（A10）。
+- 现象: 按 RemoteRAG 的 `Δα_k = r` 代入 Eq.(21)，本复现得到 n=768,r=0.033,k=5 时 k'≈147.3；论文表值为 258（论文/公式=1.75×）。反推每格所需 Δα/r 稳定在 ≈1.15–1.30（均值 1.213±0.044，16 格全部 >1.15）。
+- 系统枚举（M13，2026-11-03 更新）: 对 Table III 的 16 格逐一计算四种约定——
+  (a) `Δα=r`：相对误差 −26.3%…−55.6%（mean −41.9%）；
+  (b) 弦长 `Δα=2·asin(r/2)`：与 (a) 差 <0.02%，同样系统性低估；
+  (c) 欧氏扩张 `α'=2·asin((2sin(α_k/2)+r)/2)`：反向系统性高估 +12.0%…+71.1%（mean +42.0%）；
+  (d) 逐格反解：精确复现论文表值（≤5.6e-14），反解 `Δα/r = 1.1537–1.2977`（mean 1.2129±0.0435）。
+  三种**可推导**约定逐格取最优仍至少偏离 12.0% ⇒ 不存在由正文/Eq.(21)/RemoteRAG 推出的 Δα 能对上 Table III。
+- 参照实现交叉验证: 用同一公式复算 RemoteRAG §5.4/Fig.5(c) 的高亮例子（k=5, r=0.03, n=768, k'=160）：`Δα=r` 在 N=10^6 给出 170.34（+6.46%），点态反解 `Δα/r=0.9804` ⇒ 被引用的实现确实按 `Δα≈r` 计算；而它在同一参照点上排除 `Δα=1.213r`（2.07×）与欧氏扩张（2.90×）。注意：RemoteRAG §5.4 未声明该点的 N，附录 B.4 默认 N=10^5 时其自身公式只给 111.89（与其 k'=160 不自洽）——该简并性已在 notes 中声明。
+- 影响: 论文 Table III 无法由论文自身公式 + 被引用来源的 Δα≈r 约定复现；若按未声明的 Δα≈1.2r，则表值可复现到几个百分点内（论文/预测均值 1.042）。`1.2r` 只是表值隐含的拟合约定，不是"正确取值"。
+- 复现证据: `results/exp5_query_dp.json`（`delta_alpha_conventions`、`remoterag_reference`）、`notes/exp5_query_dp.md` §4–5、`results/gate_M13_theorem1.json`
+- 状态: CONFIRMED（M13 四约定枚举 + 参照实现交叉验证完成）
+- 处置: 报告中并列给出 [论文原值 | Δα=r | 弦长 | 欧氏扩张 | 反解 Δα/r | 实测 MC 最小 k']，不修改论文值、不凑数。
 
 ## F2: Eq.(3) 是"存在性"命题，高维下实际不可达（A19）
 
@@ -51,17 +59,19 @@
 
 - 类型: 可复现性缺失
 - 现象: 未给样本量、vec2text 步数/beam、攻击者是否归一化、指标实现口径（BLEU 是否 ×100、ROUGE 具体变体）。
-- 处置: exp3 notes 记录本复现全部设置，报告中说明只可比趋势与量级。
+- 处置: exp3 notes 记录本复现全部设置，报告中说明只可比趋势与量级。**量化（M11 敏感性）**：
+  同一 5 条 passage 上 20/4→50/10 使明文 BLEU 55.7→77.4（+21.7）、CAPRISE raw 7.21→7.16（−0.05）、
+  rescaled 29.7→33.0（+3.3）——明文基线对反演预算高度敏感，加密后水平不敏感（§exp3 notes 7）。
 - 状态: CONFIRMED
 
 ## F3b: CAPRISE 的 Vec2Text 防护部分依赖"攻击者不还原尺度"（A11 扩展，量化）
 
 - 类型: 攻击模型未说明/防护强度依赖假设
 - 论文位置: Table II、§IV-1（声称噪声足以破坏 Vec2Text）
-- 证据: 同一批 CAPRISE 密文，raw 攻击（e'=3E+λ 直接反演，对应论文口径）BLEU=**9.258**；
-  若攻击者估计并还原尺度（e'·‖E‖/‖e'‖，最强攻击）BLEU=**30.289**（F1 0.729），
-  仍比明文低 52% 但远高于论文报告的 12.425。论文未说明攻击者如何适配密文（A11）。
-- 影响: 论文 Table II 的 12.425 可复现（我们 9.26，P/R/F1 高度接近），但"CAPRISE 有效防 Vec2Text"
+- 证据: 同一批 CAPRISE 密文（50 条 passage），raw 攻击（e'=3E+λ 直接反演，对应论文口径）BLEU=**13.696**；
+  若攻击者估计并还原尺度（e'·‖E‖/‖e'‖，最强攻击）BLEU=**34.584**（F1 0.741），
+  仍比明文低 51% 但远高于论文报告的 12.425。论文未说明攻击者如何适配密文（A11）。
+- 影响: 论文 Table II 的 12.425 可复现（我们 13.70，95% CI 覆盖论文值；P/R/F1 同一水平），但"CAPRISE 有效防 Vec2Text"
   的强度依赖攻击者假设；报告同时给出两口径并标注。
 - 状态: CONFIRMED
 
@@ -113,8 +123,8 @@
 
 - 类型: 可复现性/可比性
 - 论文位置: §V-1（2339 vec/s、PHE 250–300 vec/s、9×）
-- 证据: 本机 M5 CPU：CAPRISE 78.6k vec/s（向量化 numpy），Paillier 实测 2.19 vec/s(1024-bit)/0.30(2048-bit)；与论文引用 RemoteRAG 的比值为 262–314×，而论文 9× 是"同为优化实现"的比值。A17 探针：向量化 vs 逐元素实现 34× 差异 → 论文 2339 vec/s（428µs/vec ≈ 0.56µs/element）对应逐元素 Python 风格。
-- 处置: 报告只比较同环境相对趋势 + 明确声明实现风格差异；不宣称"我们比论文快 34×"。
+- 证据: 本机 M5 CPU：CAPRISE 43.5k vec/s（单向量 EncQ，向量化 numpy）；Paillier 实测 1.15 vec/s(1024-bit)/0.17(2048-bit)；与论文引用 RemoteRAG PHE 的比值为 145–174×，而论文 9× 是"同为优化实现"的比值。A17 探针：同机向量化 vs 逐元素实现 36× → 论文 2339 vec/s（428µs/vec ≈ 0.56µs/element）对应逐元素 Python 风格。
+- 处置: 报告只比较同环境相对趋势 + 明确声明实现风格差异；不宣称"我们比论文快几十倍"。
 - 状态: CONFIRMED
 
 ## F13: 加密噪声对自然语料 top-10 的影响极小（实验设计约束）
@@ -127,12 +137,28 @@
 ## F14: Vec2Text 攻击必须使用 vec2text 训练的嵌入约定（否则基线也失败）
 
 - 类型: 可实现性/攻击模型细节
-- 证据: 直接把 sentence-transformers 的 GTR 嵌入（含 Dense+归一化）喂给 vec2text gtr-base corrector：即使 num_steps=20/beam=4，重建也是完全无关文本（说明"无加密也重建失败"，不能作为基线）。改用 vec2text 自身约定（`corrector.inversion_trainer.call_embedding_model`，T5 encoder 均值池化、无 Dense/无 L2，范数 0.93–1.57）后，10 条校准样本的明文重建 BLEU=63.727（P .886/R .927/F1 .906/ROUGE .801），20 步 beam=4 约 8.8s/text。M11 gate 用 npz 数组对嵌入约定与加密链做了字节级审计。
+- 证据: 直接把 sentence-transformers 的 GTR 嵌入（含 Dense+归一化）喂给 vec2text gtr-base corrector：即使 num_steps=20/beam=4，重建也是完全无关文本（说明"无加密也重建失败"，不能作为基线）。改用 vec2text 自身约定（`corrector.inversion_trainer.call_embedding_model`，T5 encoder 均值池化、无 Dense/无 L2，范数 0.93–1.57）后，**50 条** passage 的明文重建 BLEU=69.875（P .924/R .928/F1 .926/ROUGE .860），20 步 beam=4 在共享机上 13–21 s/text。M11 gate 用 npz 数组对嵌入约定与加密链做了字节级审计。
 - 影响: 论文 Table II 的基线 BLEU 83 隐含使用 vec2text 约定嵌入；复现 M11 必须对齐该约定，并在报告中声明（这也是 A11 的一部分）。
 - 状态: CONFIRMED
 
 ## F15: 论文 Table II 的绝对数值只能在相同攻击约定/数据规模下对齐
 
 - 类型: 可复现性
-- 证据: 见 F14 + Table II 缺样本量/步数/攻击者归一化细节（F6）。本复现固定 num_steps=20、sequence_beam_width=4、样本 20 条，报告 BLEU/P/R/F1/ROUGE 并与论文值并列，只主张趋势与量级。
+- 证据: 见 F14 + Table II 缺样本量/步数/攻击者归一化细节（F6）。本复现固定 num_steps=20、sequence_beam_width=4、样本 **50 条**（bootstrap 95% CI），报告 BLEU/P/R/F1/ROUGE 并与论文值并列；CAPRISE 行 13.70 [9.72,17.48] 覆盖论文 12.425，明文行 69.9 [62.0,78.2] 低于论文 83.0（0.84×）。
+- 状态: CONFIRMED
+
+## F16: 证明 Eq.(12) 的符号笔误（`−` 应为 `+`；结论不受影响）
+
+- 类型: 排版/符号错误（proof typo）
+- 论文位置: §III-B1 证明 Eq.(12)（LaTeX 源 ppRAG_FLLM.tex 第 317 行）
+- 现象: 论文写
+  `‖(s e_q − s e_2) − (η_eq − λ_e2)‖ = ‖C_Q(e_q) − C_DB(e_2)‖`，
+  但按 Eq.(5)(6) 有 `e'_q − e'_2 = (s e_q − s e_2) + (η_eq − λ_e2)`；打印式与密文距离**恒不相等**。
+  正确的行应为 `≤ ‖(s e_q − s e_2) + (η_eq − λ_e2)‖ = ‖e'_q − e'_2‖`（反向三角不等式方向不变）。
+- 验证: `scripts/check_proof_chain.py`（4000 组满足前提的三元组，逐式复核 Eq.(4)–(20)）：
+  - `eq12_as_printed_equals_cipher_dist`：4000/4000 不成立（打印式错误）；
+  - `eq12_corrected_plus_equals_cipher_dist`：0/4000 违反（改正后成立）；
+  - 其余 Eq.(5)–(11) 与 Eq.(13)–(20) 全部 0 违反；Eq.(2) 结论 0/4000 违反。
+- 影响: 证明逻辑本身成立（符号修正后），不改变任何结论；但按打印公式无法机械复核，属论文排版错误。
+- 证据: `results/proof_chain_check.json`
 - 状态: CONFIRMED

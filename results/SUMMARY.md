@@ -16,13 +16,13 @@
 | M8 | eq3 | PASS | 5 | 0 | results/gate_M8_eq3.json |
 | M9 | adcpe | PASS | 6 | 0 | results/gate_M9_adcpe.json |
 | M10 | vector_analysis | PASS | 29 | 0 | results/gate_M10_vector_analysis.json |
-| M11 | vec2text | PASS | 45 | 0 | results/gate_M11_vec2text.json |
+| M11 | vec2text | PASS | 71 | 0 | results/gate_M11_vec2text.json |
 | M12 | distance_dp | PASS | 18 | 0 | results/gate_M12_distance_dp.json |
-| M13 | theorem1 | PASS | 19 | 0 | results/gate_M13_theorem1.json |
+| M13 | theorem1 | PASS | 32 | 0 | results/gate_M13_theorem1.json |
 | M14 | phase1 | PASS | 12 | 0 | results/gate_M14_phase1.json |
 | M15 | phase2 | PASS | 11 | 0 | results/gate_M15_phase2.json |
 | M16 | phase3 | PASS | 11 | 0 | results/gate_M16_phase3.json |
-| M17 | efficiency | PASS | 19 | 0 | results/gate_M17_efficiency.json |
+| M17 | efficiency | PASS | 36 | 0 | results/gate_M17_efficiency.json |
 | M18 | retrieval | PASS | 19 | 0 | results/gate_M18_retrieval.json |
 
 **门禁 PASS: 20/20（已运行模块）**
@@ -31,8 +31,8 @@
 
 | 实验 | 关键字段 | 备注 |
 |---|---|---|
-| exp1_efficiency | experiment, module, paper_ref, description, hardware, settings, throughput, phase1_overhead, phase2, implementation_style_probe, paper_numbers, findings | results/exp1_efficiency.json |
+| exp1_efficiency | experiment, module, paper_ref, description, hardware, settings, paper_fig4_digitisation, throughput, paper_style_probe, paper_comparison, phase1_overhead, phase2 | results/exp1_efficiency.json |
 | exp2_retrieval | meta, plaintext, configs, beta_sensitivity | results/exp2_retrieval.json |
-| exp3_vec2text | experiment, paper_ref, definition, setup, passages, embeddings, encryption, modes, paper_table_ii, comparison, findings, summary | results/exp3_vec2text.json |
+| exp3_vec2text | experiment, paper_ref, definition, setup, passages, embeddings, encryption, modes, bootstrap, sensitivity, paper_table_ii, comparison | results/exp3_vec2text.json |
 | exp4_vector_analysis | experiment, paper_ref, definition, setup, selfcheck, main, paper_dims_synthetic, paper_fig5_reference, m_sweep, real_m_sweep, normalization_control, beta_sweep | results/exp4_vector_analysis.json |
-| exp5_query_dp | experiment, module, paper_ref, description, settings, paper_table, formula_table_dalpha_eq_r, formula_table_dalpha_eq_1_2r, paper_vs_formula_dalpha_eq_r, reverse_delta_alpha, convention_probe, numerical_stability | results/exp5_query_dp.json |
+| exp5_query_dp | experiment, module, paper_ref, description, settings, paper_table, formula_table_dalpha_eq_r, formula_table_dalpha_eq_1_2r, paper_vs_formula_dalpha_eq_r, reverse_delta_alpha, delta_alpha_conventions, remoterag_reference | results/exp5_query_dp.json |

@@ -55,10 +55,12 @@ gate.finish()   # 写 results/gate_M1_prf.json，pass = all checks pass
 
 ## 当前状态
 
-（每次更新，保持与 results/gate_*.json 一致）
+（每次更新，保持与 results/gate_*.json 一致；2026-11-03 23:00）
 
 | 模块 | 状态 | 证据 |
 |---|---|---|
+| P0 骨架 | ✅ PASS | results/gate_P0_skeleton.json |
+| M0 数据 | ✅ PASS | results/gate_M0_data.json（m=50k，1000q） |
 | M1 PRF | ✅ PASS | results/gate_M1_prf.json |
 | M2 KeyGen | ✅ PASS | results/gate_M2_keygen.json |
 | M3 noise | ✅ PASS | results/gate_M3_noise.json |
@@ -66,11 +68,15 @@ gate.finish()   # 写 results/gate_M1_prf.json，pass = all checks pass
 | M5 DecDB | ✅ PASS | results/gate_M5_decdb.json |
 | M6 EncQ | ✅ PASS | results/gate_M6_encq.json |
 | M7 Eq.(2) | ✅ PASS | results/gate_M7_eq2.json |
-| M8 Eq.(3) | ✅ PASS（含 finding A19） | results/gate_M8_eq3.json |
+| M8 Eq.(3) | ✅ PASS（含 finding F2/A19） | results/gate_M8_eq3.json |
 | M9 ADCPE | ✅ PASS | results/gate_M9_adcpe.json |
-| M0 | 🚧 进行中（data-retrieval） | — |
-| M10 | ✅ PASS | results/gate_M10_vector_analysis.json（29/29） |
-| M12, M13, M17 | ✅ PASS | results/gate_M12/M13/M17*.json |
-| M14–M16, M18 | ✅ PASS | results/gate_M14/M15/M16/M18*.json |
-| M11 | 🚧 环境已打通，正在跑 | — |
-| M19 | ⏳ 报告收尾（Lead） | — |
+| M10 向量分析 | ✅ PASS | results/gate_M10_vector_analysis.json（29 检查；论文 Fig.5 12 维数字化） |
+| M11 Vec2Text | ✅ PASS（50 条 + 95% CI + 50/10 敏感性） | results/gate_M11_vec2text.json |
+| M12 DistanceDP | ✅ PASS | results/gate_M12_distance_dp.json |
+| M13 Theorem 1 / Table III | ✅ PASS（四约定 + RemoteRAG 交叉验证；32 检查） | results/gate_M13_theorem1.json |
+| M14 Phase 1 | ✅ PASS | results/gate_M14_phase1.json |
+| M15 Phase 2 | ✅ PASS | results/gate_M15_phase2.json |
+| M16 Phase 3 | ✅ PASS | results/gate_M16_phase3.json |
+| M17 效率 | ✅ PASS（论文 15 维网格 + paper-style 探针；37 检查） | results/gate_M17_efficiency.json |
+| M18 检索精度 | ✅ PASS | results/gate_M18_retrieval.json |
+| M19 报告 | ✅ PASS | REPRODUCTION_REPORT.md、docs/PAPER_COVERAGE.md |

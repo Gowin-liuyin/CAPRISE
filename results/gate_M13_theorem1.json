@@ -118,18 +118,102 @@
       "detail": "paper/prediction means: dalpha=r 1.7701, dalpha=1.2r 1.042, distance d+r 0.7167 => 1.2r is the closest convention"
     },
     {
+      "check": "delta_alpha_conventions_present",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "16 cells, keys ['kprime_a_dalpha_eq_r', 'kprime_b_dalpha_chord', 'kprime_c_euclid_expansion', 'delta_alpha_d_rad', 'kprime_d_inverse_paper', 'delta_alpha_over_r_d'] present in every row (conventions: ['a_dalpha_eq_r', 'b_dalpha_chord', 'c_alpha_euclid_expansion', 'd_inverse_paper'])"
+    },
+    {
+      "check": "four_conventions_recomputed_from_json",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "(a) Delta alpha=r, (b) chord 2asin(r/2), (c) Euclidean expansion recomputed from the JSON primitives: max |JSON - Eq.21| = 0.000e+00 over 16 cells x 3 conventions (tol 1e-6)"
+    },
+    {
+      "check": "inverse_convention_matches_json_and_paper",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "per-cell inverted Delta alpha re-solved with brentq: max |Delta alpha - JSON| = 0.000e+00 rad, max |Delta alpha/r - JSON| = 0.000e+00, max |k'(d) - paper k'| = 4.206e-11"
+    },
+    {
+      "check": "no_derivable_convention_reproduces_paper_table",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "best of (a,b,c) per cell: min |rel err| = 0.1196 (>= 0.10); (a) rel err [-0.556, -0.263], (c) [+0.120, +0.711] => only the undeclared per-cell inversion reproduces Table III"
+    },
+    {
+      "check": "inverse_delta_alpha_ratio_interval",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "Delta alpha/r implied by the paper table: min=1.1537 mean=1.2129 max=1.2977 over 16 cells (all > 1.1 => more than Delta alpha = r; all < 1.4 => below the Euclidean-expansion effective ratio 1.351)"
+    },
+    {
+      "check": "reverse_delta_alpha_sections_consistent",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "legacy (5-dp rounded) summary mean=1.21285, min=1.15373, max=1.29769 vs full-precision conventions summary 1.212852/1.153734/1.297690: diff < 1e-3 (JSON rounding only)"
+    },
+    {
+      "check": "remoterag_reference_present",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "RemoteRAG cross-check present (N=10^4/10^5/10^6 evaluations: 3)"
+    },
+    {
+      "check": "remoterag_reference_point_k5_r003_n768_kprime160",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "reference point {'k': 5, 'r': 0.03, 'n': 768, 'kprime': 160} (RemoteRAG Sec. 5.4 / Fig. 5(c) highlighted example)"
+    },
+    {
+      "check": "remoterag_crosscheck_dalpha_eq_r_within_10pct",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "Eq.21 with Delta alpha=r at N=1e6: k'=170.336 vs RemoteRAG's 160 => rel err 6.46% (tol <=10%); JSON value agrees to 1e-6"
+    },
+    {
+      "check": "remoterag_N1e5_cannot_produce_160",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "N=10^5 (RemoteRAG appendix default) gives 111.89, far below 160 => the N=10^6 used for the cross-check is inferred from the reference value itself"
+    },
+    {
+      "check": "remoterag_reference_excludes_implied_and_euclid_conventions",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "at the reference point Delta alpha=1.213 r gives 331.14 (2.07x) and the Euclidean expansion gives 464.69 (2.90x) => both excluded"
+    },
+    {
+      "check": "remoterag_inverted_delta_alpha_ratio_near_1",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "point-wise inversion of the reference: Delta alpha/r = 0.9804 at N=1e6 (r*=0.02941); |ratio - 1| < 0.05 => the cited implementation is consistent with Delta alpha = r"
+    },
+    {
       "check": "artifact_results_json",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "results/exp5_query_dp.json (150983 bytes) with required sections"
+      "detail": "results/exp5_query_dp.json (175502 bytes) with required sections"
     },
     {
       "check": "artifact_figure",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "figures/fig6_table3.png (184302 bytes)"
+      "detail": "figures/fig6_table3.png (210266 bytes)"
     },
     {
       "check": "artifact_notes_documents_finding",
@@ -137,6 +221,13 @@
       "actual": true,
       "pass": true,
       "detail": "notes/exp5_query_dp.md exists=True, documents A10=True, mentions implied ratio=True"
+    },
+    {
+      "check": "artifact_notes_numbers_match_json",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "notes contain the JSON-formatted numbers ['1.2129', '170.34', '6.46'] (implied mean Delta alpha/r and RemoteRAG cross-check values)"
     }
   ],
   "notes": [
@@ -144,10 +235,13 @@
     "Eq.21 is the expected widened-cap size: k' - k = m*(F(alpha_k+r)-F(alpha_k)) = m*F(alpha_k+r) - k.",
     "MC validates that identity within 5% (widened-cap count) and shows ceil(Eq.21) always covers the plaintext top-k.",
     "MC also measures the minimal k' a real retrieval needs (~k): Eq.21 is a sufficient but very loose bound (A10b).",
-    "Paper Table III requires Delta alpha/r ~1.21 (range 1.15-1.30), inconsistent with RemoteRAG's Delta alpha ~ r (A10)."
+    "Four Delta-alpha conventions enumerated: (a) r, (b) 2asin(r/2), (c) Euclidean expansion, (d) per-cell inversion.",
+    "(a)/(b)/(c) never reproduce Table III (best still >= 10% off); only (d) does, needing Delta alpha/r ~1.15-1.30 (A10c).",
+    "Paper Table III requires Delta alpha/r ~1.21 (range 1.15-1.30), inconsistent with RemoteRAG's Delta alpha ~ r (A10).",
+    "RemoteRAG's highlighted point (k=5, r=0.03, n=768, k'=160) is consistent with Delta alpha = r to ~6% at N=1e6 (A10d)."
   ],
-  "duration_s": 2.708,
-  "timestamp": "2026-11-03T16:54:07+0800",
+  "duration_s": 5.217,
+  "timestamp": "2026-11-03T23:38:15+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",
