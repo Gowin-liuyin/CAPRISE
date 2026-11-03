@@ -1,0 +1,104 @@
+{
+  "module": "M2",
+  "name": "keygen",
+  "owner": "lead",
+  "paper_ref": "Algorithm 1 lines 1-5 / SPEC 2.2",
+  "pass": true,
+  "checks": [
+    {
+      "check": "s_is_positive_int",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "s=62610"
+    },
+    {
+      "check": "s_inside_keyspace",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "s=62610"
+    },
+    {
+      "check": "K_length_128bit",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "params_stored",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "explicit_s_respected",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "explicit_s_reproducible_encryption",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "keys_unique",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "K sampled fresh"
+    },
+    {
+      "check": "s_values_in_keyspace",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "invalid_params_rejected",
+      "expected": [
+        "beta",
+        "dim",
+        "s"
+      ],
+      "actual": [
+        "beta",
+        "dim",
+        "s"
+      ],
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "key_roundtrip",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "S instantiated as integers in [1, 2^16]; experiments pin s=3 (paper Table II).",
+    "k = 128 bit PRF key (paper leaves k unspecified: ambiguity A2)."
+  ],
+  "duration_s": 0.009,
+  "timestamp": "2026-11-03T15:11:18+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

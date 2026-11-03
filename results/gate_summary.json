@@ -1,0 +1,22 @@
+{
+  "range": [
+    "M8",
+    "M9"
+  ],
+  "modules": [
+    {
+      "module": "M8",
+      "name": "eq3",
+      "status": "PASS",
+      "result_file": "results/gate_M8_eq3.json"
+    },
+    {
+      "module": "M9",
+      "name": "adcpe",
+      "status": "PASS",
+      "result_file": "results/gate_M9_adcpe.json"
+    }
+  ],
+  "failed_module": null,
+  "pass": true
+}

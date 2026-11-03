@@ -1,0 +1,63 @@
+{
+  "module": "M8",
+  "name": "eq3",
+  "owner": "lead",
+  "paper_ref": "paper Eq. (3) / SPEC 5.2 / finding A19",
+  "pass": true,
+  "checks": [
+    {
+      "check": "eq3_adversarial_inversion_exists",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "constructed valid noise (||lambda||<=R): lhs=2.4594 > rhs=2.3283 (inverted despite premise; alpha=5.315 rad)"
+    },
+    {
+      "check": "premise_holds_by_construction",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "20000 triples"
+    },
+    {
+      "check": "adcpe_worst_case_bound_forbids_inversion",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "4R_adcpe=0.6000 <= s*beta=0.6000"
+    },
+    {
+      "check": "adcpe_empirical_inversions",
+      "expected": 0,
+      "actual": 0,
+      "pass": true,
+      "detail": "no inversions either (as guaranteed)"
+    },
+    {
+      "check": "caprise_leaks_more_distance_error_than_adcpe",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "CAPRISE err=0.00459 > ADCPE err=0.00251 (ratio 1.83x)"
+    }
+  ],
+  "notes": [
+    "Constructive realisation confirms the mathematical claim of Eq.(3): the noise support contains a configuration that flips the ordering.",
+    "CAPRISE empirical inversion rate on premised triples (real sampler): 0/20000. Existence-only: alignment probability decays like exp(-Omega(d)).",
+    "Distance-reconstruction error (plaintext units): CAPRISE 0.00459 vs ADCPE 0.00251 (theory proj std: 0.00383 / 0.00255); ratio 1.83x = R_db/R_adcpe = 1.5x",
+    "Finding A19: Eq.(3) holds only as an existence statement at high dimension; the practical vector-analysis advantage of CAPRISE must be sought in the increased distance-reconstruction error / ASR (measured in exp4), not in literal order inversions."
+  ],
+  "duration_s": 9.342,
+  "timestamp": "2026-11-03T15:15:41+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

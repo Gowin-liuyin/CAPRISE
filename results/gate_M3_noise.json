@@ -1,0 +1,89 @@
+{
+  "module": "M3",
+  "name": "noise",
+  "owner": "lead",
+  "paper_ref": "Algorithm 1 line 11 / Eq. 7 / SPEC 2.2",
+  "pass": true,
+  "checks": [
+    {
+      "check": "radius_formulas",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "R_db=0.2250 R_q=0.0750"
+    },
+    {
+      "check": "norm_strictly_below_radius",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max||lambda||=0.225000 < R=0.225"
+    },
+    {
+      "check": "norm_close_to_radius",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max/R=1.00000"
+    },
+    {
+      "check": "norm_min_above_zero",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "uniform_in_ball_ks",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "KS p=0.6309"
+    },
+    {
+      "check": "direction_mean_near_zero",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max|z|=2.94 (<5), frac|z|<3=1.0000 (>0.99)"
+    },
+    {
+      "check": "direction_unit_norm",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "deterministic_given_nonce",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "ratio_db_over_q",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "R_db/R_q=3.000000"
+    }
+  ],
+  "notes": [
+    "Noise is bounded (ball), not Gaussian: n supplies only the direction.",
+    "d=768: E[u^(1/d)] = 0.99870 -> norms concentrate just below R."
+  ],
+  "duration_s": 0.115,
+  "timestamp": "2026-11-03T15:11:31+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

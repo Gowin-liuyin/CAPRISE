@@ -1,0 +1,78 @@
+{
+  "module": "M6",
+  "name": "encq",
+  "owner": "lead",
+  "paper_ref": "Algorithm 1 lines 23-31",
+  "pass": true,
+  "checks": [
+    {
+      "check": "roundtrip_lt_1e9",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max|q_hat-q|=1.39e-17"
+    },
+    {
+      "check": "query_noise_bound_strict",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max||eta||=0.075000 < sβ/8=0.07500000000000001"
+    },
+    {
+      "check": "query_noise_scale",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "median/R=0.9991"
+    },
+    {
+      "check": "fresh_nonce_each_call",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "fresh_nonce_changes_ciphertext",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "deterministic_with_nonce",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max|DecQ(EncQ(q))-q|=1.39e-17"
+    },
+    {
+      "check": "malformed_input_rejected",
+      "expected": [
+        "wrong_dim"
+      ],
+      "actual": [
+        "wrong_dim"
+      ],
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "Query noise bound sβ/8 = 0.075 (s=3,β=0.2) vs DB 3sβ/8 = 0.225."
+  ],
+  "duration_s": 0.038,
+  "timestamp": "2026-11-03T15:11:57+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

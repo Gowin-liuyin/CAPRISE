@@ -1,0 +1,102 @@
+{
+  "module": "M4",
+  "name": "encdb",
+  "owner": "lead",
+  "paper_ref": "Algorithm 1 lines 6-14",
+  "pass": true,
+  "checks": [
+    {
+      "check": "roundtrip_max_err_lt_1e9",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max|e_hat-e|=2.78e-17"
+    },
+    {
+      "check": "cipher_shape",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "nonces_unique",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "noise_bound_strict",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max||lambda||=0.225000 < 3sβ/8=0.225"
+    },
+    {
+      "check": "noise_matches_expected_scale",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "median||lambda||/R=0.9991"
+    },
+    {
+      "check": "cipher_distance_correlation",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "pearson=0.989165"
+    },
+    {
+      "check": "cipher_distance_relative_deviation",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "p99 rel.dev=0.0087, max=0.0148 (bound 3β/(4d_min)=0.1151)"
+    },
+    {
+      "check": "cipher_distance_scale",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "median ratio=3.0076 (s=3)"
+    },
+    {
+      "check": "batch_equals_single",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "identical bits when nonce is fixed"
+    },
+    {
+      "check": "malformed_inputs_rejected",
+      "expected": [
+        "1d",
+        "wrong_dim"
+      ],
+      "actual": [
+        "1d",
+        "wrong_dim"
+      ],
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "EncDB = s*e + lambda with ||lambda|| < 3*s*beta/8 strictly (u<1).",
+    "Ciphertext norms are ~s (=3) because ||e||=1 and ||lambda||<=0.225."
+  ],
+  "duration_s": 2.582,
+  "timestamp": "2026-11-03T15:11:46+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

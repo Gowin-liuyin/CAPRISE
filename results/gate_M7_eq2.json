@@ -1,0 +1,47 @@
+{
+  "module": "M7",
+  "name": "eq2",
+  "owner": "lead",
+  "paper_ref": "paper Eq. (2) / SPEC 5.2",
+  "pass": true,
+  "checks": [
+    {
+      "check": "premise_holds_by_construction",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "50000 triples"
+    },
+    {
+      "check": "preservation_violations",
+      "expected": 0,
+      "actual": 0,
+      "pass": true,
+      "detail": "0/50000 violated Eq.(2)"
+    },
+    {
+      "check": "boundary_violations",
+      "expected": 0,
+      "actual": 0,
+      "pass": true,
+      "detail": "gap = beta + 1e-6 still preserved"
+    }
+  ],
+  "notes": [
+    "ciphertext margin: min=5.5582e-01, median=0.6714 (theoretical worst case s*beta/2 = 0.3000)",
+    "Random-vector isotropy note: d=768 random unit vectors give pair-distance std ~0.025, so premise gaps must be constructed; real retrieval gaps are measured in exp2."
+  ],
+  "duration_s": 6.393,
+  "timestamp": "2026-11-03T15:13:04+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

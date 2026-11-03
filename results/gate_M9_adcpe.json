@@ -1,0 +1,67 @@
+{
+  "module": "M9",
+  "name": "adcpe",
+  "owner": "lead",
+  "paper_ref": "ADCPE (SAP) Sec.5.1 / SPEC 2.1",
+  "pass": true,
+  "checks": [
+    {
+      "check": "radius_formula",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "sβ/4=0.15000000000000002"
+    },
+    {
+      "check": "roundtrip_lt_1e9",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max err=1.39e-17"
+    },
+    {
+      "check": "noise_bound_sbeta4",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max||lambda||=0.150000 < 0.15000000000000002"
+    },
+    {
+      "check": "noise_bound_stricter_than_caprise_db",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "ADCPE 0.15000000000000002 < CAPRISE DB 0.225"
+    },
+    {
+      "check": "premise_holds_by_construction",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "20000 triples"
+    },
+    {
+      "check": "dcp_violations",
+      "expected": 0,
+      "actual": 0,
+      "pass": true,
+      "detail": "0/20000 β-DCP violations"
+    }
+  ],
+  "notes": [
+    "ADCPE/SAP baseline verified; its noise radius sβ/4 < 3sβ/8 (CAPRISE DB) is exactly why ADCPE leaks stored-vector structure to vector analysis."
+  ],
+  "duration_s": 2.118,
+  "timestamp": "2026-11-03T15:15:45+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

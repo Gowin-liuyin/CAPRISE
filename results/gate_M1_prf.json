@@ -1,0 +1,124 @@
+{
+  "module": "M1",
+  "name": "prf",
+  "owner": "lead",
+  "paper_ref": "Algorithm 1 line 8 / SPEC 2.2",
+  "pass": true,
+  "checks": [
+    {
+      "check": "prf_deterministic",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "same (K,r) -> same bits"
+    },
+    {
+      "check": "prf_key_sensitivity",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "different K -> different bits"
+    },
+    {
+      "check": "prf_msg_sensitivity",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prf_output_length",
+      "expected": 32,
+      "actual": 32,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prf_arbitrary_output_length",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "prf_min_entropy_smoke",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "coins_deterministic",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "coins_shape",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "check": "u_strictly_interior",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "u=0.930730"
+    },
+    {
+      "check": "gaussian_mean_near_0",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "mean=-0.00147"
+    },
+    {
+      "check": "gaussian_std_near_1",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "std=1.00002"
+    },
+    {
+      "check": "gaussian_ks_test",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "KS p=0.3454"
+    },
+    {
+      "check": "uniform_mean_near_half",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "mean=0.50192"
+    },
+    {
+      "check": "uniform_ks_test",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "KS p=0.7424"
+    }
+  ],
+  "notes": [
+    "PRF instantiation: HMAC-SHA256 counter mode (TapeGen-style), k=128 bit.",
+    "n drawn by PCG64 seeded with 128 PRF bits; u = (128 PRF bits + 1)/2^128 in (0,1)."
+  ],
+  "duration_s": 0.071,
+  "timestamp": "2026-11-03T15:11:10+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}
