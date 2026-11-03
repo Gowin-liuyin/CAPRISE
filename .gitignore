@@ -21,3 +21,6 @@ results/*.parquet
 results/*.jsonl
 *.h5
 *.faiss
+
+# --- Model weights (large; fetched locally, never committed) ---
+models/
