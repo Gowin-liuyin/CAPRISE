@@ -1,0 +1,111 @@
+{
+  "module": "M14",
+  "name": "phase1",
+  "owner": "data-retrieval",
+  "paper_ref": "Algorithm 2 lines 1-9 / Phase 1 upload",
+  "pass": true,
+  "checks": [
+    {
+      "check": "00_real_data_loaded",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "real MS MARCO corpus subset: m=8000, d=768, ids[:3]=[85696, 105526, 112313]"
+    },
+    {
+      "check": "01_server_has_only_protocol_fields",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "server attributes = ['db', 'doc_ciphertexts'] (+ db.nonces / db.E_prime inside db)"
+    },
+    {
+      "check": "02_server_holds_no_secret_key",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "server has no CryptoKey attribute"
+    },
+    {
+      "check": "03_server_stores_ciphertext_not_plaintext",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "E' shape=(8000, 768) dtype=float32; differs from E and from sE"
+    },
+    {
+      "check": "04_no_plaintext_documents_on_server",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "checked first 200 documents; plaintext leaks=0"
+    },
+    {
+      "check": "05_documents_are_aes_ciphertexts",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "8000 AES-GCM ciphertext blobs, all bytes, len>=16"
+    },
+    {
+      "check": "06_one_distinct_128bit_nonce_per_row",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "len=8000, unique=8000/8000, bytes=[16]"
+    },
+    {
+      "check": "07_decdb_roundtrip",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max|E_hat-E|=9.39e-09 (<1e-5), relative=2.54e-08, 0.09s for m=8000 (88779 vec/s)"
+    },
+    {
+      "check": "08_aes_roundtrip_exact",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "8000/8000 documents recovered exactly (1738752 docs/s)"
+    },
+    {
+      "check": "09_db_noise_bound",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max||lambda||=0.225000 < R_db=3sβ/8=0.225000 (violations=0)"
+    },
+    {
+      "check": "10_ids_preserved",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "server ids == upload ids (first5=[85696, 105526, 112313, 180622, 262205])"
+    },
+    {
+      "check": "11_upload_stats",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "phase1_upload returned {'m': 8000, 'dim': 768}"
+    }
+  ],
+  "notes": [
+    "Phase-1 on real data: m=8000, d=768, EncDB+AES upload 0.12s (67825 docs/s end-to-end); DecDB 88779 vec/s; AES decrypt 1738752 docs/s",
+    "The paper does not report Phase-1 absolute timings beyond the 128-query embedding batch; hardware here is Apple M5 CPU (no GPU).",
+    "encryption key: s=3, beta=0.2, dim=768 (paper secure setting)"
+  ],
+  "duration_s": 0.32,
+  "timestamp": "2026-11-03T16:10:18+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

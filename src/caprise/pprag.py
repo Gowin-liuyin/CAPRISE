@@ -35,10 +35,18 @@ __all__ = ["PPRAGServer", "PPRAGClient", "RetrievalResult"]
 
 
 class PPRAGServer:
-    """Honest-but-curious cloud: ciphertext embeddings + AES ciphertext docs."""
+    """Honest-but-curious cloud: ciphertext embeddings + AES ciphertext docs.
 
-    def __init__(self, key: CryptoKey):
-        self.key = key
+    Threat-model note: the server must never hold the CAPRISE secret key (s, K)
+    nor the AES key -- it only receives ciphertext embeddings, their public
+    nonces, and AES-GCM ciphertext documents.  ``key`` is therefore accepted as
+    an optional argument for call-site compatibility only and is deliberately
+    NOT stored (M14 gate check ``server_holds_no_secret_key``).
+    """
+
+    def __init__(self, key: CryptoKey | None = None):
+        # key is intentionally ignored: the server is honest-but-curious and
+        # never sees secret material.
         self.db: EncryptedVectorDB | None = None
         self.doc_ciphertexts: list[bytes] = []
 

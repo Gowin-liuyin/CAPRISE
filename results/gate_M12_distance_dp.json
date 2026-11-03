@@ -1,0 +1,154 @@
+{
+  "module": "M12",
+  "name": "distance_dp",
+  "owner": "theory-efficiency",
+  "paper_ref": "arXiv:2601.12331 Sec. III-B2 / RemoteRAG arXiv:2412.12775 Sec. 3.2.1",
+  "pass": true,
+  "checks": [
+    {
+      "check": "gamma_mean_equals_n_over_eps",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "n=768, eps=7680: sample mean=0.099989, expected=0.1, rel_err=0.00011 (<0.02), N=5000"
+    },
+    {
+      "check": "gamma_ks_test_p_gt_0.01",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "KS D=0.00580, p=0.99567 vs Gamma(shape=768, scale=1/7680)"
+    },
+    {
+      "check": "gamma_std_over_mean_equals_1_over_sqrt_n",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "empirical std/mean=0.036150, expected 1/sqrt(n)=0.036084 (rel err <5%)"
+    },
+    {
+      "check": "directions_are_unit_norm",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max | ||direction|| - 1 | = 2.220e-16 over 5000 draws (<=1e-12)"
+    },
+    {
+      "check": "uniformity_coord_mean_zscores_max_lt_5",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max |z_j| = 2.925 over 768 coordinates (each z_j = sqrt(N)*mean_j ~ N(0,1)); <5 required"
+    },
+    {
+      "check": "uniformity_frac_abs_z_lt_3_gt_0.99",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "fraction of standardised coordinates with |z|<3: 0.99733 (Gaussian reference 0.9973); >0.99 required"
+    },
+    {
+      "check": "uniformity_unit_variance",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "E[z^2] = 1.00000 (target 1.0 +/- 0.02; for uniform S^(n-1), Var(x_j)=1/n)"
+    },
+    {
+      "check": "norm_shift_equals_realised_radius_fixed",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max | ||e~-e|| - r | = 6.939e-18 over 200 draws (radius=0.033, tol 1e-12)"
+    },
+    {
+      "check": "norm_shift_equals_realised_radius_gamma",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "max | ||e~-e|| - r | = 2.082e-17 over 200 gamma draws (mean radius 0.05, tol 1e-12)"
+    },
+    {
+      "check": "perturbation_not_renormalised",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "||e~||=1.003925350543, ||e + r d||=1.003925350543 (DistanceDP adds, never normalises)"
+    },
+    {
+      "check": "gamma_seeded_reproducible",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "seed=1234 twice: vectors identical=True, radii equal=True"
+    },
+    {
+      "check": "gamma_different_seed_differs",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "seed=1234 vs 1235: vectors/radii differ"
+    },
+    {
+      "check": "fixed_radius_seeded_reproducible_and_exact",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "seed=99 twice with radius=0.02: identical=True, returned radius=0.02"
+    },
+    {
+      "check": "fixed_radius_returned_exactly",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "20 draws with radius=0.033 all return r==0.033 exactly (no sampling of the radius)"
+    },
+    {
+      "check": "invalid_arguments_rejected",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "rejected 5/5 invalid configurations (missing eps, r<=0, unknown mode, eps<=0)"
+    },
+    {
+      "check": "epsilon_for_radius",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "epsilon_for_radius(768, 0.1) = 7680.000000 (expected 7680)"
+    },
+    {
+      "check": "ridge_range_eps_10n_50n_maps_to_rbar_0.02_0.1",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "r_bar=0.1 -> eps=7680 (10n=7680), r_bar=0.02 -> eps=38400 (50n=38400)"
+    },
+    {
+      "check": "gamma_mean_at_eps_50n_is_0.02",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "eps=50n=38400: sample mean radius=0.020020, expected 0.02, rel_err=0.00100 (<0.02)"
+    }
+  ],
+  "notes": [
+    "DistanceDP mechanism: e~ = e_q + r*d, r ~ Gamma(shape=n, scale=1/eps), d uniform on S^{n-1}.",
+    "Mean radius r_bar = n/eps; RemoteRAG's typical range r_bar in [0.02,0.1] corresponds to eps in [10n,50n].",
+    "Two modes implemented: radius='gamma' + eps (actual DP mechanism) and fixed radius (Table III / ablations).",
+    "Perturbed query is NOT re-normalised, matching RemoteRAG and Eq. 21's e~_q = e_q + noise."
+  ],
+  "duration_s": 0.462,
+  "timestamp": "2026-11-03T15:26:49+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

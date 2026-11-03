@@ -1,14 +1,14 @@
 {
   "range": [
-    "P0",
-    "P0"
+    "M13",
+    "M13"
   ],
   "modules": [
     {
-      "module": "P0",
-      "name": "skeleton",
+      "module": "M13",
+      "name": "theorem1",
       "status": "PASS",
-      "result_file": "results/gate_P0_skeleton.json"
+      "result_file": "results/gate_M13_theorem1.json"
     }
   ],
   "failed_module": null,

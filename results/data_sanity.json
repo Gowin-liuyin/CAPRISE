@@ -1,0 +1,305 @@
+{
+  "n_queries_evaluated": 1000,
+  "MRR@10": 0.7219400793650795,
+  "Recall@10": 0.97,
+  "Recall@100": 0.997,
+  "nDCG@10": 0.7827913218444017,
+  "corpus_size": 50000,
+  "corpus_composition": {
+    "qrels": 1053,
+    "bm25_hard_neg": 18544,
+    "random_fill": 30403
+  },
+  "qrels_pairs_in_corpus": 1080,
+  "random_fill_only_control": {
+    "n_queries_evaluated": 1000,
+    "MRR@10": 0.9486023809523809,
+    "Recall@10": 0.995,
+    "Recall@100": 0.998,
+    "nDCG@10": 0.9602626123981518
+  },
+  "examples": [
+    {
+      "qid": 300674,
+      "query": "how many years did william bradford serve as governor of plymouth colony?",
+      "top10": [
+        {
+          "rank": 1,
+          "pid": 7067032,
+          "relevant": true
+        },
+        {
+          "rank": 2,
+          "pid": 3289523,
+          "relevant": false
+        },
+        {
+          "rank": 3,
+          "pid": 4917605,
+          "relevant": false
+        },
+        {
+          "rank": 4,
+          "pid": 3849932,
+          "relevant": false
+        },
+        {
+          "rank": 5,
+          "pid": 4309131,
+          "relevant": false
+        },
+        {
+          "rank": 6,
+          "pid": 4882206,
+          "relevant": false
+        },
+        {
+          "rank": 7,
+          "pid": 4917599,
+          "relevant": false
+        },
+        {
+          "rank": 8,
+          "pid": 4917596,
+          "relevant": false
+        },
+        {
+          "rank": 9,
+          "pid": 2495758,
+          "relevant": false
+        },
+        {
+          "rank": 10,
+          "pid": 2495764,
+          "relevant": false
+        }
+      ]
+    },
+    {
+      "qid": 125705,
+      "query": "define preventive",
+      "top10": [
+        {
+          "rank": 1,
+          "pid": 7067056,
+          "relevant": true
+        },
+        {
+          "rank": 2,
+          "pid": 8773436,
+          "relevant": false
+        },
+        {
+          "rank": 3,
+          "pid": 9930,
+          "relevant": false
+        },
+        {
+          "rank": 4,
+          "pid": 8052649,
+          "relevant": false
+        },
+        {
+          "rank": 5,
+          "pid": 8377431,
+          "relevant": false
+        },
+        {
+          "rank": 6,
+          "pid": 135982,
+          "relevant": false
+        },
+        {
+          "rank": 7,
+          "pid": 135979,
+          "relevant": false
+        },
+        {
+          "rank": 8,
+          "pid": 6476891,
+          "relevant": false
+        },
+        {
+          "rank": 9,
+          "pid": 8787238,
+          "relevant": false
+        },
+        {
+          "rank": 10,
+          "pid": 5943105,
+          "relevant": false
+        }
+      ]
+    },
+    {
+      "qid": 94798,
+      "query": "color overlay photoshop",
+      "top10": [
+        {
+          "rank": 1,
+          "pid": 7067181,
+          "relevant": true
+        },
+        {
+          "rank": 2,
+          "pid": 7067183,
+          "relevant": false
+        },
+        {
+          "rank": 3,
+          "pid": 7067184,
+          "relevant": false
+        },
+        {
+          "rank": 4,
+          "pid": 587860,
+          "relevant": false
+        },
+        {
+          "rank": 5,
+          "pid": 194579,
+          "relevant": false
+        },
+        {
+          "rank": 6,
+          "pid": 1132437,
+          "relevant": false
+        },
+        {
+          "rank": 7,
+          "pid": 226300,
+          "relevant": false
+        },
+        {
+          "rank": 8,
+          "pid": 360122,
+          "relevant": false
+        },
+        {
+          "rank": 9,
+          "pid": 939486,
+          "relevant": false
+        },
+        {
+          "rank": 10,
+          "pid": 1005810,
+          "relevant": false
+        }
+      ]
+    },
+    {
+      "qid": 9083,
+      "query": "____________________ is considered the father of modern medicine.",
+      "top10": [
+        {
+          "rank": 1,
+          "pid": 6653709,
+          "relevant": false
+        },
+        {
+          "rank": 2,
+          "pid": 7067274,
+          "relevant": true
+        },
+        {
+          "rank": 3,
+          "pid": 1459337,
+          "relevant": false
+        },
+        {
+          "rank": 4,
+          "pid": 1195004,
+          "relevant": false
+        },
+        {
+          "rank": 5,
+          "pid": 1176427,
+          "relevant": false
+        },
+        {
+          "rank": 6,
+          "pid": 171616,
+          "relevant": false
+        },
+        {
+          "rank": 7,
+          "pid": 96535,
+          "relevant": false
+        },
+        {
+          "rank": 8,
+          "pid": 2397711,
+          "relevant": false
+        },
+        {
+          "rank": 9,
+          "pid": 296608,
+          "relevant": false
+        },
+        {
+          "rank": 10,
+          "pid": 89520,
+          "relevant": false
+        }
+      ]
+    },
+    {
+      "qid": 174249,
+      "query": "does xpress bet charge to deposit money in your account",
+      "top10": [
+        {
+          "rank": 1,
+          "pid": 7067348,
+          "relevant": true
+        },
+        {
+          "rank": 2,
+          "pid": 901680,
+          "relevant": false
+        },
+        {
+          "rank": 3,
+          "pid": 6595197,
+          "relevant": false
+        },
+        {
+          "rank": 4,
+          "pid": 647667,
+          "relevant": false
+        },
+        {
+          "rank": 5,
+          "pid": 5640358,
+          "relevant": false
+        },
+        {
+          "rank": 6,
+          "pid": 1813096,
+          "relevant": false
+        },
+        {
+          "rank": 7,
+          "pid": 5804544,
+          "relevant": false
+        },
+        {
+          "rank": 8,
+          "pid": 5804542,
+          "relevant": false
+        },
+        {
+          "rank": 9,
+          "pid": 5518253,
+          "relevant": false
+        },
+        {
+          "rank": 10,
+          "pid": 839678,
+          "relevant": false
+        }
+      ]
+    }
+  ],
+  "note": "primary = exact plaintext top-k over the m-passage corpus. The corpus contains the qrels-relevant passages of the eval queries plus BM25 hard negatives (top1000.dev, query-token-overlap ranked) plus uniform random filler, which makes the retrieval task non-trivial (like MS MARCO reranking). random_fill_only_control repeats the evaluation on the original task-1 spec corpus (uniform random filler only, hard negatives removed); as expected, MRR there is much higher because all remaining distractors are random passages (the full-8.8M-collection MS MARCO dev MRR@10 of GTR-T5-base is ~0.39).",
+  "elapsed_s": 3.14
+}

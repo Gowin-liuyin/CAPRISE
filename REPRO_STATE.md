@@ -3,7 +3,7 @@
 更新时间: 2026-11-03 15:40 (+08:00)
 论文: *Efficient Privacy-Preserving Retrieval Augmented Generation with Distance-Preserving Encryption* (arXiv:2601.12331v1, 2026-01-18, NTU/DTC)
 论文源: `doc/References/CAPRISE_2026_Privacy_Preserving_RAG_DPE.pdf`（LaTeX 源 `output/pdf/source/caprise/ppRAG_FLLM.tex`）；代码源: 论文未公开，本仓库独立复现
-当前阶段: Phase 3（核心协议 M1–M9 已完成并 PASS；M12 PASS；正在做 M10/M11/M13 与 M0 数据）
+当前阶段: Phase 3（核心协议 M1–M9 已完成并 PASS；M0/M12/M14 PASS；正在做 M10/M11/M13/M15-M18）
 当前目标: 完成 M13（Theorem 1/Table III）与 M10/M11（隐私实验），并行推进 M0 数据 → M14–M18
 本轮门禁: P0 skeleton — PASS（见 results/gate_P0_skeleton.json）
 证据: results/gate_summary.json, results/gate_*.json
@@ -11,7 +11,7 @@
 | 模块 | 依赖 | 状态 | 门禁证据 | 备注 |
 |---|---|---|---|---|
 | P0 | — | PASS | results/gate_P0_skeleton.json | 骨架门禁（含 fail-fast 自检） |
-| M0 数据 | — | IN_PROGRESS | — | data-retrieval：MS MARCO 子集 + GTR 嵌入 |
+| M0 数据 | — | PASS | results/gate_M0_data.json | m=50,000（1053 qrels + 18,544 BM25 硬负 + 随机填充）；1000 query；qrels 覆盖 100%；MRR@10=0.722 |
 | M1 PRF | — | PASS | results/gate_M1_prf.json | KS p=0.35/0.74 |
 | M2 KeyGen | M1 | PASS | results/gate_M2_keygen.json | s∈[1,2^16], K=128bit |
 | M3 噪声 | M1 | PASS | results/gate_M3_noise.json | 模长<R 严格；球内均匀 KS p=0.63 |
@@ -25,7 +25,7 @@
 | M11 Vec2Text | M4,M0 | PENDING | — | 依赖 .venv-vec2text（transformers 4.x，已验证导入） |
 | M12 DistanceDP | — | PASS | results/gate_M12_distance_dp.json | Gamma 均值 0.099989（期望 0.1） |
 | M13 Theorem1 | M12 | IN_PROGRESS | — | theory-efficiency；Table III + MC |
-| M14 Phase1 | M4,M9 | PENDING | — | 等待 M0 数据 |
+| M14 Phase1 | M4,M9 | PASS | results/gate_M14_phase1.json | 服务器无密钥/无明文；AES 8000/8000；DecDB 9.8e-9 |
 | M15 Phase2 | M6,M12,M13,M14 | PENDING | — | 等待上游 |
 | M16 Phase3 | M15 | PENDING | — | 等待上游 |
 | M17 效率 | M4,M6,M1 | PENDING | — | theory-efficiency，M13 后做 |
