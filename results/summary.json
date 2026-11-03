@@ -1,0 +1,91 @@
+{
+  "gates": {
+    "M0": {
+      "pass": true,
+      "n_checks": 15
+    },
+    "M10": {
+      "pass": true,
+      "n_checks": 29
+    },
+    "M11": {
+      "pass": true,
+      "n_checks": 45
+    },
+    "M12": {
+      "pass": true,
+      "n_checks": 18
+    },
+    "M13": {
+      "pass": true,
+      "n_checks": 19
+    },
+    "M14": {
+      "pass": true,
+      "n_checks": 12
+    },
+    "M15": {
+      "pass": true,
+      "n_checks": 11
+    },
+    "M16": {
+      "pass": true,
+      "n_checks": 11
+    },
+    "M17": {
+      "pass": true,
+      "n_checks": 19
+    },
+    "M18": {
+      "pass": true,
+      "n_checks": 19
+    },
+    "M1": {
+      "pass": true,
+      "n_checks": 14
+    },
+    "M2": {
+      "pass": true,
+      "n_checks": 10
+    },
+    "M3": {
+      "pass": true,
+      "n_checks": 9
+    },
+    "M4": {
+      "pass": true,
+      "n_checks": 10
+    },
+    "M5": {
+      "pass": true,
+      "n_checks": 5
+    },
+    "M6": {
+      "pass": true,
+      "n_checks": 7
+    },
+    "M7": {
+      "pass": true,
+      "n_checks": 3
+    },
+    "M8": {
+      "pass": true,
+      "n_checks": 5
+    },
+    "M9": {
+      "pass": true,
+      "n_checks": 6
+    },
+    "P0": {
+      "pass": true,
+      "n_checks": 11
+    }
+  },
+  "experiments_present": [
+    "exp1_efficiency",
+    "exp2_retrieval",
+    "exp3_vec2text",
+    "exp4_vector_analysis",
+    "exp5_query_dp"
+  ]
+}
