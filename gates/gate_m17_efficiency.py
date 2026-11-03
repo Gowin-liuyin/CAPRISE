@@ -7,7 +7,10 @@ Acceptance criteria (docs/MODULE_PLAN.md M17; SPEC.md Sec. 6; task brief):
      * embeddings/s decreases with d (paper Fig.4a trend);
      * elements/s stays within one order of magnitude (same ballpark, paper
        Fig.4b "remains high") and is stable inside d in [1536, 3072];
-     * independent re-measurement at d=768 agrees with the stored value.
+     * the stored throughput table is exactly recomputable from its raw run arrays,
+       and an independent re-measurement reproduces the load-invariant ratio
+       emb/s(d=768) / emb/s(d=1536) within 10% (absolute wall-clock rates are
+       load-sensitive on a shared machine, so they are reported, not asserted).
 2. Phase-1 overhead: real embedding time for 128 queries (gtr-t5-base, local
    weights; MPS fp16 + CPU fp32) and real CAPRISE EncQ time for the same batch;
    overhead = encryption / embedding must be below the paper's <19% bound in
@@ -132,25 +135,86 @@ def main() -> int:
         f"(max/min={high_ratio:.2f} < 2; paper Fig.4b high region)",
     )
 
-    # independent re-measurement at d=768 (batch=1000, 2 reps) -- guards against a
-    # stale/hand-edited JSON
+    # ------------------------------------------------------------------ #
+    # 2a. Internal consistency of the stored throughput table (load-invariant,
+    #     strict): every reported rate must be exactly recomputable from the raw
+    #     runs_s / runs_cpu_s arrays stored in the JSON.  This is the strongest
+    #     anti-tampering check and it does not depend on machine load.
+    # ------------------------------------------------------------------ #
+    inconsistent = []
+    for r in rows:
+        d = r["d"]
+        med = float(np.median(r["runs_s"]))
+        med_cpu = float(np.median(r["runs_cpu_s"]))
+        # stored medians keep 6 decimals and rates 1 decimal -> allow 1e-4 relative
+        # (rounding only; grossly edited numbers still fail by orders of magnitude)
+        tol = 1e-4
+        checks = [
+            (abs(r["median_s"] - med) / med <= tol, f"median_s d={d}"),
+            (abs(r["embeddings_per_s"] - 1000.0 / med) / (1000.0 / med) <= tol, f"embeddings_per_s d={d}"),
+            (abs(r["elements_per_s"] - 1000.0 * d / med) / (1000.0 * d / med) <= tol, f"elements_per_s d={d}"),
+            (abs(r["median_cpu_s"] - med_cpu) / med_cpu <= tol, f"median_cpu_s d={d}"),
+            (abs(r["embeddings_per_s_cpu"] - 1000.0 / med_cpu) / (1000.0 / med_cpu) <= tol,
+             f"embeddings_per_s_cpu d={d}"),
+        ]
+        inconsistent += [label for ok, label in checks if not ok]
+    g.check_true(
+        "throughput_internal_consistency",
+        not inconsistent,
+        detail=f"all 6 rows: median/emb-per-s/elements-per-s are exactly recomputable from the stored "
+        f"raw runs_s and runs_cpu_s arrays (rel tol 1e-4, i.e. JSON rounding only); inconsistencies={inconsistent}",
+    )
+
+    # ------------------------------------------------------------------ #
+    # 2b. Independent re-measurement at d=768 and d=1536, compared as a
+    #     *load-invariant ratio*.  On this shared machine absolute wall-clock
+    #     throughput swings with co-running jobs (observed d=768 EncDB range
+    #     ~69k-102k emb/s across runs, load average 1-5; wall-clock and CPU time
+    #     move together, so this is resource contention, not process scheduling).
+    #     Comparing emb/s(d=768)/emb/s(d=1536) cancels the common load factor and
+    #     is therefore safe to bound tightly ([0.9,1.1]).
+    # ------------------------------------------------------------------ #
     key = KeyGen(dim=768, beta=0.2, s=3, rng=np.random.default_rng(20260118))
+    key1536 = KeyGen(dim=1536, beta=0.2, s=3, rng=np.random.default_rng(20260118))
     rng = np.random.default_rng(123)
-    E = rng.standard_normal((1000, 768))
-    E /= np.linalg.norm(E, axis=1, keepdims=True)
-    EncDB(key, E[:16])
-    runs = []
-    for _ in range(2):
-        t0 = time.perf_counter()
-        EncDB(key, E)
-        runs.append(time.perf_counter() - t0)
-    recheck = 1000.0 / float(np.median(runs))
-    stored = next(r["embeddings_per_s"] for r in rows if r["d"] == 768)
+    Er = rng.standard_normal((1000, 1536))
+    Er /= np.linalg.norm(Er, axis=1, keepdims=True)
+    E768 = np.ascontiguousarray(Er[:, :768])
+    EncDB(key, E768[:16])
+    EncDB(key1536, Er[:16])
+    m768, m1536, round_cost_ratios = [], [], []
+    # 5 interleaved rounds: a 768-block immediately followed by a 1536-block; the
+    # per-round cost ratio is insensitive to slow load drift on the shared machine.
+    for _ in range(5):
+        t0 = time.process_time()
+        EncDB(key, E768)
+        c768 = time.process_time() - t0
+        t0 = time.process_time()
+        EncDB(key1536, Er)
+        c1536 = time.process_time() - t0
+        m768.append(c768)
+        m1536.append(c1536)
+        round_cost_ratios.append(c768 / c1536)
+    recheck768 = 1000.0 / float(np.median(m768))
+    recheck1536 = 1000.0 / float(np.median(m1536))
+    gate_cost_ratio = float(np.median(round_cost_ratios))  # per-vector cost(768)/cost(1536)
+    stored768 = next(r["embeddings_per_s_cpu"] for r in rows if r["d"] == 768)
+    stored1536 = next(r["embeddings_per_s_cpu"] for r in rows if r["d"] == 1536)
+    stored_cost_ratio = stored1536 / stored768  # (1000/stored1536)/(1000/stored768)
+    cost_dev = abs(gate_cost_ratio - stored_cost_ratio) / stored_cost_ratio
     g.check_true(
         "independent_recheck_d768",
-        recheck > 1000.0 and 0.33 < recheck / stored < 3.0,
-        detail=f"gate re-measurement {recheck:.0f} emb/s vs stored {stored:.0f} emb/s "
-        f"(ratio {recheck/stored:.2f}, must be >1000 emb/s and within [0.33,3] of stored)",
+        recheck768 > 10_000.0
+        and 0.5 < recheck768 / stored768 < 2.0
+        and cost_dev < 0.10
+        and recheck768 > recheck1536,
+        detail=f"gate re-measurement (CPU time, 5 interleaved rounds): d=768 {recheck768:.0f} emb/s vs "
+        f"stored {stored768:.0f} (load factor {recheck768/stored768:.2f}, absolute window [0.5,2.0]); "
+        f"per-vector cost ratio cost(768)/cost(1536): gate {gate_cost_ratio:.3f} vs stored "
+        f"{stored_cost_ratio:.3f} (dev {cost_dev*100:.1f}% < 10%, load drift cancels within each round); "
+        "ordering preserved (768 faster than 1536). Absolute rates are load-sensitive on this shared "
+        "machine (observed 0.8-1.1x swings minutes apart; wall~=CPU time => resource contention), so "
+        "the JSON is verified strictly by throughput_internal_consistency; see notes/exp1_efficiency.md.",
     )
 
     # ================================================================== #
@@ -245,9 +309,11 @@ def main() -> int:
     g.check_true(
         "per_element_style_probe_slower",
         style.get("ratio_per_element_over_vectorised", 0) > 5,
-        detail=f"vectorised {style.get('vectorised_standard_normal_us')} us vs per-element loop "
-        f"{style.get('per_element_scalar_loop_us')} us per vector "
-        f"({style.get('ratio_per_element_over_vectorised')}x slower) -> explains paper's 2339 vec/s (A17)",
+        detail=f"vectorised {style.get('vectorised_standard_normal_us_per_vector')} us/vector vs "
+        f"per-element loop {style.get('per_element_scalar_loop_us_per_vector')} us/vector "
+        f"({style.get('ratio_per_element_over_vectorised')}x slower; scalar draw "
+        f"{style.get('per_element_scalar_loop_us_per_element')} us/element) -> explains paper's "
+        "2339 vec/s (A17)",
     )
 
     # ================================================================== #

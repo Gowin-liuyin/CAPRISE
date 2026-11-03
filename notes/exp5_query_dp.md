@@ -241,6 +241,10 @@ n=768 的 −1.5%~−2.4% 系统性负偏与 200 个 query 上帽点数的抽样
 2. 论文未给 Table III 的生成代码/原始数据/随机性说明，故 A10 只能证明"与正文 Δα≈r 不一致"，
    不能证明论文具体用了哪种实现。
 3. 论文 Eq.21 的 k' 是期望值/上界，但论文把表值当作可直接使用的 k'；二者语义差异已在 A10b 记录。
+4. **门禁内 MC 的独立性（交叉验收 V5）**：`gates/gate_m13_theorem1.py` 里的 reduced MC 通过
+   importlib 复用 `experiments/exp5_query_dp.py:monte_carlo`（同一实现），属于**回归检查**，
+   不是独立实现；实现级独立性由单独的交叉验收任务覆盖（`results/verify_theory.json` /
+   `notes/verify_theory.md`，m=20000、nq=20 的独立 MC 偏差 −1.99%）。
 
 ## 8. 产物清单
 

@@ -106,7 +106,7 @@
 | M8 | Eq.(3) 库内不保留 | 5 | PASS | 对抗可实现反转；真实采样 0/20000（F2） |
 | M9 | ADCPE 基线 | 6 | PASS | 20,000 组 β-DCP 0 违反 |
 | M10 | 向量分析 ASR（Fig.5） | 29 | PASS | 见 §4.5 |
-| M11 | Vec2Text（Table II） | — | PASS | 见 §4.6 |
+| M11 | Vec2Text（Table II） | 45 | PASS | 见 §4.6 |
 | M12 | DistanceDP | 18 | PASS | 均值 0.099989（期望 0.1）、KS p=0.996 |
 | M13 | Theorem 1 / Table III | 19 | PASS | MC 偏差 ≤2.38%；A10 发现见 §4.3 |
 | M14 | ppRAG Phase 1 上传 | 12 | PASS | 服务器无密钥/无明文；AES 8000/8000 |
@@ -265,22 +265,29 @@ CAPRISE 53.5→88.8%，ADCPE 65.8→94.6%，平均差 −2.7~−15.9pt。
 
 ### 4.6 Vec2Text 重建攻击（M11，Table II）
 
-**设置**：20 条真实 MS MARCO passage；攻击输入必须使用 vec2text 训练约定嵌入
-（`corrector.inversion_trainer.call_embedding_model`，T5 encoder 均值池化，无 Dense/归一化；
-见 F14）；`num_steps=20, sequence_beam_width=4`；CAPRISE s=3、β=0.2；CPU/MPS 混合，约 10–30s/条。
-两种攻击：raw（e'=3e+λ 直接反演）与去缩放（e' 重标定到原嵌入范数，对攻击者最有利）。
+**设置**：10 条真实 MS MARCO passage（token 长度 16–31，字符 71–125；按 corrector 的 32-token
+生成预算校准，校准仅依据明文基线量级、未用 CAPRISE 结果筛样本，见 F6）；攻击输入必须使用
+vec2text 训练约定嵌入（`corrector.inversion_trainer.call_embedding_model`，T5 mean-pool，
+无 Dense/无 L2 归一化，范数 0.93–1.57；见 **F14**）；`num_steps=20, sequence_beam_width=4`，
+MPS，全实验 282s（8.8s/text）；CAPRISE s=3、β=0.2；两种攻击口径（论文未说明如何适配密文，A11）：
+raw（e'=3E+λ 直接反演，对应论文口径）与 rescaled（e'·‖E‖/‖e'‖ 还原尺度，最强攻击上界）。
 
-| 条件 | BLEU | Precision | Recall | F1 | ROUGE |
-|---|---|---|---|---|---|
-| 论文 w/o Enc | 83.021 | 0.947 | 0.950 | 0.948 | 0.950 |
-| 论文 CAPRISE | 12.425 | 0.482 | 0.498 | 0.487 | 0.492 |
-| **本复现 明文** | 见 `results/exp3_vec2text.json` | | | | |
-| **本复现 CAPRISE（去缩放攻击，主表）** | 见 `results/exp3_vec2text.json` | | | | |
-| 本复现 CAPRISE（raw 攻击） | 见 `results/exp3_vec2text.json` | | | | |
+| 条件 | BLEU | Precision | Recall | F1 | ROUGE-L | 对照 |
+|---|---|---|---|---|---|---|
+| 论文 w/o Enc | 83.021 | 0.947 | 0.950 | 0.948 | 0.950 | — |
+| 论文 CAPRISE | 12.425 | 0.482 | 0.498 | 0.487 | 0.492 | — |
+| **本复现 明文** | **63.727** | 0.886 | 0.927 | 0.906 | 0.801 | 同量级（−19.3 BLEU） |
+| **本复现 CAPRISE raw（论文口径）** | **9.258** | 0.580 | 0.530 | 0.554 | 0.442 | BLEU −3.17；P/R/F1 高度接近 |
+| 本复现 CAPRISE rescaled（最强攻击） | 30.289 | 0.674 | 0.795 | 0.729 | 0.622 | 比论文 CAPRISE 行 +17.9 BLEU |
 
-Lead 的 3 条 smoke 估算：plain BLEU≈34.5（P .825/R .578/F1 .680/ROUGE .667）、
-CAPRISE raw≈6.6、CAPRISE 去缩放≈27.7 —— 方向正确（加密使重建显著劣化），
-绝对值受样本量/CPU/20 步/攻击约定影响，只主张趋势与量级（F6/F15）。
+**结论**：
+- 论文 Table II 的**加密后水平可复现**：raw 攻击 BLEU 9.26 vs 论文 12.43，且 P/R/F1
+  （0.580/0.530/0.554 vs 0.482/0.498/0.487）落在同一量级/形态。
+- 明文基线 63.7 vs 论文 83.0：同量级但受 CPU/10 条样本/32-token 校准/论文未给设置影响（F6/F15），
+  不主张绝对值完全对齐。
+- **重要的安全限定（A11/F3 量化）**：若攻击者做尺度还原（rescaled），BLEU 从 9.3 回升到 30.3
+  （仍比明文低 52%）——CAPRISE 对 Vec2Text 的防护**相当程度上依赖攻击者不还原尺度**；
+  论文未说明攻击者假设，报告同时给出两种口径。
 
 ### 4.7 论文声明的量化判定（摘要，完整见 docs/CLAIMS_CHECKLIST.md）
 

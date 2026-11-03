@@ -24,7 +24,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "median/R=0.9991"
+      "detail": "median/R=0.9992"
     },
     {
       "check": "fresh_nonce_each_call",
@@ -62,8 +62,8 @@
   "notes": [
     "Query noise bound sβ/8 = 0.075 (s=3,β=0.2) vs DB 3sβ/8 = 0.225."
   ],
-  "duration_s": 0.038,
-  "timestamp": "2026-11-03T15:11:57+0800",
+  "duration_s": 0.02,
+  "timestamp": "2026-11-03T16:53:52+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

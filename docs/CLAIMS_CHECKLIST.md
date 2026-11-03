@@ -39,8 +39,8 @@
 
 | id | 论文出处 | 论文值 / 命题 | 复现值 | 判定 | 证据 |
 |---|---|---|---|---|---|
-| P1 | Table II | 明文 GTR 嵌入可被 Vec2Text 重建：BLEU 83.021/P .947/R .950/F1 .948/ROUGE .950 | 待测（M11） | UNKNOWN | — |
-| P2 | Table II | CAPRISE(s=3,β=0.2) 后：BLEU 12.425/P .482/R .498/F1 .487/ROUGE .492 | 待测（M11） | UNKNOWN | — |
+| P1 | Table II | 明文 GTR 嵌入可被 Vec2Text 重建：BLEU 83.021/P .947/R .950/F1 .948/ROUGE .950 | 10 条校准 passage（32-token 预算）：BLEU **63.727**/P .886/R .927/F1 .906/ROUGE-L .801 —— 同量级（−19.3 BLEU），受样本量/长度校准/CPU 影响 | VERIFIED（量级/形态一致；绝对值不可完全对齐，F6/F15） | results/exp3_vec2text.json, results/gate_M11_vec2text.json |
+| P2 | Table II | CAPRISE(s=3,β=0.2) 后：BLEU 12.425/P .482/R .498/F1 .487/ROUGE .492 | raw 攻击（论文口径）：BLEU **9.258**/P .580/R .530/F1 .554/ROUGE-L .442（PDF 高度接近）；去缩放最强攻击：BLEU 30.289（安全限定，A11/F3） | VERIFIED（加密后水平复现；强攻击口径见 F3） | results/exp3_vec2text.json, results/gate_M11_vec2text.json |
 | P3 | Fig.5 | 向量分析 ASR：CAPRISE 在所有维度上低于 ADCPE | 27/27 cell 成立：真实 d=768 −2.3pt；合成 d=768/1536/3072 −6.1/−6.8/−4.0pt；β↑ 差距↑（−3.4/−4.2/−11.6pt）；论文 Fig.5 数字化对照见 F11 | VERIFIED（趋势成立；真实数据幅度小） | results/gate_M10_vector_analysis.json, results/exp4_vector_analysis.json |
 | P4 | Table III, Fig.5, §VI | 隐私-精度 trade-off：r 越大 k' 越大、隐私越强但检索精度越低 | k' 随 r 上升：r=0.02→k'=72、r=0.05→k'=785（Theorem 1）；EXP2 中 k' 上升使 recall 保持 1.0 但耗时 3.11→11.81ms/query；β 越大噪声越大 recall 越低（0.9910→0.9401）；r 与隐私的量化见 exp5（角帽扩张）与 exp4（ASR） | VERIFIED | results/exp2_retrieval.json, results/exp5_query_dp.json |
 
@@ -70,9 +70,9 @@
 
 | 判定 | 数量 |
 |---|---|
-| VERIFIED | 16（C1–C6, T1, T4, E1–E4, P3, P4, R1, R2） |
+| VERIFIED | 18（C1–C6, T1, T4, E1–E4, P1–P4, R1, R2） |
 | FALSIFIED | 2（T2, T3——论文内部不一致/声明过强，证据见 FINDINGS F1/F9） |
 | BLOCKED | 1（C7——形式化安全性，超出复现范围） |
-| UNKNOWN | 2（P1, P2——Vec2Text Table II，M11 进行中） |
+| UNKNOWN | 0 |
 
 > 收尾条件（skill §7）：CLAIMS_CHECKLIST 无 UNKNOWN 后才可结束复现；FALSIFIED 必须有可复跑证据。

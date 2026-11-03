@@ -12,8 +12,14 @@ Acceptance criteria (docs/MODULE_PLAN.md M13; SPEC.md Sec. 5; task brief):
 2. Monte-Carlo check of Eq.21's mathematical identity: the mean number of DB
    points inside the widened angular cap (radius alpha_k + r around the
    DistanceDP-perturbed query) matches Eq.21 with Delta alpha = r within 5%.
-   Checked on the full m=100,000 / nq=200 experiment JSON *and* independently
-   with a smaller MC run inside the gate.
+   Checked on the full m=100,000 / nq=200 experiment JSON *and* with a smaller
+   reduced MC run inside the gate.
+   NOTE (cross-review V5): the gate-internal reduced MC reuses
+   ``experiments/exp5_query_dp.py:monte_carlo`` (imported via importlib), so it is
+   a *regression* check of the same implementation, NOT an independent
+   re-implementation.  Implementation-level independence is covered by the
+   separate cross-review task (results/verify_theory.json / notes/verify_theory.md
+   by data-retrieval).
 3. Retrieval sufficiency: retrieving ceil(Eq.21) candidates under the perturbed
    query always contains the plaintext top-k (coverage rate == 1.0).
 4. Reverse-engineered Delta alpha/r from the paper's Table III is documented and

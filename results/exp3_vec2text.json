@@ -1,0 +1,422 @@
+{
+  "experiment": "exp3_vec2text",
+  "paper_ref": "paper Section V-B / Table II (Vec2Text reconstruction attack)",
+  "definition": {
+    "bleu": "corpus BLEU, 0-100 (sacrebleu with effective_order=True)",
+    "precision/recall/f1": "token-level micro-averaged P/R/F1 over the corpus (0-1)",
+    "rouge": "mean ROUGE-L F1 (0-1)",
+    "attack_embedding_convention": "vec2text attack-convention embeddings E = T5 encoder last_hidden_state mean-pool (corrector.inversion_trainer.call_embedding_model), NO sentence-transformers Dense projection and NO L2 normalisation -- finding F14. data/passage_emb.npy (ST GTR embeddings, Dense+normalised) is NOT used as the attack input because vec2text reconstructs garbage from it even without encryption.",
+    "attack_modes": {
+      "plaintext": "invert the plaintext attack-convention embedding E_i (paper 'w/o Enc')",
+      "caprise_raw": "invert the CAPRISE ciphertext e'_i directly (norm ~ s*||E_i|| ~ 1.5-3, out of the inversion model's input distribution; naive attacker)",
+      "caprise_rescaled": "invert e'_i * (||E_i||/||e'_i||): attacker restores the original per-vector norm; strongest attack, used for the main Table II row"
+    },
+    "references": "original MS MARCO passage texts (full text, not truncated)"
+  },
+  "setup": {
+    "n_passages": 10,
+    "num_steps": 20,
+    "sequence_beam_width": 4,
+    "seed": 20260101,
+    "s": 3,
+    "beta": 0.2,
+    "d": 768,
+    "device": "mps:0",
+    "corrector_load_seconds": 16.61,
+    "attack_embedding_convention": "vec2text_t5_meanpool_v1",
+    "vec2text": "0.0.13 (jxm/gtr__nq__32 inversion + jxm/gtr__nq__32__correct corrector, offline local snapshots)",
+    "environments": {
+      "python": "3.12.13",
+      "run_with": "must be .venv-vec2text/bin/python (transformers 4.x); main .venv has transformers 5.x and is incompatible with vec2text 0.0.13"
+    },
+    "inversion_seconds_total": 265.27
+  },
+  "passages": {
+    "source": "data/passages.jsonl (M0 artifact; real MS MARCO passages)",
+    "selection": "first 10 passages of the first 400 rows whose tokenised length is <= 32 tokens (the vec2text gtr__nq__32 corrector generation budget; F6/A11). Full passage text is used as the BLEU/P/R/F1/ROUGE reference (not truncated).",
+    "max_ref_tokens": 32,
+    "pool_size": 400,
+    "passage_ids": [
+      85696,
+      3489272,
+      7071501,
+      7075317,
+      7079676,
+      7081193,
+      7082706,
+      7084934,
+      7085473,
+      7089522
+    ],
+    "passage_sources": [
+      "qrels",
+      "qrels",
+      "qrels",
+      "qrels",
+      "qrels",
+      "qrels",
+      "qrels",
+      "qrels",
+      "qrels",
+      "qrels"
+    ],
+    "texts": [
+      "Safety definition, the state of being safe; freedom from the occurrence or risk of injury, danger, or loss. See more.",
+      "honesty. n, pl-ties. 1. the condition of being honest. 2. sincerity or fairness. 3. virtue or respect.",
+      "Definition of central city. : a city that constitutes the densely populated center of a metropolitan area.",
+      "Synonyms for Discipline: command (noun) authority, charge, command, commission, control, coordination, direction, domination,",
+      "Texas Roadhouse Address: 1051 Baltimore Pike, Glen Mills, PA 19342, United States Phone: +1 610-459-1720",
+      "The largest unit within which gene flow can readily occur is a species.",
+      "Best Answer: Normally e. coli feeds on undigested nutrients in the intestines of mammals.",
+      "Tribal definition, of, relating to, or characteristic of a tribe: tribal customs. See more.",
+      "turo. first-person singular present indicative of turare; Anagrams . urto, urtÃ²",
+      "How rich is Vinny Pazienza? Vinny Pazienza Net Worth: $300,000. People also search for"
+    ],
+    "ref_token_lengths": [
+      28,
+      30,
+      26,
+      31,
+      31,
+      16,
+      27,
+      25,
+      30,
+      28
+    ],
+    "text_token_stats": {
+      "min": 16,
+      "max": 31,
+      "mean": 27.2
+    }
+  },
+  "embeddings": {
+    "convention": "vec2text_t5_meanpool_v1",
+    "description": "mean-pooled T5 last_hidden_state (vec2text attack convention); no Dense, no L2 normalisation",
+    "norm_min": 0.9286366421508339,
+    "norm_max": 1.5679943096086328,
+    "norm_mean": 1.1717829614385988,
+    "seconds": 0.48,
+    "sha256": "2955b5c0ac17aafdd5446e78ab2422ae004f9c571f6e24637d428533dec1ea0d",
+    "arrays_file": "results/exp3_vec2text_arrays.npz",
+    "arrays_sha256": "84d43dde2c377df5840114e2c37b7ddd0fb93d343af4904e4071327ae6bfe30e"
+  },
+  "encryption": {
+    "method": "CAPRISE Algorithm 1 EncDB (src/caprise/caprise.py)",
+    "s": 3,
+    "beta": 0.2,
+    "d": 768,
+    "noise_radius_db": 0.225,
+    "noise_radius_adcpe": 0.15000000000000002,
+    "noise_bound": 0.225,
+    "noise_norm_min": 0.22434514762465077,
+    "noise_norm_max": 0.22495881317033253,
+    "noise_norm_mean": 0.2248102856157494,
+    "ep_norm_min": 2.809019895236581,
+    "ep_norm_max": 4.710652789444663,
+    "ep_norm_mean": 3.525794047244814,
+    "nonces_sha256": "f7fad40fa51c183874f2f4303853e990cb45f69580c3d89de60fc570fe99f9a9",
+    "deterministic_nonces": true,
+    "max_abs_ep_minus_s_e": 0.030273436824822725
+  },
+  "modes": {
+    "plaintext": {
+      "hypotheses": [
+        "Safety definition, the state of being safe; freedom from the danger, occurrence, or risk of injury, loss, or other more. See",
+        "honesty. n. pl-ties. 1. the condition or virtue of being honest. 2. sincerity. 3. respect or fairness.",
+        "Definition of central city.  : a city that constitutes a densely populated center of the metropolitan area.",
+        "Synonyms for Discipline: command (command, charge) – authority, direction, commission, control, co-ordination, domination,",
+        "Texas Roadhouse Address: 1027 Baltimore Pike, Glen Mills, PA Phone : 14551 - 16534 1934 United States 24",
+        "The largest unit within which gene flow can readily occur is a species.",
+        "Best Answer: Normally e. coli feeds on undigested nutrients in the intestines of mammals.",
+        "Tribal definition A definition of a tribe, or tribal customs, relating to, or characteristic of a tribe. See more.",
+        "turo ; first person singular indicative of urre. urto. 2nd grammatical present. turto-s",
+        "How rich is Vinny Pazienza? Vinny Pazienza Net Worth: $300,000. People also search for"
+      ],
+      "seconds": 78.81839919090271,
+      "per_text_seconds": 7.881839919090271,
+      "metrics": {
+        "bleu": 63.72695624524072,
+        "precision": 0.8860759493670886,
+        "recall": 0.9271523178807947,
+        "f1": 0.9061488673139159,
+        "rouge": 0.8014097352511985
+      },
+      "per_passage_bleu": [
+        60.974552792236565,
+        56.16347168941238,
+        70.82593633017144,
+        49.44878524313092,
+        37.614350791262964,
+        100.00000000000004,
+        100.00000000000004,
+        49.700883887603304,
+        8.47178590796544,
+        100.00000000000004
+      ]
+    },
+    "caprise_raw": {
+      "hypotheses": [
+        "The state definition of \"safe.\" Safety is defined as the freedom to see yourself safe, avoid danger, avoid injury, and risk of loss or injury.",
+        ", honesty. A state of being honest; lying;",
+        "Definition of \"central city\" Central city, also defined as a city centrally populated, is an area of densely populated metropolitan area.",
+        "Synonyms of \"discipline\": \"command\", \"command\", \"proposition\", \"direct authority\". Discipline, command,",
+        "U.S. Roadhouse Address        211 Baltimore Gales Mill, Texas, 19",
+        ". The largest unit that can readily occur within a species is gene flow.",
+        "naturally. In mammals, E. coli feeds on undigested nutrients. In mammals, E. coli usually ingests from intestinal",
+        ". Tribal definition A tribal definition, denoting tribal customs or particular traits. Tribal",
+        "uro, indicative of uro. turo – first-person singular. turo",
+        "Celebrity Vinny Pazienza Rich: Vinny Pazienza, net worth $300,000 to $600,000. It"
+      ],
+      "seconds": 88.75753569602966,
+      "per_text_seconds": 8.875753569602967,
+      "metrics": {
+        "bleu": 9.25830992828702,
+        "precision": 0.5797101449275363,
+        "recall": 0.5298013245033113,
+        "f1": 0.5536332179930797,
+        "rouge": 0.44150281712771433
+      },
+      "per_passage_bleu": [
+        5.28832590909379,
+        4.69525932526761,
+        10.008350737965104,
+        7.148683682281811,
+        3.407003717264705,
+        22.08959113415789,
+        21.800193956058223,
+        7.009378515928603,
+        9.642085430897607,
+        8.026690728381682
+      ]
+    },
+    "caprise_rescaled": {
+      "hypotheses": [
+        "Safety definition; the state of being safe. Freedom from danger, injury, loss, or occurrence of risks, or actions that harm others. See",
+        "honesty. 1. politeness. 2. ties. Any condition upon which one is seriously honest, the aim of being. 3. virtues. From",
+        "Definition of central city - defined as a city in the center of a metropolitan area, one that constitutes the densely populated portion.",
+        "Synonyms for Discipline: command, any command consisting of command, position, direction, coordination, commission, domination, charge, authority",
+        "Texas Roadhouse Address: 512 523 Baltimore Pike, Glen Mills, PA 1934 Phone:  0  399, US",
+        "The largest unit within which gene flow can occur most readily is a species .",
+        "an answer. Normally, E. coli feeds on undigested nutrients that it best ingests in intestine of mammals.",
+        "definition of a term, related to tribal customs. Tribal definition: A tribe, or tribe of, has characteristics of others. See also",
+        "turo - first person singular; it is indicative of urto. urre: anagram emphasizing 2nd-sent",
+        "How Rich is Vinny Pazienza?\" Worth: Vinny Pazienza Net worth: $300,000. People go to search for"
+      ],
+      "seconds": 97.65179824829102,
+      "per_text_seconds": 9.7651798248291,
+      "metrics": {
+        "bleu": 30.288947478396828,
+        "precision": 0.6741573033707865,
+        "recall": 0.7947019867549668,
+        "f1": 0.729483282674772,
+        "rouge": 0.6219531534156116
+      },
+      "per_passage_bleu": [
+        21.36637393814553,
+        13.952118378975724,
+        40.4899367063915,
+        35.45968452939003,
+        35.28573301438501,
+        67.29864884660302,
+        29.945160623183902,
+        10.90202442784887,
+        6.256118460580958,
+        36.651343611373036
+      ]
+    }
+  },
+  "paper_table_ii": {
+    "w/o Enc": {
+      "bleu": 83.021,
+      "precision": 0.947,
+      "recall": 0.95,
+      "f1": 0.948,
+      "rouge": 0.95
+    },
+    "CAPRISE": {
+      "bleu": 12.425,
+      "precision": 0.482,
+      "recall": 0.498,
+      "f1": 0.487,
+      "rouge": 0.492
+    }
+  },
+  "comparison": {
+    "w/o Enc": {
+      "ours": {
+        "bleu": 63.72695624524072,
+        "precision": 0.8860759493670886,
+        "recall": 0.9271523178807947,
+        "f1": 0.9061488673139159,
+        "rouge": 0.8014097352511985
+      },
+      "paper": {
+        "bleu": 83.021,
+        "precision": 0.947,
+        "recall": 0.95,
+        "f1": 0.948,
+        "rouge": 0.95
+      },
+      "note": "paper 'w/o Enc' row: plaintext attack-convention embeddings",
+      "delta_ours_minus_paper": {
+        "bleu": -19.29404375475928,
+        "precision": -0.0609240506329114,
+        "recall": -0.022847682119205293,
+        "f1": -0.04185113268608409,
+        "rouge": -0.14859026474880144
+      },
+      "ratio_ours_over_paper": {
+        "bleu": 0.7676004413972455,
+        "precision": 0.9356662612112868,
+        "recall": 0.9759498082955734,
+        "f1": 0.9558532355632025,
+        "rouge": 0.8435891950012616
+      }
+    },
+    "CAPRISE": {
+      "ours": {
+        "bleu": 9.25830992828702,
+        "precision": 0.5797101449275363,
+        "recall": 0.5298013245033113,
+        "f1": 0.5536332179930797,
+        "rouge": 0.44150281712771433
+      },
+      "paper": {
+        "bleu": 12.425,
+        "precision": 0.482,
+        "recall": 0.498,
+        "f1": 0.487,
+        "rouge": 0.492
+      },
+      "note": "paper-closest CAPRISE row: raw ciphertext e' fed to vec2text (no rescaling)",
+      "delta_ours_minus_paper": {
+        "bleu": -3.1666900717129813,
+        "precision": 0.09771014492753627,
+        "recall": 0.0318013245033113,
+        "f1": 0.06663321799307975,
+        "rouge": -0.05049718287228566
+      },
+      "ratio_ours_over_paper": {
+        "bleu": 0.7451356079104241,
+        "precision": 1.2027181430031872,
+        "recall": 1.0638580813319505,
+        "f1": 1.1368238562486237,
+        "rouge": 0.8973634494465739
+      }
+    },
+    "CAPRISE_rescaled_attack": {
+      "ours": {
+        "bleu": 30.288947478396828,
+        "precision": 0.6741573033707865,
+        "recall": 0.7947019867549668,
+        "f1": 0.729483282674772,
+        "rouge": 0.6219531534156116
+      },
+      "paper": {
+        "bleu": 12.425,
+        "precision": 0.482,
+        "recall": 0.498,
+        "f1": 0.487,
+        "rouge": 0.492
+      },
+      "note": "strongest-attacker row (not in the paper): e' * ||E||/||e'|| restores the original norm; upper bound on reconstruction",
+      "delta_ours_minus_paper": {
+        "bleu": 17.863947478396828,
+        "precision": 0.19215730337078651,
+        "recall": 0.29670198675496684,
+        "f1": 0.24248328267477204,
+        "rouge": 0.12995315341561164
+      },
+      "ratio_ours_over_paper": {
+        "bleu": 2.4377422517824407,
+        "precision": 1.3986666045037064,
+        "recall": 1.5957871219979254,
+        "f1": 1.4979122847531254,
+        "rouge": 1.264132425641487
+      }
+    }
+  },
+  "findings": [
+    {
+      "kind": "main_effect",
+      "row": "CAPRISE raw ciphertext (paper Table II analogue)",
+      "plain_bleu": 63.72695624524072,
+      "caprise_raw_bleu": 9.25830992828702,
+      "bleu_drop_abs": 54.4686463169537,
+      "bleu_drop_fraction": 0.8547190941827156,
+      "plain_f1": 0.9061488673139159,
+      "caprise_raw_f1": 0.5536332179930797,
+      "conclusion": "Vec2Text reconstruction collapses when the raw CAPRISE ciphertext is fed to the inversion model (paper-closest attack setting): BLEU drops by more than half"
+    },
+    {
+      "kind": "scale_adaptation_recovery",
+      "plain_bleu": 63.72695624524072,
+      "caprise_rescaled_bleu": 30.288947478396828,
+      "bleu_drop_fraction_vs_plain": 0.524707450928054,
+      "recovery_vs_raw_bleu": 21.03063755010981,
+      "conclusion": "a scale-normalising adversary (e'*||E||/||e'||) recovers much of the reconstruction ability -- the strongest attacker, reported as the privacy upper bound (F3/A11); CAPRISE still degrades it relative to plaintext"
+    },
+    {
+      "kind": "paper_baseline",
+      "ours_plain_bleu": 63.72695624524072,
+      "paper_plain_bleu": 83.021,
+      "delta": -19.29404375475928,
+      "note": "paper does not state num_steps/beam/N/passage length (A11); our CPU/MPS budget and N=20 may explain the delta"
+    },
+    {
+      "kind": "paper_caprise_row",
+      "row": "CAPRISE raw ciphertext (paper Table II analogue)",
+      "ours_caprise_bleu": 9.25830992828702,
+      "paper_caprise_bleu": 12.425,
+      "delta": -3.1666900717129813,
+      "rescaled_attack_bleu": 30.288947478396828
+    },
+    {
+      "kind": "attack_adaptation",
+      "raw_bleu": 9.25830992828702,
+      "rescaled_bleu": 30.288947478396828,
+      "conclusion": "raw ciphertext (norm ~ s*||E||) is out of the inversion model's input distribution and is much weaker than restoring the original norm; the rescaled attack is the conservative (attacker-favourable) main setting",
+      "rescaled_attack_stronger": true
+    },
+    {
+      "kind": "embedding_convention_F14",
+      "attack_convention": "vec2text_t5_meanpool_v1",
+      "ep_norm_mean": 3.525794047244814,
+      "conclusion": "Vec2Text gtr-base operates on T5 mean-pooled (un-Densed, un-normalised) embeddings; using sentence-transformers GTR embeddings as attack input produces garbage even without encryption (F14), so the attack baseline here is the correct vec2text convention."
+    }
+  ],
+  "summary": {
+    "main_paper_comparison_row": "CAPRISE raw ciphertext (paper Table II analogue; paper does not specify A11 adaptation)",
+    "plain_bleu": 63.72695624524072,
+    "caprise_rescaled_bleu": 30.288947478396828,
+    "caprise_raw_bleu": 9.25830992828702,
+    "per_text_seconds_mean": 8.84092443784078,
+    "attack_convention": "vec2text_t5_meanpool_v1"
+  },
+  "runtime": {
+    "seconds_total": 282.4,
+    "hardware": {
+      "platform": "macOS-26.6.2-arm64-arm-64bit",
+      "machine": "arm64",
+      "python": "3.12.13"
+    }
+  },
+  "config": {
+    "n": 10,
+    "num_steps": 20,
+    "sequence_beam_width": 4,
+    "seed": 20260101,
+    "s": 3,
+    "beta": 0.2,
+    "modes": [
+      "plaintext",
+      "caprise_raw",
+      "caprise_rescaled"
+    ],
+    "use_cache": true,
+    "batch_size": 4,
+    "max_ref_tokens": 32,
+    "pool_size": 400
+  }
+}

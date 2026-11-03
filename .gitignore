@@ -17,6 +17,7 @@ data/*
 # --- Large / regenerable result artifacts ---
 results/*.npy
 results/*.npz
+!results/exp3_vec2text_arrays.npz
 results/*.parquet
 results/*.jsonl
 *.h5

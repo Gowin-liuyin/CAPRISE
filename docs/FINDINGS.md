@@ -54,6 +54,17 @@
 - 处置: exp3 notes 记录本复现全部设置，报告中说明只可比趋势与量级。
 - 状态: CONFIRMED
 
+## F3b: CAPRISE 的 Vec2Text 防护部分依赖"攻击者不还原尺度"（A11 扩展，量化）
+
+- 类型: 攻击模型未说明/防护强度依赖假设
+- 论文位置: Table II、§IV-1（声称噪声足以破坏 Vec2Text）
+- 证据: 同一批 CAPRISE 密文，raw 攻击（e'=3E+λ 直接反演，对应论文口径）BLEU=**9.258**；
+  若攻击者估计并还原尺度（e'·‖E‖/‖e'‖，最强攻击）BLEU=**30.289**（F1 0.729），
+  仍比明文低 52% 但远高于论文报告的 12.425。论文未说明攻击者如何适配密文（A11）。
+- 影响: 论文 Table II 的 12.425 可复现（我们 9.26，P/R/F1 高度接近），但"CAPRISE 有效防 Vec2Text"
+  的强度依赖攻击者假设；报告同时给出两口径并标注。
+- 状态: CONFIRMED
+
 ## F7: Algorithm 2 未说明 nonce 如何随密文返回（A9）
 
 - 类型: 规范缺口
@@ -116,7 +127,7 @@
 ## F14: Vec2Text 攻击必须使用 vec2text 训练的嵌入约定（否则基线也失败）
 
 - 类型: 可实现性/攻击模型细节
-- 证据: 直接把 sentence-transformers 的 GTR 嵌入（含 Dense+归一化）喂给 vec2text gtr-base corrector：即使 num_steps=20/beam=4，重建也是完全无关文本（说明"无加密也重建失败"，不能作为基线）。改用 vec2text 自身约定（`corrector.inversion_trainer.call_embedding_model`，T5 encoder 均值池化、无 Dense）后，20 步 beam=4 的重建与原文高度接近（约 8.7s/text CPU/MPS 混合）。
+- 证据: 直接把 sentence-transformers 的 GTR 嵌入（含 Dense+归一化）喂给 vec2text gtr-base corrector：即使 num_steps=20/beam=4，重建也是完全无关文本（说明"无加密也重建失败"，不能作为基线）。改用 vec2text 自身约定（`corrector.inversion_trainer.call_embedding_model`，T5 encoder 均值池化、无 Dense/无 L2，范数 0.93–1.57）后，10 条校准样本的明文重建 BLEU=63.727（P .886/R .927/F1 .906/ROUGE .801），20 步 beam=4 约 8.8s/text。M11 gate 用 npz 数组对嵌入约定与加密链做了字节级审计。
 - 影响: 论文 Table II 的基线 BLEU 83 隐含使用 vec2text 约定嵌入；复现 M11 必须对齐该约定，并在报告中声明（这也是 A11 的一部分）。
 - 状态: CONFIRMED
 

@@ -45,7 +45,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "gate re-measurement (CPU time, 5 interleaved rounds): d=768 80476 emb/s vs stored 69147 (load factor 1.16, absolute window [0.5,2.0]); per-vector cost ratio cost(768)/cost(1536): gate 0.723 vs stored 0.700 (dev 3.3% < 10%, load drift cancels within each round); ordering preserved (768 faster than 1536). Absolute rates are load-sensitive on this shared machine (observed 0.8-1.1x swings minutes apart; wall~=CPU time => resource contention), so the JSON is verified strictly by throughput_internal_consistency; see notes/exp1_efficiency.md."
+      "detail": "gate re-measurement (CPU time, 5 interleaved rounds): d=768 86408 emb/s vs stored 69147 (load factor 1.25, absolute window [0.5,2.0]); per-vector cost ratio cost(768)/cost(1536): gate 0.658 vs stored 0.700 (dev 6.0% < 10%, load drift cancels within each round); ordering preserved (768 faster than 1536). Absolute rates are load-sensitive on this shared machine (observed 0.8-1.1x swings minutes apart; wall~=CPU time => resource contention), so the JSON is verified strictly by throughput_internal_consistency; see notes/exp1_efficiency.md."
     },
     {
       "check": "phase1_caprise_encryption_measured",
@@ -145,8 +145,8 @@
     "Phase-1: embedding dominates (128 queries: ~0.21-0.63 s vs CAPRISE ~1.5 ms); overhead 0.23-0.69% < 19% paper bound.",
     "Phase-2: CAPRISE ~78.6k vectors/s (d=768) vs measured Paillier 2.19 vec/s (1024-bit) / 0.30 vec/s (2048-bit); paper 9x internal-consistent, cross-hardware ratios reported but not asserted (A17/A17b)."
   ],
-  "duration_s": 0.176,
-  "timestamp": "2026-11-03T16:39:34+0800",
+  "duration_s": 0.165,
+  "timestamp": "2026-11-03T16:54:10+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

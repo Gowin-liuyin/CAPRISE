@@ -24,7 +24,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "||e_bad-e||=0.106 (noise R=0.225, /s)"
+      "detail": "||e_bad-e||=0.104 (noise R=0.225, /s)"
     },
     {
       "check": "batch_equals_single",
@@ -47,10 +47,10 @@
   ],
   "notes": [
     "DecDB replays PRF(K, r) to rebuild lambda; correctness needs (K, r).",
-    "Measurement scale: wrong-nonce error 0.106 vs noise radius/s = 0.075."
+    "Measurement scale: wrong-nonce error 0.104 vs noise radius/s = 0.075."
   ],
-  "duration_s": 0.024,
-  "timestamp": "2026-11-03T15:11:48+0800",
+  "duration_s": 0.012,
+  "timestamp": "2026-11-03T16:53:51+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

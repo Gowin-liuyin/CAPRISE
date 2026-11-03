@@ -81,22 +81,30 @@ def throughput_rows() -> list[dict]:
         E = rng.standard_normal((BATCH, d))
         E /= np.linalg.norm(E, axis=1, keepdims=True)  # GTR embeddings are L2-normalised
         EncDB(key, E[:16])  # warm-up (cache, allocator)
-        runs = []
+        runs_wall, runs_cpu = [], []
         for _ in range(REPS):
-            t0 = time.perf_counter()
+            t0w, t0c = time.perf_counter(), time.process_time()
             EncDB(key, E)
-            runs.append(time.perf_counter() - t0)
-        med = float(np.median(runs))
+            runs_wall.append(time.perf_counter() - t0w)
+            runs_cpu.append(time.process_time() - t0c)
+        med = float(np.median(runs_wall))
+        med_cpu = float(np.median(runs_cpu))
         rows.append(
             {
                 "d": d,
                 "batch": BATCH,
                 "reps": REPS,
-                "runs_s": [round(x, 6) for x in runs],
+                "runs_s": [round(x, 6) for x in runs_wall],
                 "median_s": round(med, 6),
+                "runs_cpu_s": [round(x, 6) for x in runs_cpu],
+                "median_cpu_s": round(med_cpu, 6),
                 "embeddings_per_s": round(BATCH / med, 1),
                 "elements_per_s": round(BATCH * d / med, 0),
                 "ms_per_vector": round(med / BATCH * 1000, 4),
+                # CPU-time based (robust to co-running jobs on the same machine)
+                "embeddings_per_s_cpu": round(BATCH / med_cpu, 1),
+                "elements_per_s_cpu": round(BATCH * d / med_cpu, 0),
+                "ms_per_vector_cpu": round(med_cpu / BATCH * 1000, 4),
                 "input_mb": round(BATCH * d * 8 / 1e6, 2),
             }
         )
@@ -115,20 +123,25 @@ def caprise_encrypt_queries(d: int = 768, n: int = 128, reps: int = 3) -> dict:
     Q /= np.linalg.norm(Q, axis=1, keepdims=True)
     for i in range(8):  # warm-up
         EncQ(key, Q[i])
-    runs = []
+    runs, runs_cpu = [], []
     for _ in range(reps):
-        t0 = time.perf_counter()
+        t0w, t0c = time.perf_counter(), time.process_time()
         for i in range(n):
             EncQ(key, Q[i])
-        runs.append(time.perf_counter() - t0)
+        runs.append(time.perf_counter() - t0w)
+        runs_cpu.append(time.process_time() - t0c)
     med = float(np.median(runs))
+    med_cpu = float(np.median(runs_cpu))
     return {
         "n": n,
         "d": d,
         "reps": reps,
         "runs_ms": [round(x * 1000, 3) for x in runs],
         "median_ms": round(med * 1000, 3),
+        "runs_cpu_ms": [round(x * 1000, 3) for x in runs_cpu],
+        "median_cpu_ms": round(med_cpu * 1000, 3),
         "vectors_per_s": round(n / med, 1),
+        "vectors_per_s_cpu": round(n / med_cpu, 1),
     }
 
 
@@ -265,17 +278,22 @@ def caprise_vector_throughput(d: int = 768, n: int = 2000) -> dict:
     Q /= np.linalg.norm(Q, axis=1, keepdims=True)
     for i in range(32):
         EncQ(key, Q[i])
-    t0 = time.perf_counter()
+    t0w, t0c = time.perf_counter(), time.process_time()
     for i in range(n):
         EncQ(key, Q[i])
-    elapsed = time.perf_counter() - t0
+    elapsed = time.perf_counter() - t0w
+    elapsed_cpu = time.process_time() - t0c
     return {
         "d": d,
         "n_vectors": n,
         "elapsed_ms": round(elapsed * 1000, 2),
+        "elapsed_cpu_ms": round(elapsed_cpu * 1000, 2),
         "us_per_vector": round(elapsed / n * 1e6, 3),
+        "us_per_vector_cpu": round(elapsed_cpu / n * 1e6, 3),
         "vectors_per_s": round(n / elapsed, 1),
+        "vectors_per_s_cpu": round(n / elapsed_cpu, 1),
         "elements_per_s": round(n * d / elapsed, 0),
+        "elements_per_s_cpu": round(n * d / elapsed_cpu, 0),
         "measurement": "single-vector EncQ calls in a loop (no batching)",
     }
 
@@ -307,6 +325,10 @@ def builtin_pow_paillier(nbits: int, n_elements: int = 32) -> dict:
     return {
         "impl": "pure CPython builtin pow (no GMP)",
         "n_bits": nbits,
+        "modulus_type": (
+            f"synthetic {nbits}-bit odd modulus (timing-only emulation of pow(r, n, n^2); "
+            "NOT a real Paillier keypair -- primality is irrelevant for measuring modpow cost)"
+        ),
         "n_elements": n_elements,
         "us_per_element": round(per_elem * 1e6, 2),
         "vector_768_elems_s": round(per_elem * 768, 6),
@@ -394,12 +416,16 @@ def phase2(exec_bench: dict) -> dict:
             "phe_vectors_per_s": phe_2048["vectors_per_s"],
             "speedup": round(cap["vectors_per_s"] / phe_2048["vectors_per_s"], 1),
         }
+    our_over_paper = cap["vectors_per_s"] / PAPER_PHASE2_CAPRISE_VEC_S
     cap_vs["paper_caprise_2339"] = {
         "paper_vectors_per_s": PAPER_PHASE2_CAPRISE_VEC_S,
-        "our_over_paper": round(cap["vectors_per_s"] / PAPER_PHASE2_CAPRISE_VEC_S, 2),
+        "our_over_paper": round(our_over_paper, 2),
         "paper_caprise_over_paper_phe_mid": round(PAPER_PHASE2_CAPRISE_VEC_S / 275.0, 2),
-        "note": "paper claims ~9x (2339 / 250-300 = 7.8-9.4x); our implementation is additionally "
-                "~35x faster than the paper's CAPRISE implementation because it is vectorised (A17)",
+        "note": (
+            f"paper claims ~9x (2339 / 250-300 = 7.8-9.4x); our implementation is additionally "
+            f"{our_over_paper:.2f}x faster than the paper's CAPRISE implementation on the same "
+            "single-vector basis because it is vectorised (A17)"
+        ),
     }
     return {
         "caprise": cap,
@@ -437,14 +463,21 @@ def style_probe(d: int = 768, reps: int = 10) -> dict:
     return {
         "d": d,
         "vectorised_standard_normal_us": round(vec_us, 3),
-        "per_element_scalar_loop_us": round(elem_us, 3),
+        # NOTE: the two *_us fields below are PER-VECTOR costs (one vector = d coordinates),
+        # not per-element costs; the field name states the unit explicitly.
+        "vectorised_standard_normal_us_per_vector": round(vec_us, 3),
+        "per_element_scalar_loop_us_per_vector": round(elem_us, 3),
+        "per_element_scalar_loop_us_per_element": round(elem_us / d, 4),
         "ratio_per_element_over_vectorised": round(elem_us / vec_us, 2),
         "per_element_loop_vectors_per_s": round(1e6 / elem_us, 1),
         "note": (
-            "The paper reports 2339 vectors/s at d=768 = 428 us/vector = 0.56 us/element; "
-            "a per-element Python/numpy-scalar implementation does a handful of scalar ops per "
-            "element (~0.5-0.7 us), which reproduces that order of magnitude. This reproduction "
-            "draws all d Gaussians with a single PCG64 call, hence the ~35x higher throughput."
+            "Per-element cost of the raw scalar draw is "
+            f"{elem_us / d:.3f} us/element (measured), while the paper's 2339 vectors/s at d=768 "
+            "corresponds to 428 us/vector = 0.56 us/element. A per-element Python implementation "
+            "doing a handful of numpy-scalar operations per coordinate would land in that range, "
+            "so the 'paper used a per-element-style implementation' statement is a plausible "
+            "reconstruction (A17), NOT a measurement of the paper's code. This reproduction draws "
+            "all d Gaussians with a single PCG64 call, hence the ~34x higher per-vector throughput."
         ),
     }
 
@@ -575,9 +608,10 @@ def main() -> int:
 
     print("[exp1] D. implementation-style probe (A17) ...", flush=True)
     style = style_probe(768)
-    print(f"  vectorised {style['vectorised_standard_normal_us']} us vs per-element loop "
-          f"{style['per_element_scalar_loop_us']} us per vector (ratio "
-          f"{style['ratio_per_element_over_vectorised']}x)")
+    print(f"  vectorised {style['vectorised_standard_normal_us_per_vector']} us/vector vs "
+          f"per-element loop {style['per_element_scalar_loop_us_per_vector']} us/vector "
+          f"(ratio {style['ratio_per_element_over_vectorised']}x; "
+          f"scalar draw {style['per_element_scalar_loop_us_per_element']} us/element)")
 
     # ---------------------------------------------------------------- #
     # data-quality checks for the experiment itself
@@ -617,7 +651,12 @@ def main() -> int:
         },
         "settings": {"dims": list(DIMS), "batch": BATCH, "reps": REPS, "seed": SEED, "beta": 0.2, "s": 3},
         "throughput": {
-            "description": "EncDB on batch=1000 L2-normalised random embeddings; median of 3 runs",
+            "description": (
+                "EncDB on batch=1000 L2-normalised random embeddings; median of 3 runs. "
+                "Wall-clock rates are the operational numbers (paper comparison); *_cpu rates use "
+                "time.process_time() and are robust to co-running jobs on the machine (used by the "
+                "M17 gate's independent re-check)."
+            ),
             "rows": rows,
             "embeddings_per_s_decreasing": mono,
             "elements_per_s_range": [min(elem_vals), max(elem_vals)],
@@ -641,12 +680,17 @@ def main() -> int:
                 "id": "A17",
                 "statement": (
                     "The paper's CAPRISE throughput (2339 vectors/s at d=768 = 428 us/vector) is "
-                    "consistent with a per-element Python implementation (~0.56 us/element); this "
-                    "reproduction uses vectorised numpy noise generation (one PCG64 call for all d "
-                    f"Gaussians) and reaches {rows[1]['embeddings_per_s']:.0f} embeddings/s at d=768 "
-                    f"(~{rows[1]['embeddings_per_s']/PAPER_PHASE2_CAPRISE_VEC_S:.0f}x the paper's "
-                    "implementation). Absolute numbers are therefore implementation-style sensitive, "
-                    "not scheme-inherent."
+                    "consistent with a per-element Python implementation style (see "
+                    "implementation_style_probe; plausible reconstruction, not a measurement of the "
+                    "paper's code). This reproduction uses vectorised numpy noise generation (one "
+                    "PCG64 call for all d Gaussians) and reaches "
+                    f"{p2['caprise']['vectors_per_s']:.1f} single-vector encryptions/s at d=768 "
+                    "(same measurement basis as the paper's Phase-2 number), i.e. "
+                    f"{p2['comparisons']['paper_caprise_2339']['our_over_paper']:.2f}x the paper's "
+                    f"CAPRISE implementation. The batch EncDB throughput at d=768 "
+                    f"({rows[1]['embeddings_per_s']:.1f} embeddings/s) is a different (batch) "
+                    "measurement basis and is therefore not used for the paper comparison. Absolute "
+                    "numbers are implementation-style sensitive, not scheme-inherent."
                 ),
             },
             {
@@ -664,11 +708,24 @@ def main() -> int:
                 "id": "A17c",
                 "statement": (
                     "Phase-1: the embedding step dominates. On this machine gtr-t5-base embeds 128 "
-                    "queries in ~224 ms (MPS fp16) / ~606 ms (CPU fp32), while CAPRISE encrypts the "
-                    "same batch in ~1.6 ms, so the encryption overhead is ~0.26-0.71% (paper: 15/79.52 "
-                    "= 18.9%, <19%). CAPRISE is even relatively cheaper here because our "
-                    "implementation is faster; the paper's 15 ms encryption corresponds to a "
-                    "per-element Python implementation. Embedding remains the bottleneck in both."
+                    "queries in "
+                    + ", ".join(
+                        f"{name} {dev['median_ms']:.3f} ms"
+                        for name, dev in embed.get("devices", {}).items()
+                    )
+                    + f", while CAPRISE encrypts the same batch in {enc['median_ms']:.3f} ms, so the "
+                    "encryption overhead is "
+                    + ", ".join(
+                        f"{row['embedding_source']} {row['overhead_pct']:.3f}%"
+                        for row in p1["rows"]
+                        if "paper" not in row["embedding_source"]
+                    )
+                    + f" (paper: {PAPER_PHASE1_ENC_MS:g}/{PAPER_PHASE1_EMBED_MS:g} = "
+                    f"{PAPER_PHASE1_ENC_MS / PAPER_PHASE1_EMBED_MS * 100:.2f}%, <19%). CAPRISE is even "
+                    "relatively cheaper here because our implementation is faster; the paper's 15 ms "
+                    "encryption corresponds to a per-element Python implementation. Embedding remains "
+                    "the bottleneck in both. All numbers are read from this JSON's measured medians "
+                    "(not hardcoded)."
                 ),
             },
         ],
