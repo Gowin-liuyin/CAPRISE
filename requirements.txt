@@ -1,0 +1,21 @@
+# CAPRISE / ppRAG reproduction -- Python dependencies
+# Tested on Apple M5 (macOS, arm64, CPU-only) with CPython 3.12.13.
+# Install with: uv pip install -r requirements.txt  (or pip install -r ...)
+
+numpy==2.5.4
+scipy==1.18.1
+torch==2.15.0
+transformers==5.22.1
+datasets==5.1.0
+sentence-transformers==6.2.0
+accelerate==1.15.0
+huggingface-hub==2.4.0
+tokenizers==0.23.3
+safetensors==0.8.0
+matplotlib==3.11.2
+tqdm==4.70.1
+nltk==3.10.4
+rouge-score==0.1.2
+sacrebleu==2.6.0
+cryptography==50.0.2
+vec2text==0.0.13

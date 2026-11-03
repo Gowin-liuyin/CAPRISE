@@ -1,0 +1,23 @@
+# --- Python / tooling ---
+.venv/
+.venv-*/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+
+# --- Caches (huge; recreate with scripts/prepare_data.py) ---
+.cache/
+*.log
+
+# --- Data artifacts (downloaded / generated; NOT committed) ---
+data/*
+!data/README.md
+
+# --- Large / regenerable result artifacts ---
+results/*.npy
+results/*.npz
+results/*.parquet
+results/*.jsonl
+*.h5
+*.faiss
