@@ -56,10 +56,19 @@ gate.finish()   # 写 results/gate_M1_prf.json，pass = all checks pass
 
 （每次更新，保持与 results/gate_*.json 一致）
 
-| 模块 | 状态 |
-|---|---|
-| M1–M9 | 进行中（Lead） |
-| M0 | 进行中（data-retrieval） |
-| M10, M11 | 等待 M1–M9 通过（privacy） |
-| M12, M13 | 可并行启动（theory，独立模块） |
-| M14–M18 | 等待前置模块 |
+| 模块 | 状态 | 证据 |
+|---|---|---|
+| M1 PRF | ✅ PASS | results/gate_M1_prf.json |
+| M2 KeyGen | ✅ PASS | results/gate_M2_keygen.json |
+| M3 noise | ✅ PASS | results/gate_M3_noise.json |
+| M4 EncDB | ✅ PASS | results/gate_M4_encdb.json |
+| M5 DecDB | ✅ PASS | results/gate_M5_decdb.json |
+| M6 EncQ | ✅ PASS | results/gate_M6_encq.json |
+| M7 Eq.(2) | ✅ PASS | results/gate_M7_eq2.json |
+| M8 Eq.(3) | ✅ PASS（含 finding A19） | results/gate_M8_eq3.json |
+| M9 ADCPE | ✅ PASS | results/gate_M9_adcpe.json |
+| M0 | 🚧 进行中（data-retrieval） | — |
+| M10, M11 | 🚧 进行中（privacy-attacks，按 M10→M11） | — |
+| M12, M13, M17 | 🚧 进行中（theory-efficiency，按 M12→M13→M17） | — |
+| M14–M16, M18 | ⏳ 等待 M0 与核心模块（data-retrieval） | — |
+| M19 | ⏳ 报告收尾（Lead） | — |
