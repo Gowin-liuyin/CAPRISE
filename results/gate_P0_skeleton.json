@@ -93,8 +93,8 @@
     "Skeleton gate: artefacts, plan/claims coverage, fail-fast runner behaviour verified.",
     "Fail-fast demonstration: S1 (deliberately failing) stops the run; S2 (passing) completes."
   ],
-  "duration_s": 1.908,
-  "timestamp": "2026-11-03T23:33:38+0800",
+  "duration_s": 1.907,
+  "timestamp": "2026-11-03T23:58:40+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

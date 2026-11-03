@@ -1053,6 +1053,333 @@
       "only_inverse_reproduces_paper": "the paper's Table III is reproduced exactly (|rel err| < 1e-9) only by convention (d), Delta alpha = 1.15-1.30 r, which is derivable neither from Eq.21 nor from RemoteRAG's 'Delta alpha ~ r'; 1.2 r is a fitted convention implicit in the table, not a correct value"
     }
   },
+  "paper_table_rounding": {
+    "description": "Rounding-consistency check of paper Table III under Delta alpha=r: for each cell, does the paper's k' fall inside the k' range produced by the true r inside the printed interval?",
+    "rows": [
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 5,
+        "paper_kprime": 258,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 147.2509613773437,
+        "kprime_over_interval": [
+          140.72563495235502,
+          154.0511000024286
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 1.7521108017682274,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 10,
+        "paper_kprime": 571,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 253.7865331150757,
+        "kprime_over_interval": [
+          243.07804873620165,
+          264.9193834356811
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 2.249922377642822,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 15,
+        "paper_kprime": 673,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 348.0850907242944,
+        "kprime_over_interval": [
+          333.8418338367471,
+          362.87144590078253
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 1.9334352947999687,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 768,
+        "r": 0.033,
+        "k": 20,
+        "paper_kprime": 928,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 435.03585418171116,
+        "kprime_over_interval": [
+          417.6360464374107,
+          453.080239681638
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 2.1331575112252277,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 5,
+        "paper_kprime": 58,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 42.725471348104556,
+        "kprime_over_interval": [
+          25.689685912411715,
+          69.7714837045954
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.3575040407968038,
+        "implied_extra_r_if_inside": "consistent"
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 10,
+        "paper_kprime": 108,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 78.0356902175383,
+        "kprime_over_interval": [
+          47.98996235812035,
+          124.60921017998338
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.3839821202187215,
+        "implied_extra_r_if_inside": "consistent"
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 15,
+        "paper_kprime": 170,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 110.83037410297868,
+        "kprime_over_interval": [
+          69.08799655967078,
+          174.6069232439268
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.53387554067122,
+        "implied_extra_r_if_inside": "consistent"
+      },
+      {
+        "n": 768,
+        "r": 0.02,
+        "k": 20,
+        "paper_kprime": 203,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 142.05073957389789,
+        "kprime_over_interval": [
+          89.42156844549352,
+          221.62337917863925
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.429066829281765,
+        "implied_extra_r_if_inside": "consistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 5,
+        "paper_kprime": 982,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 472.0680524480275,
+        "kprime_over_interval": [
+          445.8071316768902,
+          499.69961716011034
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 2.0802085523635676,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 10,
+        "paper_kprime": 1492,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 766.9004569725201,
+        "kprime_over_interval": [
+          726.4658574885685,
+          809.3025394209652
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 1.9454936901328015,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 15,
+        "paper_kprime": 2077,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 1015.1146995870181,
+        "kprime_over_interval": [
+          963.367567470354,
+          1069.2695177883866
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 2.0460742030875836,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.033,
+        "k": 20,
+        "paper_kprime": 2603,
+        "r_printed_half_width": 0.0005,
+        "r_true_interval": [
+          0.0325,
+          0.0335
+        ],
+        "kprime_at_printed_r": 1236.5120249923334,
+        "kprime_over_interval": [
+          1175.0412058462412,
+          1300.7481597189142
+        ],
+        "paper_inside_interval": false,
+        "paper_over_kprime_at_printed_r": 2.105114990706329,
+        "implied_extra_r_if_inside": "inconsistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 5,
+        "paper_kprime": 145,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 94.95739832393656,
+        "kprime_over_interval": [
+          48.04041613023557,
+          181.05345695552722
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.5270005556107245,
+        "implied_extra_r_if_inside": "consistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 10,
+        "paper_kprime": 245,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 167.23602029074078,
+        "kprime_over_interval": [
+          87.31436047041518,
+          309.05101330890415
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.4649953973675414,
+        "implied_extra_r_if_inside": "consistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 15,
+        "paper_kprime": 388,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 232.36810617770664,
+        "kprime_over_interval": [
+          123.64035331840105,
+          421.4188195648022
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.6697644370491695,
+        "implied_extra_r_if_inside": "consistent"
+      },
+      {
+        "n": 1536,
+        "r": 0.02,
+        "k": 20,
+        "paper_kprime": 501,
+        "r_printed_half_width": 0.005,
+        "r_true_interval": [
+          0.015,
+          0.025
+        ],
+        "kprime_at_printed_r": 293.1408633265597,
+        "kprime_over_interval": [
+          158.12727621901334,
+          524.4648441732024
+        ],
+        "paper_inside_interval": true,
+        "paper_over_kprime_at_printed_r": 1.7090759517955183,
+        "implied_extra_r_if_inside": "consistent"
+      }
+    ],
+    "by_column": {
+      "r=0.033": {
+        "n_cells": 8,
+        "n_inside_interval": 0,
+        "r_printed_half_width": 0.0005,
+        "paper_over_kprime_at_printed_r_min": 1.7521108017682274,
+        "paper_over_kprime_at_printed_r_max": 2.249922377642822
+      },
+      "r=0.02": {
+        "n_cells": 8,
+        "n_inside_interval": 8,
+        "r_printed_half_width": 0.005,
+        "paper_over_kprime_at_printed_r_min": 1.3575040407968038,
+        "paper_over_kprime_at_printed_r_max": 1.7090759517955183
+      }
+    },
+    "n_inside_interval_total": 8,
+    "conclusion": "At Delta alpha=r, 8/16 Table III cells lie inside the prediction interval implied by the printed precision of r. The split is systematic: the r=0.02 column (2 decimals, true r in [0.015,0.025)) is compatible in 8/8 cells, while the r=0.033 column (3 decimals, true r in [0.0325,0.0335)) is compatible in 0/8 cells. The r=0.033 column therefore cannot be explained by rounding: its paper values are 1.75-2.25x the Delta-alpha=r formula and would require a true r of roughly 0.039-0.043, i.e. 19-30% above the printed 0.033 (far outside 3-decimal rounding). The inconsistency of Table III is thus localised in the r=0.033 half; the r=0.02 half is consistent with Delta alpha=r."
+  },
   "remoterag_reference": {
     "reference": {
       "paper": "RemoteRAG: A Privacy-Preserving LLM Cloud RAG Service (arXiv:2412.12775v1)",
@@ -1067,8 +1394,9 @@
       },
       "source_url": "https://arxiv.org/abs/2412.12775 (TeX source e-print, files 5_experiments.tex, 12_experiments_appendix.tex)",
       "caveats": [
-        "Sec. 5.4 does not restate N for the highlighted point; k'=160 with k=5, n=768 and Delta alpha=r is reached at N=10^6 (the headline total-document count), while N=10^5 gives 111.89 (30% below).",
-        "r is quoted to two decimals (0.03 -> [0.025,0.035)), so the (N, r) pair yielding k'=160 is not unique: (N=10^6, r=0.02941) or (N=10^5, r=0.03392)."
+        "Appendix B.4 says 'Unless otherwise specified, our experiments used ... N=10^5, k=5, k'=160, and T5'; Sec. 5.4 does not specify otherwise, so the documented default is N=10^5.",
+        "r is printed to two decimals (0.03 -> [0.025,0.035)); at N=10^5 the Delta-alpha=r formula reaches k'=160 exactly at r=0.033921, which rounds to 0.03 -- i.e. the reference point is consistent with Delta alpha=r once the printed precision of r is honoured.",
+        "The earlier N=10^6 reading (r=0.02941 -> 170.34, +6.46%) would also round to r=0.03, but it is not the documented default and is therefore only a secondary cross-check."
       ]
     },
     "implied_ratio_used": 1.2128519777074982,
@@ -1111,28 +1439,38 @@
       }
     ],
     "primary": {
-      "N": 1000000,
-      "note": "N=10^6 is the only N among {1e4,1e5,1e6} that lands near k'=160; Sec. 5.4 itself does not state N, and Appendix B.4's default N=10^5 gives 111.89.",
-      "kprime_a_dalpha_eq_r": 170.33592716516665,
-      "kprime_c_euclid_expansion": 464.6929211496681,
-      "kprime_at_implied_ratio": 331.1402306098393,
-      "rel_err_vs_reference": 0.06459954478229157,
-      "abs_rel_err_vs_reference": 0.06459954478229157
-    },
-    "secondary_N1e5": {
+      "N": 100000,
+      "documented_default": true,
+      "note": "N=10^5 is the default stated in RemoteRAG Appendix B.4; Sec. 5.4 does not override it.",
       "kprime_a_dalpha_eq_r": 111.88533165054137,
+      "kprime_c_euclid_expansion": 274.6696742192639,
+      "kprime_at_implied_ratio": 199.20054264766006,
       "rel_err_vs_reference": -0.30071667718411643,
-      "note": "documents why N=10^6 (not the appendix default 10^5) is the N consistent with k'=160"
+      "abs_rel_err_vs_reference": 0.30071667718411643,
+      "r_printed_interval": [
+        0.025,
+        0.035
+      ],
+      "kprime_dalpha_eq_r_interval": [
+        69.7714837045954,
+        176.20398147214556
+      ],
+      "reference_inside_interval": true
     },
-    "inversions": {
-      "delta_alpha_rad_at_N1e6": 0.029413160912826468,
-      "delta_alpha_over_quoted_r_at_N1e6": 0.9804386970942156,
-      "r_at_N1e6": 0.029413160912826187,
-      "r_at_N1e5": 0.03392117999211741,
-      "note": "both (N=1e6, r=0.02941) and (N=1e5, r=0.03392) reproduce k'=160; r=0.03 is only quoted to two decimals, so the reference point cannot distinguish them"
+    "pointwise_inversion": {
+      "N": 100000,
+      "r_star": 0.03392117999211741,
+      "r_star_rounds_to_quoted_r": true,
+      "delta_alpha_over_quoted_r": 1.130705999737247,
+      "note": "r*=0.033921 reproduces k'=160 exactly and rounds to the printed 0.03; the ratio to the printed r is 1.1307 but the ratio to the true r* is 1.0 by construction."
     },
-    "conclusion": "Delta alpha = r agrees with the cited implementation's highlighted point (k=5, r=0.03, n=768, k'=160) to 6.46% (170.34 vs 160 at N=10^6); with Delta alpha = 1.213 r it would be 331.14 (2.07x) and with the Euclidean-expansion convention 464.69 (2.90x), both excluded. The agreement is only as precise as the reference's 2-decimal r and the inferred N: the point-wise inversion gives Delta alpha/r = 0.9804 at N=10^6 (and N=10^5 would need r=0.03392).",
-    "verdict": "the cited implementation is consistent with Delta alpha = r (6.46% at N=10^6, 1.96% at the inverted r), NOT with the implied Delta alpha ~ 1.2 r nor with the Euclidean-expansion convention"
+    "secondary_N1e6": {
+      "kprime_a_dalpha_eq_r": 170.33592716516665,
+      "r_star_at_N1e6": 0.029413160912826187,
+      "note": "N=10^6 would also give k'=160 with r=0.02941 (which also rounds to 0.03), but it is not the documented default; kept only to document the degeneracy of the printed point."
+    },
+    "conclusion": "With RemoteRAG's documented default N=10^5 (Appendix B.4) and r printed to two decimals, Delta alpha=r reaches k'=160 at r*=0.03392 (rounds to the quoted 0.03); the prediction over r in [0.025,0.035) is [69.77,176.20], which contains 160. The reference point is therefore consistent with Delta alpha=r once the printed precision of r is honoured (evaluating the formula at the printed r=0.03 alone gives 111.89, -30.07%, which is a rounding artefact, not a convention difference). The paper-implied ~1.2 r convention and the Euclidean-expansion convention remain excluded at the reference point (199.2 = 1.25x and 274.7 = 1.72x).",
+    "verdict": "the cited implementation is consistent with Delta alpha = r at its documented default N=10^5 once the 2-decimal printed r is honoured (r*=0.033921 -> 0.03); it is NOT consistent with the paper-implied ~1.2 r nor with the Euclidean-expansion convention"
   },
   "convention_probe": {
     "angle_dalpha_eq_r": {
@@ -3276,7 +3614,7 @@
             ]
           }
         ],
-        "runtime_s": 16.66
+        "runtime_s": 4.12
       },
       {
         "n": 1536,
@@ -5078,7 +5416,7 @@
             ]
           }
         ],
-        "runtime_s": 22.2
+        "runtime_s": 5.71
       }
     ],
     "rows": [
@@ -8655,7 +8993,7 @@
   "findings": [
     {
       "id": "A10",
-      "statement": "The paper's Table III cannot be reproduced from Theorem 1 with RemoteRAG's Delta alpha ~ r: Eq.21 gives 0.44-0.74x the paper values (paper/formula = 1.357-2.250); inverting the table requires Delta alpha/r = 1.213 (range 1.154-1.298) instead of ~1. The paper's Table III can therefore only be reproduced with an UNDECLARED Delta alpha ~ 1.2 r; neither the paper's text nor Eq.21 yields that convention. 1.2 r is NOT a 'correct' value -- it is the fitted convention implicit in the table."
+      "statement": "The paper's Table III cannot be reproduced from Theorem 1 with RemoteRAG's Delta alpha ~ r: Eq.21 gives 0.44-0.74x the paper values (paper/formula = 1.357-2.250); inverting the table requires Delta alpha/r = 1.213 (range 1.154-1.298) instead of ~1. The paper's Table III can therefore only be reproduced with an UNDECLARED Delta alpha ~ 1.2 r; neither the paper's text nor Eq.21 yields that convention. 1.2 r is NOT a 'correct' value -- it is the fitted convention implicit in the table. Rounding-aware split: 8/8 cells in the r=0.02 column are consistent with Delta alpha=r given the printed 2-decimal r, while 0/8 cells in the r=0.033 column are not (3-decimal r cannot absorb a 19-30% shift)."
     },
     {
       "id": "A10b",
@@ -8663,14 +9001,14 @@
     },
     {
       "id": "A10c",
-      "statement": "Four Delta-alpha conventions were enumerated on all 16 Table III cells: (a) Delta alpha = r; (b) Delta alpha = 2 asin(r/2); (c) Euclidean query shift alpha' = 2 asin((2 sin(alpha_k/2)+r)/2); (d) per-cell inversion of the paper's k'. (a) and (b) agree to <0.02%. None of the three derivable conventions reproduces the table: the best of (a,b,c) is still off by >= 12.0% in every cell ((a) -56%..-26%, (c) +12%..+71%), while (d) requires Delta alpha/r = 1.154-1.298 (mean 1.213, std 0.043). The paper's Table III is reproduced exactly only by the undeclared (d) ~1.2 r convention."
+      "statement": "Four Delta-alpha conventions were enumerated on all 16 Table III cells: (a) Delta alpha = r; (b) Delta alpha = 2 asin(r/2); (c) Euclidean query shift alpha' = 2 asin((2 sin(alpha_k/2)+r)/2); (d) per-cell inversion of the paper's k'. (a) and (b) agree to <0.02%. None of the three derivable conventions reproduces the table: the best of (a,b,c) is still off by >= 12.0% in every cell ((a) -56%..-26%, (c) +12%..+71%), while (d) requires Delta alpha/r = 1.154-1.298 (mean 1.213, std 0.043). The paper's Table III is reproduced exactly only by the undeclared (d) ~1.2 r convention. A rounding-aware check localises the mismatch: r=0.02 column 8/8 inside the Delta-alpha=r prediction interval, r=0.033 column 0/8 inside."
     },
     {
       "id": "A10d",
-      "statement": "Cross-check against the cited implementation (RemoteRAG arXiv:2412.12775 Sec. 5.4 / Fig. 5(c): highlighted k'=160, r=0.03, n=768): Eq.21 with Delta alpha=r gives 170.34 at N=10^6 (+6.46%), consistent with the reference within its 2-decimal r and the N inferred from the result (N=10^5 gives 111.89, 30% below). The same reference point excludes the paper-implied convention: Delta alpha = 1.213 r gives 331.14 (2.07x) and the Euclidean-expansion convention 464.69 (2.90x). The cited implementation therefore supports Delta alpha = r, while the paper's Table III remains inconsistent with it."
+      "statement": "Cross-check against the cited implementation (RemoteRAG arXiv:2412.12775 Sec. 5.4 / Fig. 5(c): highlighted k'=160, r=0.03, n=768) using its DOCUMENTED default N=10^5 (Appendix B.4: 'Unless otherwise specified ... N=10^5, k=5, k'=160, and T5'). At N=10^5 the Delta-alpha=r formula reaches k'=160 exactly at r*=0.03392, which rounds to the printed 0.03; the prediction over the printed interval r in [0.025,0.035) is [69.77,176.20], which contains 160. Evaluating at the printed r=0.03 alone gives 111.89 (-30.07%), a rounding artefact rather than a convention difference. The reference point excludes the paper-implied convention (Delta alpha=1.213r -> 199.2 = 1.25x) and the Euclidean-expansion convention (274.7 = 1.72x). Conclusion: the cited implementation supports Delta alpha=r at its documented N=10^5; the paper's Table III remains inconsistent with Delta alpha=r only in its r=0.033 column."
     }
   ],
-  "runtime_s": 38.9,
+  "runtime_s": 9.8,
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

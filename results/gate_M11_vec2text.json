@@ -519,8 +519,8 @@
     "The absolute difference from paper Table II is reported, not fitted: the paper does not state num_steps / beam width / N / per-passage length (A11) and uses an A100; our MPS-feasible settings are recorded in the artefact and explained in notes/exp3_vec2text.md. No gate threshold was relaxed relative to the 10-passage main experiment; coverage was extended (N>=50, CI, 50/10 sensitivity on 5 passages).",
     "This gate validates the committed artefact and recomputes the metric + CI + encryption-audit layer in the calling environment (vec2text inversion itself is not re-run)."
   ],
-  "duration_s": 10.928,
-  "timestamp": "2026-11-03T23:38:09+0800",
+  "duration_s": 11.273,
+  "timestamp": "2026-11-03T23:59:23+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

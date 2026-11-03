@@ -10,14 +10,14 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "s=47796"
+      "detail": "s=42034"
     },
     {
       "check": "s_inside_keyspace",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "s=47796"
+      "detail": "s=42034"
     },
     {
       "check": "K_length_128bit",
@@ -88,8 +88,8 @@
     "S instantiated as integers in [1, 2^16]; experiments pin s=3 (paper Table II).",
     "k = 128 bit PRF key (paper leaves k unspecified: ambiguity A2)."
   ],
-  "duration_s": 0.009,
-  "timestamp": "2026-11-03T23:33:43+0800",
+  "duration_s": 0.01,
+  "timestamp": "2026-11-03T23:58:45+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

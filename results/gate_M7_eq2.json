@@ -28,11 +28,11 @@
     }
   ],
   "notes": [
-    "ciphertext margin: min=5.6240e-01, median=0.6715 (theoretical worst case s*beta/2 = 0.3000)",
+    "ciphertext margin: min=5.5602e-01, median=0.6716 (theoretical worst case s*beta/2 = 0.3000)",
     "Random-vector isotropy note: d=768 random unit vectors give pair-distance std ~0.025, so premise gaps must be constructed; real retrieval gaps are measured in exp2."
   ],
-  "duration_s": 5.34,
-  "timestamp": "2026-11-03T23:33:55+0800",
+  "duration_s": 5.223,
+  "timestamp": "2026-11-03T23:58:56+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

@@ -31,35 +31,35 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "max||lambda||=0.224999 < 3sβ/8=0.225"
+      "detail": "max||lambda||=0.225000 < 3sβ/8=0.225"
     },
     {
       "check": "noise_matches_expected_scale",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "median||lambda||/R=0.9991"
+      "detail": "median||lambda||/R=0.9990"
     },
     {
       "check": "cipher_distance_correlation",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "pearson=0.989294"
+      "detail": "pearson=0.989196"
     },
     {
       "check": "cipher_distance_relative_deviation",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "p99 rel.dev=0.0091, max=0.0157 (bound 3β/(4d_min)=0.1151)"
+      "detail": "p99 rel.dev=0.0091, max=0.0142 (bound 3β/(4d_min)=0.1151)"
     },
     {
       "check": "cipher_distance_scale",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "median ratio=3.0082 (s=3)"
+      "detail": "median ratio=3.0083 (s=3)"
     },
     {
       "check": "batch_equals_single",
@@ -86,8 +86,8 @@
     "EncDB = s*e + lambda with ||lambda|| < 3*s*beta/8 strictly (u<1).",
     "Ciphertext norms are ~s (=3) because ||e||=1 and ||lambda||<=0.225."
   ],
-  "duration_s": 0.872,
-  "timestamp": "2026-11-03T23:33:46+0800",
+  "duration_s": 0.768,
+  "timestamp": "2026-11-03T23:58:48+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

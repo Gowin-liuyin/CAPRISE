@@ -26,7 +26,7 @@
 | M10 向量分析 | M4,M9 | PASS | results/gate_M10_vector_analysis.json | 29 检查；论文 Fig.5 数字化；27/27 cell |
 | M11 Vec2Text | M4,M0 | PASS（敏感性收尾中） | results/gate_M11_vec2text.json | 50 条 + 95% CI；敏感性 50/10 见 §3 |
 | M12 DistanceDP | — | PASS | results/gate_M12_distance_dp.json | Gamma 均值 0.099989；KS p=0.996 |
-| M13 Theorem1 | M12 | PASS | results/gate_M13_theorem1.json | 32 检查；四约定 + RemoteRAG 交叉验证 |
+| M13 Theorem1 | M12 | PASS | results/gate_M13_theorem1.json | 36 检查；四约定 + 舍入细分 + RemoteRAG 交叉验证（N=10^5 已确认） |
 | M14 Phase1 | M4,M9 | PASS | results/gate_M14_phase1.json | 服务器无密钥/无明文；AES 8000/8000 |
 | M15 Phase2 | M6,M12,M13,M14 | PASS | results/gate_M15_phase2.json | 只收 e'_q；k'=Theorem1；top-10 一致 |
 | M16 Phase3 | M15 | PASS | results/gate_M16_phase3.json | prompt 精确、0 泄漏 |
@@ -46,9 +46,9 @@
 2. **Table II 对齐**：Vec2Text 样本 10 → **50 条真实 passage**，bootstrap 95% CI；
    CAPRISE raw BLEU **13.696 [9.72,17.48]** vs 论文 **12.425**（CI 覆盖论文值）；
    明文 **69.875 [61.99,78.17]** vs 论文 83.021（0.84×）；rescaled 最强攻击 34.584。
-3. **Table III 对齐**：四种 Δα 约定系统枚举（Δα=r / 弦长 / 欧氏扩张 / 逐格反解），
-   RemoteRAG 参照实现交叉验证；结论：论文表值只能由未声明的 `Δα≈1.2r` 复现（1.2129±0.0435），
-   被引实现本身用 `Δα≈r`（F1/A10）。
+3. **Table III 对齐**：四种 Δα 约定系统枚举 + 舍入感知细分（r=0.02 列 8/8 兼容、r=0.033 列 0/8）
+   + RemoteRAG 参照实现交叉验证（附录 B.4 文档默认 N=10^5，r\*=0.03392→0.03，与 Δα=r 自洽）。
+   结论：论文 r=0.033 列只能由未声明的 `Δα≈1.2r` 复现（1.2129±0.0435）；被引实现用 `Δα≈r`（F1/A10）。
 4. **证明逐式复核**：Eq.(12) 符号笔误（F16），其余 Eq.(5)–(20) 0 违反。
 5. **文档修正**：F1 的出处（把误归于 CAPRISE 的 `Δα≈r` 改回 RemoteRAG §3.2.2）、A10/A13/A16 更新、
    新增 `docs/PAPER_COVERAGE.md`（论文要素覆盖矩阵）、C8 声明、F16 发现。

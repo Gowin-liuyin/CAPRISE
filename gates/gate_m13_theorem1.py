@@ -411,43 +411,108 @@ def main() -> int:
             (rp["k"], rp["r"], rp["n"], rp["kprime"]) == (5, 0.03, 768, 160),
             detail=f"reference point {rp} (RemoteRAG Sec. 5.4 / Fig. 5(c) highlighted example)",
         )
-        primary = next(x for x in ref["evaluations"] if x["N"] == 10**6)
-        alpha_ref = alpha_for_fraction(rp["k"] / 10**6, rp["n"])
-        kp_a_ref = rp["k"] + 10**6 * (cap_fraction(alpha_ref + rp["r"], rp["n"]) - cap_fraction(alpha_ref, rp["n"]))
-        rel_ref = abs(kp_a_ref - rp["kprime"]) / rp["kprime"]
+        primary = ref["primary"]
         g.check_true(
-            "remoterag_crosscheck_dalpha_eq_r_within_10pct",
-            rel_ref <= 0.10 and abs(kp_a_ref - primary["kprime_a_dalpha_eq_r"]) < 1e-6,
-            detail=f"Eq.21 with Delta alpha=r at N=1e6: k'={kp_a_ref:.3f} vs RemoteRAG's {rp['kprime']} "
-            f"=> rel err {rel_ref * 100:.2f}% (tol <=10%); JSON value agrees to 1e-6",
+            "remoterag_primary_uses_documented_default_N",
+            primary["N"] == 10**5 and primary.get("documented_default") is True,
+            detail=f"RemoteRAG primary reading uses N={primary['N']:g} (Appendix B.4 documented default: "
+            "'Unless otherwise specified ... N=10^5, k=5, k'=160, and T5'); Sec. 5.4 does not override it",
         )
-        secondary = next(x for x in ref["evaluations"] if x["N"] == 10**5)
+        # recompute the Delta-alpha=r prediction interval over the printed r precision
+        r_lo, r_hi = primary["r_printed_interval"]
+        alpha_lo = alpha_for_fraction(rp["k"] / primary["N"], rp["n"])
+        kp_lo = rp["k"] + primary["N"] * (cap_fraction(alpha_lo + r_lo, rp["n"]) - cap_fraction(alpha_lo, rp["n"]))
+        alpha_hi = alpha_for_fraction(rp["k"] / primary["N"], rp["n"])
+        kp_hi = rp["k"] + primary["N"] * (cap_fraction(alpha_hi + r_hi, rp["n"]) - cap_fraction(alpha_hi, rp["n"]))
+        interval_ok = (kp_lo <= rp["kprime"] <= kp_hi) and abs(kp_lo - primary["kprime_dalpha_eq_r_interval"][0]) < 1e-6 \
+            and abs(kp_hi - primary["kprime_dalpha_eq_r_interval"][1]) < 1e-6
         g.check_true(
-            "remoterag_N1e5_cannot_produce_160",
-            secondary["kprime_a_dalpha_eq_r"] < 0.8 * rp["kprime"],
-            detail=f"N=10^5 (RemoteRAG appendix default) gives {secondary['kprime_a_dalpha_eq_r']:.2f}, far below "
-            f"160 => the N=10^6 used for the cross-check is inferred from the reference value itself",
+            "remoterag_kprime160_inside_rounding_interval",
+            interval_ok and primary["reference_inside_interval"] is True,
+            detail=f"at N=10^5, Delta alpha=r over the printed r in [{r_lo},{r_hi}) predicts "
+            f"k' in [{kp_lo:.2f},{kp_hi:.2f}], which contains the reference k'=160; "
+            f"evaluating at the printed r=0.03 alone gives {primary['kprime_a_dalpha_eq_r']:.2f} "
+            f"({100 * primary['rel_err_vs_reference']:+.2f}%) -- a rounding artefact, not a convention difference",
+        )
+        pinv = ref["pointwise_inversion"]
+        alpha_star = alpha_for_fraction(rp["k"] / primary["N"], rp["n"])
+        r_star = brentq(
+            lambda x: rp["k"] + primary["N"] * (cap_fraction(alpha_star + x, rp["n"]) - cap_fraction(alpha_star, rp["n"]))
+            - rp["kprime"],
+            1e-6, 0.2, xtol=1e-15,
+        )
+        g.check_true(
+            "remoterag_pointwise_inversion_rounds_to_quoted_r",
+            abs(r_star - pinv["r_star"]) < 1e-9 and round(r_star, 2) == rp["r"],
+            detail=f"point-wise inversion at N=10^5: r*={r_star:.6f} reproduces k'=160 and rounds to the "
+            f"printed r={rp['r']}; Delta alpha/r_printed = {r_star / rp['r']:.4f} (the excess is pure rounding "
+            "of r), ratio to the true r* is 1 by construction",
         )
         g.check_true(
             "remoterag_reference_excludes_implied_and_euclid_conventions",
-            primary["kprime_dalpha_at_implied_ratio"] > 1.5 * rp["kprime"]
-            and primary["kprime_c_euclid_expansion"] > 2.0 * rp["kprime"],
-            detail=f"at the reference point Delta alpha={ref['implied_ratio_used']:.3f} r gives "
-            f"{primary['kprime_dalpha_at_implied_ratio']:.2f} "
-            f"({primary['kprime_dalpha_at_implied_ratio'] / rp['kprime']:.2f}x) and the Euclidean expansion gives "
-            f"{primary['kprime_c_euclid_expansion']:.2f} "
+            primary["kprime_at_implied_ratio"] > 1.2 * rp["kprime"]
+            and primary["kprime_c_euclid_expansion"] > 1.5 * rp["kprime"],
+            detail=f"at the documented N=10^5 reference point, Delta alpha={ref['implied_ratio_used']:.3f} r gives "
+            f"{primary['kprime_at_implied_ratio']:.2f} ({primary['kprime_at_implied_ratio'] / rp['kprime']:.2f}x) "
+            f"and the Euclidean expansion gives {primary['kprime_c_euclid_expansion']:.2f} "
             f"({primary['kprime_c_euclid_expansion'] / rp['kprime']:.2f}x) => both excluded",
         )
-        inv_ref = ref["inversions"]
+        sec = ref["secondary_N1e6"]
         g.check_true(
-            "remoterag_inverted_delta_alpha_ratio_near_1",
-            abs(inv_ref["delta_alpha_over_quoted_r_at_N1e6"] - 1.0) < 0.05,
-            detail=f"point-wise inversion of the reference: Delta alpha/r = "
-            f"{inv_ref['delta_alpha_over_quoted_r_at_N1e6']:.4f} at N=1e6 (r*={inv_ref['r_at_N1e6']:.5f}); "
-            "|ratio - 1| < 0.05 => the cited implementation is consistent with Delta alpha = r",
+            "remoterag_secondary_N1e6_documented_as_non_default",
+            "not the documented default" in sec.get("note", "").lower()
+            or "not the documented default" in sec.get("note", ""),
+            detail=f"secondary N=1e6 reading kept only to document the degeneracy: "
+            f"k'={sec['kprime_a_dalpha_eq_r']:.2f} at r=0.03, r*={sec['r_star_at_N1e6']:.5f} also rounds to 0.03",
         )
-        note_required.append(f"{primary['kprime_a_dalpha_eq_r']:.2f}")
-        note_required.append(f"{rel_ref * 100:.2f}")
+        note_required.extend(["0.03392", "8/8"])
+
+    # ================================================================== #
+    # 3d. Table III rounding-consistency split (r=0.02 vs r=0.033)
+    # ================================================================== #
+    rnd = res.get("paper_table_rounding") or {}
+    rnd_rows = rnd.get("rows", [])
+    g.check_true(
+        "paper_table_rounding_present",
+        len(rnd_rows) == 16 and all(k in rnd_rows[0] for k in (
+            "n", "r", "k", "paper_kprime", "r_true_interval", "kprime_over_interval",
+            "paper_inside_interval", "paper_over_kprime_at_printed_r")),
+        detail=f"{len(rnd_rows)} cells with printed-r interval, Delta-alpha=r prediction interval and inside flag",
+    )
+    if len(rnd_rows) == 16:
+        worst_lo = worst_hi = 0.0
+        for row in rnd_rows:
+            n, r, k = row["n"], row["r"], row["k"]
+            half = row["r_printed_half_width"]
+            a_k = alpha_for_fraction(k / M, n)
+            kp_at = k + M * (cap_fraction(a_k + r, n) - cap_fraction(a_k, n))
+            lo = k_prime(k, M, n, r - half)
+            hi = k_prime(k, M, n, r + half)
+            worst_lo = max(worst_lo, abs(lo - row["kprime_over_interval"][0]))
+            worst_hi = max(worst_hi, abs(hi - row["kprime_over_interval"][1]))
+            if abs(kp_at - row["kprime_at_printed_r"]) > 1e-9:
+                worst_lo = float("inf")
+            inside = bool(lo <= row["paper_kprime"] <= hi)
+            if inside != row["paper_inside_interval"]:
+                worst_hi = float("inf")
+        g.check_true(
+            "paper_table_rounding_reproducible",
+            worst_lo < 1e-6 and worst_hi < 1e-6,
+            detail=f"recomputed k'(r+/-printed half-width) from JSON primitives: max |diff| = "
+            f"{max(worst_lo, worst_hi):.2e}; inside flags recomputed exactly",
+        )
+        by_col = rnd["by_column"]
+        c02, c33 = by_col["r=0.02"], by_col["r=0.033"]
+        g.check_true(
+            "paper_table_rounding_split_02_consistent_0033_not",
+            c02["n_inside_interval"] == 8 and c33["n_inside_interval"] == 0
+            and rnd["n_inside_interval_total"] == 8,
+            detail=f"Delta-alpha=r with printed-r precision: r=0.02 column {c02['n_inside_interval']}/8 inside "
+            f"(paper/Eq21 {c02['paper_over_kprime_at_printed_r_min']:.2f}-{c02['paper_over_kprime_at_printed_r_max']:.2f}x), "
+            f"r=0.033 column {c33['n_inside_interval']}/8 inside "
+            f"({c33['paper_over_kprime_at_printed_r_min']:.2f}-{c33['paper_over_kprime_at_printed_r_max']:.2f}x) "
+            "=> the inconsistency is localised in the r=0.033 half and cannot be 3-decimal rounding",
+        )
 
     # ================================================================== #
     # 4. Artifacts

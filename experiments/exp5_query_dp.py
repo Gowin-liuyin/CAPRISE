@@ -375,17 +375,104 @@ REMOTERAG_REF = {
     "source_url": "https://arxiv.org/abs/2412.12775 (TeX source e-print, files 5_experiments.tex, "
     "12_experiments_appendix.tex)",
     "caveats": [
-        "Sec. 5.4 does not restate N for the highlighted point; k'=160 with k=5, n=768 and Delta alpha=r "
-        "is reached at N=10^6 (the headline total-document count), while N=10^5 gives 111.89 (30% below).",
-        "r is quoted to two decimals (0.03 -> [0.025,0.035)), so the (N, r) pair yielding k'=160 is not "
-        "unique: (N=10^6, r=0.02941) or (N=10^5, r=0.03392).",
+        "Appendix B.4 says 'Unless otherwise specified, our experiments used ... N=10^5, k=5, k'=160, "
+        "and T5'; Sec. 5.4 does not specify otherwise, so the documented default is N=10^5.",
+        "r is printed to two decimals (0.03 -> [0.025,0.035)); at N=10^5 the Delta-alpha=r formula "
+        "reaches k'=160 exactly at r=0.033921, which rounds to 0.03 -- i.e. the reference point is "
+        "consistent with Delta alpha=r once the printed precision of r is honoured.",
+        "The earlier N=10^6 reading (r=0.02941 -> 170.34, +6.46%) would also round to r=0.03, but it is "
+        "not the documented default and is therefore only a secondary cross-check.",
     ],
 }
 
 
+def paper_table_rounding_consistency() -> dict:
+    """Is Table III consistent with Delta alpha = r once r's printed precision is honoured?
+
+    The paper prints r=0.033 (3 decimals -> true r in [0.0325, 0.0335)) and r=0.02
+    (2 decimals -> true r in [0.015, 0.025)).  For every cell we compute the k'
+    range that Delta alpha = r_true would produce for r_true inside the printed
+    interval and check whether the paper's k' lies inside that range.  This
+    separates a genuine convention mismatch from a rounding artefact.
+    """
+    half_width = {0.033: 0.0005, 0.02: 0.005}
+    rows = []
+    for n in DIMS:
+        for r in RADII:
+            half = half_width[r]
+            for k in KS:
+                paper_kp = PAPER_TABLE[(n, r)][k][0]
+                kp_at_r = k_prime(k, M, n, r)
+                lo = k_prime(k, M, n, r - half)
+                hi = k_prime(k, M, n, r + half)
+                rows.append(
+                    {
+                        "n": n,
+                        "r": r,
+                        "k": k,
+                        "paper_kprime": paper_kp,
+                        "r_printed_half_width": half,
+                        "r_true_interval": [r - half, r + half],
+                        "kprime_at_printed_r": kp_at_r,
+                        "kprime_over_interval": [lo, hi],
+                        "paper_inside_interval": bool(lo <= paper_kp <= hi),
+                        "paper_over_kprime_at_printed_r": paper_kp / kp_at_r,
+                        "implied_extra_r_if_inside": "consistent" if lo <= paper_kp <= hi else "inconsistent",
+                    }
+                )
+    by_column = {}
+    for r in RADII:
+        col = [x for x in rows if x["r"] == r]
+        by_column[f"r={r}"] = {
+            "n_cells": len(col),
+            "n_inside_interval": int(sum(x["paper_inside_interval"] for x in col)),
+            "r_printed_half_width": half_width[r],
+            "paper_over_kprime_at_printed_r_min": min(x["paper_over_kprime_at_printed_r"] for x in col),
+            "paper_over_kprime_at_printed_r_max": max(x["paper_over_kprime_at_printed_r"] for x in col),
+        }
+    inside_total = int(sum(x["paper_inside_interval"] for x in rows))
+    col33 = by_column["r=0.033"]
+    col02 = by_column["r=0.02"]
+    conclusion = (
+        f"At Delta alpha=r, {inside_total}/16 Table III cells lie inside the prediction interval implied "
+        f"by the printed precision of r. The split is systematic: the r=0.02 column (2 decimals, true r in "
+        f"[0.015,0.025)) is compatible in {col02['n_inside_interval']}/8 cells, while the r=0.033 column "
+        f"(3 decimals, true r in [0.0325,0.0335)) is compatible in {col33['n_inside_interval']}/8 cells. "
+        "The r=0.033 column therefore cannot be explained by rounding: its paper values are "
+        f"{col33['paper_over_kprime_at_printed_r_min']:.2f}-{col33['paper_over_kprime_at_printed_r_max']:.2f}x "
+        "the Delta-alpha=r formula and would require a true r of roughly 0.039-0.043, i.e. 19-30% above the "
+        "printed 0.033 (far outside 3-decimal rounding). The inconsistency of Table III is thus localised "
+        "in the r=0.033 half; the r=0.02 half is consistent with Delta alpha=r."
+    )
+    return {
+        "description": (
+            "Rounding-consistency check of paper Table III under Delta alpha=r: for each cell, does the "
+            "paper's k' fall inside the k' range produced by the true r inside the printed interval?"
+        ),
+        "rows": rows,
+        "by_column": by_column,
+        "n_inside_interval_total": inside_total,
+        "conclusion": conclusion,
+    }
+
+
 def remoterag_reference_check(implied_ratio: float) -> dict:
-    """Recompute RemoteRAG's highlighted point (k=5, r=0.03, n=768, k'=160)."""
-    k, r, n, kp_ref = 5, 0.03, 768, 160
+    """Recompute RemoteRAG's highlighted point (k=5, r=0.03, n=768, k'=160).
+
+    Resolution of the N ambiguity (2026-11-04, arXiv:2412.12775 TeX source):
+    Sec. 5.4 does not restate N, but Appendix B.4 states "Unless otherwise
+    specified, our experiments used the following hyperparameter settings:
+    N=10^5, k=5, k'=160, and T5 as the embedding model."  Sec. 5.4 does not
+    specify otherwise, so the documented default is N=10^5.  At N=10^5 the
+    Delta-alpha=r formula reaches k'=160 exactly at r*=0.033921, which is what
+    "r=0.03" (two decimals) quotes; the prediction over the quoted interval
+    r in [0.025, 0.035) is [69.77, 176.19] and contains 160.  The reference
+    point is therefore consistent with Delta alpha=r once the printed precision
+    of r is honoured.  The N=10^6 reading (r=0.02941 -> 170.34, +6.46%) is
+    retained only as a secondary cross-check -- it is not the documented N.
+    """
+    k, r_quoted, n, kp_ref = 5, 0.03, 768, 160
+    r_lo, r_hi = 0.025, 0.035
 
     def _kp(N: int, da: float) -> float:
         a = alpha_for_fraction(k / N, n)
@@ -395,14 +482,14 @@ def remoterag_reference_check(implied_ratio: float) -> dict:
     for N in (10**4, 10**5, 10**6):
         alpha_k = alpha_for_fraction(k / N, n)
         chord_k = 2.0 * math.sin(alpha_k / 2.0)
-        alpha_c = 2.0 * math.asin(min((chord_k + r) / 2.0, 1.0))
+        alpha_c = 2.0 * math.asin(min((chord_k + r_quoted) / 2.0, 1.0))
         row = {
             "N": N,
             "alpha_k_rad": alpha_k,
-            "kprime_a_dalpha_eq_r": _kp(N, r),
-            "kprime_b_dalpha_chord": _kp(N, 2.0 * math.asin(r / 2.0)),
+            "kprime_a_dalpha_eq_r": _kp(N, r_quoted),
+            "kprime_b_dalpha_chord": _kp(N, 2.0 * math.asin(r_quoted / 2.0)),
             "kprime_c_euclid_expansion": k + N * (cap_fraction(alpha_c, n) - cap_fraction(alpha_k, n)),
-            "kprime_dalpha_at_implied_ratio": _kp(N, implied_ratio * r),
+            "kprime_dalpha_at_implied_ratio": _kp(N, implied_ratio * r_quoted),
         }
         for tag, key in (
             ("a", "kprime_a_dalpha_eq_r"),
@@ -412,62 +499,67 @@ def remoterag_reference_check(implied_ratio: float) -> dict:
         ):
             row[f"rel_err_{tag}_vs_reference"] = row[key] / kp_ref - 1.0
         evals.append(row)
-    primary = next(x for x in evals if x["N"] == 10**6)
-    secondary = next(x for x in evals if x["N"] == 10**5)
 
-    # invert the reference point: Delta alpha at N=1e6, r at N=1e5 / N=1e6
-    da_star = brentq(lambda x: _kp(10**6, x) - kp_ref, 0.0, 0.2, xtol=1e-15)
+    primary_N = 10**5  # Appendix B.4 documented default
+    primary = next(x for x in evals if x["N"] == primary_N)
+    kp_lo, kp_hi = _kp(primary_N, r_lo), _kp(primary_N, r_hi)
+    r_star = brentq(lambda x: _kp(primary_N, x) - kp_ref, 1e-6, 0.2, xtol=1e-15)
     r_star_1e6 = brentq(lambda x: _kp(10**6, x) - kp_ref, 1e-6, 0.2, xtol=1e-15)
-    r_star_1e5 = brentq(lambda x: _kp(10**5, x) - kp_ref, 1e-6, 0.2, xtol=1e-15)
-
+    inside = bool(kp_lo <= kp_ref <= kp_hi)
+    rounds_to_quoted = bool(round(r_star, 2) == r_quoted)
     abs_rel = abs(primary["rel_err_a_vs_reference"])
     conclusion = (
-        "Delta alpha = r agrees with the cited implementation's highlighted point "
-        f"(k=5, r=0.03, n=768, k'=160) to {abs_rel * 100:.2f}% "
-        f"({primary['kprime_a_dalpha_eq_r']:.2f} vs {kp_ref} at N=10^6); with Delta alpha = "
-        f"{implied_ratio:.3f} r it would be {primary['kprime_dalpha_at_implied_ratio']:.2f} "
-        f"({primary['kprime_dalpha_at_implied_ratio'] / kp_ref:.2f}x) and with the Euclidean-expansion "
-        f"convention {primary['kprime_c_euclid_expansion']:.2f} "
-        f"({primary['kprime_c_euclid_expansion'] / kp_ref:.2f}x), both excluded. The agreement is only "
-        f"as precise as the reference's 2-decimal r and the inferred N: the point-wise inversion gives "
-        f"Delta alpha/r = {da_star / r:.4f} at N=10^6 (and N=10^5 would need r={r_star_1e5:.5f})."
+        "With RemoteRAG's documented default N=10^5 (Appendix B.4) and r printed to two decimals, "
+        f"Delta alpha=r reaches k'=160 at r*={r_star:.5f} (rounds to the quoted 0.03); the prediction "
+        f"over r in [0.025,0.035) is [{kp_lo:.2f},{kp_hi:.2f}], which contains 160. The reference point "
+        "is therefore consistent with Delta alpha=r once the printed precision of r is honoured "
+        f"(evaluating the formula at the printed r=0.03 alone gives {primary['kprime_a_dalpha_eq_r']:.2f}, "
+        f"{100 * primary['rel_err_a_vs_reference']:+.2f}%, which is a rounding artefact, not a convention "
+        "difference). The paper-implied ~1.2 r convention and the Euclidean-expansion convention remain "
+        f"excluded at the reference point ({primary['kprime_dalpha_at_implied_ratio']:.1f} = "
+        f"{primary['kprime_dalpha_at_implied_ratio'] / kp_ref:.2f}x and "
+        f"{primary['kprime_c_euclid_expansion']:.1f} = {primary['kprime_c_euclid_expansion'] / kp_ref:.2f}x)."
     )
     return {
         "reference": REMOTERAG_REF,
         "implied_ratio_used": implied_ratio,
         "evaluations": evals,
         "primary": {
-            "N": 10**6,
-            "note": (
-                "N=10^6 is the only N among {1e4,1e5,1e6} that lands near k'=160; Sec. 5.4 itself does "
-                "not state N, and Appendix B.4's default N=10^5 gives 111.89."
-            ),
+            "N": primary_N,
+            "documented_default": True,
+            "note": "N=10^5 is the default stated in RemoteRAG Appendix B.4; Sec. 5.4 does not override it.",
             "kprime_a_dalpha_eq_r": primary["kprime_a_dalpha_eq_r"],
             "kprime_c_euclid_expansion": primary["kprime_c_euclid_expansion"],
             "kprime_at_implied_ratio": primary["kprime_dalpha_at_implied_ratio"],
             "rel_err_vs_reference": primary["rel_err_a_vs_reference"],
             "abs_rel_err_vs_reference": abs_rel,
+            "r_printed_interval": [r_lo, r_hi],
+            "kprime_dalpha_eq_r_interval": [kp_lo, kp_hi],
+            "reference_inside_interval": inside,
         },
-        "secondary_N1e5": {
-            "kprime_a_dalpha_eq_r": secondary["kprime_a_dalpha_eq_r"],
-            "rel_err_vs_reference": secondary["rel_err_a_vs_reference"],
-            "note": "documents why N=10^6 (not the appendix default 10^5) is the N consistent with k'=160",
-        },
-        "inversions": {
-            "delta_alpha_rad_at_N1e6": da_star,
-            "delta_alpha_over_quoted_r_at_N1e6": da_star / r,
-            "r_at_N1e6": r_star_1e6,
-            "r_at_N1e5": r_star_1e5,
+        "pointwise_inversion": {
+            "N": primary_N,
+            "r_star": r_star,
+            "r_star_rounds_to_quoted_r": rounds_to_quoted,
+            "delta_alpha_over_quoted_r": r_star / r_quoted,
             "note": (
-                "both (N=1e6, r=0.02941) and (N=1e5, r=0.03392) reproduce k'=160; r=0.03 is only "
-                "quoted to two decimals, so the reference point cannot distinguish them"
+                "r*=0.033921 reproduces k'=160 exactly and rounds to the printed 0.03; the ratio to the "
+                "printed r is 1.1307 but the ratio to the true r* is 1.0 by construction."
+            ),
+        },
+        "secondary_N1e6": {
+            "kprime_a_dalpha_eq_r": next(x for x in evals if x["N"] == 10**6)["kprime_a_dalpha_eq_r"],
+            "r_star_at_N1e6": r_star_1e6,
+            "note": (
+                "N=10^6 would also give k'=160 with r=0.02941 (which also rounds to 0.03), but it is not "
+                "the documented default; kept only to document the degeneracy of the printed point."
             ),
         },
         "conclusion": conclusion,
         "verdict": (
-            "the cited implementation is consistent with Delta alpha = r "
-            f"({abs_rel * 100:.2f}% at N=10^6, {abs(da_star / r - 1.0) * 100:.2f}% at the inverted r), "
-            "NOT with the implied Delta alpha ~ 1.2 r nor with the Euclidean-expansion convention"
+            "the cited implementation is consistent with Delta alpha = r at its documented default N=10^5 "
+            "once the 2-decimal printed r is honoured (r*=0.033921 -> 0.03); it is NOT consistent with the "
+            "paper-implied ~1.2 r nor with the Euclidean-expansion convention"
         ),
     }
 
@@ -841,6 +933,9 @@ def main() -> int:
     conventions = delta_alpha_conventions()
     conv_summary = conventions["summary"]
 
+    print("[exp5] Table III rounding consistency under Delta alpha=r ...", flush=True)
+    rounding = paper_table_rounding_consistency()
+
     print("[exp5] RemoteRAG reference-implementation cross-check ...", flush=True)
     remoterag = remoterag_reference_check(conv_summary["inverse"]["mean"])
 
@@ -890,6 +985,12 @@ def main() -> int:
         f"(mean {best['mean'] * 100:.1f}%, max {best['max'] * 100:.1f}%)"
     )
 
+    print("\n=== Table III rounding consistency under Delta alpha=r (printed r precision) ===")
+    print(rounding["conclusion"])
+    for col, info in rounding["by_column"].items():
+        print(f"  {col}: {info['n_inside_interval']}/{info['n_cells']} cells inside the rounding interval "
+              f"(paper/Eq21 = {info['paper_over_kprime_at_printed_r_min']:.2f}-{info['paper_over_kprime_at_printed_r_max']:.2f}x)")
+
     print("\n=== RemoteRAG reference cross-check (k=5, r=0.03, n=768, k'=160) ===")
     for ev in remoterag["evaluations"]:
         print(
@@ -934,6 +1035,7 @@ def main() -> int:
         "paper_vs_formula_dalpha_eq_r": pvf,
         "reverse_delta_alpha": {"rows": reverse, "summary": reverse_summary_},
         "delta_alpha_conventions": conventions,
+        "paper_table_rounding": rounding,
         "remoterag_reference": remoterag,
         "convention_probe": probe,
         "numerical_stability": stability,
@@ -963,7 +1065,11 @@ def main() -> int:
                     f"Delta alpha/r = {inv['mean']:.3f} (range {inv['min']:.3f}-{inv['max']:.3f}) instead "
                     "of ~1. The paper's Table III can therefore only be reproduced with an UNDECLARED "
                     "Delta alpha ~ 1.2 r; neither the paper's text nor Eq.21 yields that convention. "
-                    "1.2 r is NOT a 'correct' value -- it is the fitted convention implicit in the table."
+                    "1.2 r is NOT a 'correct' value -- it is the fitted convention implicit in the table. "
+                    f"Rounding-aware split: {rounding['by_column']['r=0.02']['n_inside_interval']}/8 cells in the "
+                    f"r=0.02 column are consistent with Delta alpha=r given the printed 2-decimal r, while "
+                    f"{rounding['by_column']['r=0.033']['n_inside_interval']}/8 cells in the r=0.033 column are "
+                    "not (3-decimal r cannot absorb a 19-30% shift)."
                 ),
             },
             {
@@ -989,27 +1095,33 @@ def main() -> int:
                     f"(c) {conv_summary['rel_err']['c']['min'] * 100:+.0f}%..{conv_summary['rel_err']['c']['max'] * 100:+.0f}%), "
                     f"while (d) requires Delta alpha/r = {inv['min']:.3f}-{inv['max']:.3f} "
                     f"(mean {inv['mean']:.3f}, std {inv['std']:.3f}). The paper's Table III is reproduced "
-                    "exactly only by the undeclared (d) ~1.2 r convention."
+                    "exactly only by the undeclared (d) ~1.2 r convention. A rounding-aware check localises "
+                    f"the mismatch: r=0.02 column {rounding['by_column']['r=0.02']['n_inside_interval']}/8 inside the "
+                    f"Delta-alpha=r prediction interval, r=0.033 column "
+                    f"{rounding['by_column']['r=0.033']['n_inside_interval']}/8 inside."
                 ),
             },
             {
                 "id": "A10d",
                 "statement": (
                     "Cross-check against the cited implementation (RemoteRAG arXiv:2412.12775 Sec. 5.4 / "
-                    "Fig. 5(c): highlighted k'=160, r=0.03, n=768): Eq.21 with Delta alpha=r gives "
-                    f"{remoterag['primary']['kprime_a_dalpha_eq_r']:.2f} at N=10^6 "
-                    f"({100 * remoterag['primary']['rel_err_vs_reference']:+.2f}%), consistent with the "
-                    "reference within its 2-decimal r and the N inferred from the result (N=10^5 gives "
-                    f"{remoterag['secondary_N1e5']['kprime_a_dalpha_eq_r']:.2f}, 30% below). The same "
-                    "reference point excludes the paper-implied convention: Delta alpha = "
-                    f"{remoterag['implied_ratio_used']:.3f} r gives "
-                    f"{remoterag['primary']['kprime_at_implied_ratio']:.2f} "
-                    f"({remoterag['primary']['kprime_at_implied_ratio'] / 160:.2f}x) and the "
-                    "Euclidean-expansion convention "
-                    f"{remoterag['primary']['kprime_c_euclid_expansion']:.2f} "
-                    f"({remoterag['primary']['kprime_c_euclid_expansion'] / 160:.2f}x). The cited "
-                    "implementation therefore supports Delta alpha = r, while the paper's Table III "
-                    "remains inconsistent with it."
+                    "Fig. 5(c): highlighted k'=160, r=0.03, n=768) using its DOCUMENTED default N=10^5 "
+                    "(Appendix B.4: 'Unless otherwise specified ... N=10^5, k=5, k'=160, and T5'). At N=10^5 "
+                    f"the Delta-alpha=r formula reaches k'=160 exactly at r*={remoterag['pointwise_inversion']['r_star']:.5f}, "
+                    "which rounds to the printed 0.03; the prediction over the printed interval "
+                    f"r in [{remoterag['primary']['r_printed_interval'][0]},{remoterag['primary']['r_printed_interval'][1]}) "
+                    f"is [{remoterag['primary']['kprime_dalpha_eq_r_interval'][0]:.2f},"
+                    f"{remoterag['primary']['kprime_dalpha_eq_r_interval'][1]:.2f}], which contains 160. "
+                    f"Evaluating at the printed r=0.03 alone gives {remoterag['primary']['kprime_a_dalpha_eq_r']:.2f} "
+                    f"({100 * remoterag['primary']['rel_err_vs_reference']:+.2f}%), a rounding artefact rather than a "
+                    "convention difference. The reference point excludes the paper-implied convention "
+                    f"(Delta alpha={remoterag['implied_ratio_used']:.3f}r -> "
+                    f"{remoterag['primary']['kprime_at_implied_ratio']:.1f} = "
+                    f"{remoterag['primary']['kprime_at_implied_ratio'] / 160:.2f}x) and the Euclidean-expansion "
+                    f"convention ({remoterag['primary']['kprime_c_euclid_expansion']:.1f} = "
+                    f"{remoterag['primary']['kprime_c_euclid_expansion'] / 160:.2f}x). Conclusion: the cited "
+                    "implementation supports Delta alpha=r at its documented N=10^5; the paper's Table III "
+                    "remains inconsistent with Delta alpha=r only in its r=0.033 column."
                 ),
             },
         ],

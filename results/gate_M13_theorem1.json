@@ -174,39 +174,67 @@
       "detail": "reference point {'k': 5, 'r': 0.03, 'n': 768, 'kprime': 160} (RemoteRAG Sec. 5.4 / Fig. 5(c) highlighted example)"
     },
     {
-      "check": "remoterag_crosscheck_dalpha_eq_r_within_10pct",
+      "check": "remoterag_primary_uses_documented_default_N",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "Eq.21 with Delta alpha=r at N=1e6: k'=170.336 vs RemoteRAG's 160 => rel err 6.46% (tol <=10%); JSON value agrees to 1e-6"
+      "detail": "RemoteRAG primary reading uses N=100000 (Appendix B.4 documented default: 'Unless otherwise specified ... N=10^5, k=5, k'=160, and T5'); Sec. 5.4 does not override it"
     },
     {
-      "check": "remoterag_N1e5_cannot_produce_160",
+      "check": "remoterag_kprime160_inside_rounding_interval",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "N=10^5 (RemoteRAG appendix default) gives 111.89, far below 160 => the N=10^6 used for the cross-check is inferred from the reference value itself"
+      "detail": "at N=10^5, Delta alpha=r over the printed r in [0.025,0.035) predicts k' in [69.77,176.20], which contains the reference k'=160; evaluating at the printed r=0.03 alone gives 111.89 (-30.07%) -- a rounding artefact, not a convention difference"
+    },
+    {
+      "check": "remoterag_pointwise_inversion_rounds_to_quoted_r",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "point-wise inversion at N=10^5: r*=0.033921 reproduces k'=160 and rounds to the printed r=0.03; Delta alpha/r_printed = 1.1307 (the excess is pure rounding of r), ratio to the true r* is 1 by construction"
     },
     {
       "check": "remoterag_reference_excludes_implied_and_euclid_conventions",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "at the reference point Delta alpha=1.213 r gives 331.14 (2.07x) and the Euclidean expansion gives 464.69 (2.90x) => both excluded"
+      "detail": "at the documented N=10^5 reference point, Delta alpha=1.213 r gives 199.20 (1.25x) and the Euclidean expansion gives 274.67 (1.72x) => both excluded"
     },
     {
-      "check": "remoterag_inverted_delta_alpha_ratio_near_1",
+      "check": "remoterag_secondary_N1e6_documented_as_non_default",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "point-wise inversion of the reference: Delta alpha/r = 0.9804 at N=1e6 (r*=0.02941); |ratio - 1| < 0.05 => the cited implementation is consistent with Delta alpha = r"
+      "detail": "secondary N=1e6 reading kept only to document the degeneracy: k'=170.34 at r=0.03, r*=0.02941 also rounds to 0.03"
+    },
+    {
+      "check": "paper_table_rounding_present",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "16 cells with printed-r interval, Delta-alpha=r prediction interval and inside flag"
+    },
+    {
+      "check": "paper_table_rounding_reproducible",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "recomputed k'(r+/-printed half-width) from JSON primitives: max |diff| = 0.00e+00; inside flags recomputed exactly"
+    },
+    {
+      "check": "paper_table_rounding_split_02_consistent_0033_not",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "Delta-alpha=r with printed-r precision: r=0.02 column 8/8 inside (paper/Eq21 1.36-1.71x), r=0.033 column 0/8 inside (1.75-2.25x) => the inconsistency is localised in the r=0.033 half and cannot be 3-decimal rounding"
     },
     {
       "check": "artifact_results_json",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "results/exp5_query_dp.json (175502 bytes) with required sections"
+      "detail": "results/exp5_query_dp.json (186729 bytes) with required sections"
     },
     {
       "check": "artifact_figure",
@@ -227,7 +255,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "notes contain the JSON-formatted numbers ['1.2129', '170.34', '6.46'] (implied mean Delta alpha/r and RemoteRAG cross-check values)"
+      "detail": "notes contain the JSON-formatted numbers ['1.2129', '0.03392', '8/8'] (implied mean Delta alpha/r and RemoteRAG cross-check values)"
     }
   ],
   "notes": [
@@ -240,8 +268,8 @@
     "Paper Table III requires Delta alpha/r ~1.21 (range 1.15-1.30), inconsistent with RemoteRAG's Delta alpha ~ r (A10).",
     "RemoteRAG's highlighted point (k=5, r=0.03, n=768, k'=160) is consistent with Delta alpha = r to ~6% at N=1e6 (A10d)."
   ],
-  "duration_s": 5.217,
-  "timestamp": "2026-11-03T23:38:15+0800",
+  "duration_s": 5.213,
+  "timestamp": "2026-11-04T00:01:04+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

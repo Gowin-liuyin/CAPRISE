@@ -132,7 +132,7 @@
 | DistanceDP 机制 | "adds calibrated noise ... and expands the retrieval space"（引用 RemoteRAG） | `src/caprise/dp.py`：r~Gamma(n,1/ε)、球面均匀方向、`ẽ=e+r·d` | VERIFIED | M12：均值 0.099989（期望 0.1）、KS p=0.9957、方向 max\|z\|=2.925、‖ẽ−e‖=r 误差 2.1e-17、ε∈[10n,50n] ↔ r̄∈[0.1,0.02] |
 | Lemma 1 的 α_k（RemoteRAG） | `k = m·(Ω_{n-1}/Ω_n)∫_0^{α_k} sin^{n-2}` | `theorem.alpha_for_fraction`（Beta 反解） | VERIFIED | `m·F(α_k)=k` 误差 2.2e-12（16 格） |
 | Eq.(21) 公式本体 | `k' = k + m·(Ω 比)·∫_{α_k}^{α_k'} sin^{n-2}θ` | `theorem.k_prime`（Beta 形式） | VERIFIED | Beta roundtrip 4.6e-12；直接积分对照 1.1e-16；与 MC 16 格偏差 ≤2.38%；`ceil(Eq.21)` 覆盖明文 top-k 100% |
-| Table III 数值 | m=100k, n=768/1536, r=0.033/0.02, k=5/10/15/20 | 16 格 × 四约定（Δα=r / 弦长 / 欧氏扩张 / 逐格反解）+ 参照实现交叉验证 | **FALSIFIED** | 可推导的三种约定逐格最优仍偏离 ≥12.0%：(a) Δα=r 为论文的 0.444–0.737×、(b) 弦长与 (a) 差 <0.02%、(c) 欧氏扩张高估 12–71%；只有 (d) 逐格反解 `Δα/r=1.1537–1.2977`（mean 1.2129±0.0435）能精确复现（≤5.6e-14）。RemoteRAG 高亮例（k'=160）与 Δα=r 自洽（+6.46%）⇒ 表值与被引实现约定不一致。见 F1/A10、`notes/exp5_query_dp.md` §4–5 |
+| Table III 数值 | m=100k, n=768/1536, r=0.033/0.02, k=5/10/15/20 | 16 格 × 四约定（Δα=r / 弦长 / 欧氏扩张 / 逐格反解）+ 舍入感知细分 + 参照实现交叉验证 | **FALSIFIED（r=0.033 列）** | 可推导的三种约定逐格最优仍偏离 ≥12.0%；**舍入感知**：r=0.02 列 8/8 格与 Δα=r 兼容、r=0.033 列 0/8 格（论文值是公式 1.75–2.25×，需真实 r≈0.039–0.043）；被引实现的文档默认 N=10^5 下与 Δα=r 自洽（r*=0.03392）。见 F1/A10、`notes/exp5_query_dp.md` §4–5 |
 | 定理的"must satisfy"解读 | §III-B2 声称给出检索所需 k' | MC 实测最小 k'≈k（k=5→mean 5.53/p99 8.01；公式/p99=18.4×） | FALSIFIED（作为"必要/最小"）；VERIFIED（作为充分上界） | `results/exp5_query_dp.json` |
 
 ---
