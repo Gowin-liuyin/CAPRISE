@@ -1,0 +1,103 @@
+{
+  "module": "M16",
+  "name": "phase3",
+  "owner": "data-retrieval",
+  "paper_ref": "Algorithm 2 lines 22-27 / Phase 3 prompting the LLM",
+  "pass": true,
+  "checks": [
+    {
+      "check": "00_phase2_to_phase3_handoff",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "10 plaintext docs returned by Phase 2 for query 300674"
+    },
+    {
+      "check": "01_prompt_contains_query",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "query 'how many years did william bradford serve as governor of ply' present"
+    },
+    {
+      "check": "02_prompt_contains_all_retrieved_docs_in_order",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "10/10 docs present with [i] markers in retrieval order"
+    },
+    {
+      "check": "03_exactly_k_documents",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "markers [1]..[10] present, [11] absent"
+    },
+    {
+      "check": "04_no_non_retrieved_documents",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "checked 20 random non-retrieved corpus docs; leaks=0 (prompt must contain only the retrieved documents)"
+    },
+    {
+      "check": "05_prompt_exact_template",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "prompt == template(query, retrieved docs) exactly; len=4032 chars (query 73 + 10 docs 3810 chars)"
+    },
+    {
+      "check": "06_no_extra_payload",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "ends with 'Answer:'; no ciphertext/embedding identifiers leaked"
+    },
+    {
+      "check": "07_docs_are_decrypted_corpus_texts",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "10/10 decrypted docs match corpus texts"
+    },
+    {
+      "check": "08_server_never_sees_prompt_plaintext",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "server only has ['db', 'doc_ciphertexts']; query/documents not present in its AES blobs"
+    },
+    {
+      "check": "09_batch_prompts_ok",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "20/20 prompts correctly assembled"
+    },
+    {
+      "check": "10_empty_context_edge_case",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "empty retrieval list produces a well-formed prompt"
+    }
+  ],
+  "notes": [
+    "Phase-3 gate on real data: Phase-1 upload m=4000, Phase-2 k=10 over 20 queries, prompt template filled with decrypted documents only",
+    "LLM generation is out of scope (SPEC.md §3); prompt assembly is the verifiable Phase-3 object."
+  ],
+  "duration_s": 0.123,
+  "timestamp": "2026-11-03T16:11:39+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

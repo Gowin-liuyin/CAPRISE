@@ -87,6 +87,19 @@ from caprise.prf import new_nonce  # noqa: E402
 TS_DEFAULT = (1, 5, 10)
 METHODS = ("ADCPE", "CAPRISE")
 
+# Paper Fig. 5 reference values, digitised from the paper source figure
+# ../../output/pdf/source/caprise/figures/exp_asr.png (bar heights, +-1 pp).
+# Paper axis: "Embedding Size" in {64,128,256,312,384,512,768,896,1024,1536,1792,2048};
+# paper axis: "ASR (%)"; method labels in the published figure are "CONPRISE"
+# (typo for CAPRISE) vs "ADCPE".  PAPER_ANALYSIS.md previously recorded "no ASR
+# values given" (A12) because the numbers are only in the figure image.
+PAPER_FIG5 = {
+    "source": "figures/exp_asr.png in the paper LaTeX source (digitised bar heights, +-1 pp)",
+    "dims": [64, 128, 256, 312, 384, 512, 768, 896, 1024, 1536, 1792, 2048],
+    "CAPRISE": [53.5, 60.6, 70.2, 73.3, 75.1, 76.3, 83.1, 84.6, 84.8, 86.3, 87.5, 88.8],
+    "ADCPE": [65.8, 76.5, 78.2, 78.7, 78.5, 85.8, 87.5, 87.3, 88.3, 91.9, 91.7, 94.6],
+}
+
 
 # --------------------------------------------------------------------------- #
 # Deterministic randomness helpers
@@ -419,7 +432,11 @@ def run_experiment(cfg: dict) -> dict:
         },
         "selfcheck": {},
         "main": {"synthetic": {}, "real_gtr": {}},
+        "paper_dims_synthetic": {},
+        "paper_fig5_reference": PAPER_FIG5,
         "m_sweep": {},
+        "real_m_sweep": {},
+        "normalization_control": {},
         "beta_sweep": {},
         "findings": [],
     }
@@ -470,6 +487,73 @@ def run_experiment(cfg: dict) -> dict:
             )
         else:
             results["main"]["real_gtr"] = {"status": "skipped", "reason": meta.get("reason", "unavailable")}
+
+    # ---------------- paper Fig.5 dimension grid (same embedding-size points as the figure) ----------------
+    # The paper varies the embedding size over {64,...,2048}.  GTR only emits 768
+    # dims, so for this controlled trend we use L2-normalised Gaussian vectors at
+    # exactly the paper's sizes (A13: the paper does not state which embedding
+    # model produces each size; we hold the distribution fixed to isolate the
+    # dimension effect).
+    paper_dims = cfg.get("paper_dims") or []
+    paper_asr = {}
+    for d in paper_dims:
+        E = synthetic_db(m, int(d), seed)
+        q = _rng(seed, "q", int(d), m).choice(m, size=nq, replace=False)
+        cell = _summarise_cell(E, q, beta, s, seed, tag=f"paperedims_{d}")
+        cell["source"] = "synthetic_gaussian_normalized"
+        results["paper_dims_synthetic"][str(d)] = cell
+        paper_asr[str(d)] = {mm: cell[mm]["asr@10"] for mm in METHODS}
+        print(
+            f"[exp4] paper-dim d={d}: ADCPE ASR@10={cell['ADCPE']['asr@10']:.3f} "
+            f"CAPRISE ASR@10={cell['CAPRISE']['asr@10']:.3f}",
+            flush=True,
+        )
+
+    # ---------------- normalisation control (A4): unnormalised Gaussian DB ----------------
+    # Does omitting L2 normalisation (a plausible reading of the paper, A4) explain
+    # the paper's strong ASR-vs-dimension trend?  With unnormalised embeddings the
+    # norm grows like sqrt(d) while the noise radius stays fixed at s*beta/8 etc., so
+    # the relative noise shrinks with d and ASR should *increase* with d, but from a
+    # point that is already ~1.0 at large d.  Measured to decide the question.
+    for d in cfg.get("norm_control_dims", []) or []:
+        rng = _rng(seed, "synthetic_unnorm", int(d), m)
+        E = rng.standard_normal((m, int(d)))  # NOTE: no L2 normalisation
+        q = _rng(seed, "q", int(d), m, "unnorm").choice(m, size=nq, replace=False)
+        cell = _summarise_cell(E, q, beta, s, seed, tag=f"unnorm_{d}")
+        cell["source"] = "synthetic_gaussian_unnormalized"
+        results["normalization_control"][str(d)] = cell
+        print(
+            f"[exp4] unnormalised d={d}: ADCPE ASR@10={cell['ADCPE']['asr@10']:.3f} "
+            f"CAPRISE ASR@10={cell['CAPRISE']['asr@10']:.3f}",
+            flush=True,
+        )
+
+    # ---------------- real-GTR m sweep: database density effect ----------------
+    # The paper does not state m for Fig. 5; larger m makes nearest neighbours
+    # denser (smaller distance gaps), which should lower ASR on real embeddings.
+    # This tests whether the remaining gap between our m=5000 real point and the
+    # paper's numbers is explained by database size.
+    for m_i in cfg.get("real_m_sweep", []) or []:
+        try:
+            E_m, meta_m = load_real_db(int(m_i), seed)
+            if E_m is None:
+                results["real_m_sweep"][str(m_i)] = {"status": "skipped", "reason": meta_m.get("reason", "unavailable")}
+                continue
+            q = _rng(seed, "q", "real_m", int(m_i)).choice(E_m.shape[0], size=min(nq, E_m.shape[0]), replace=False)
+            cell = _summarise_cell(E_m, q, beta, s, seed, tag=f"real_m_{m_i}")
+            cell["source"] = "real_gtr"
+            cell["provenance"] = meta_m
+            results["real_m_sweep"][str(m_i)] = cell
+            print(
+                f"[exp4] real m={m_i}: ADCPE ASR@10={cell['ADCPE']['asr@10']:.3f} "
+                f"CAPRISE ASR@10={cell['CAPRISE']['asr@10']:.3f} "
+                f"nn={cell['plaintext_gap_stats']['nn_distance_mean']:.3f}",
+                flush=True,
+            )
+            del E_m
+        except MemoryError:  # pragma: no cover
+            results["real_m_sweep"][str(m_i)] = {"status": "skipped", "reason": "MemoryError"}
+            print(f"[exp4] real m={m_i}: skipped (MemoryError)", flush=True)
 
     # ---------------- m sweep at d=768 synthetic ----------------
     if cfg.get("m_sweep"):
@@ -546,6 +630,49 @@ def run_experiment(cfg: dict) -> dict:
                 "theory_ratio_noise_radii": 1.5,
             }
         )
+    # paper Fig.5 comparison at the common d=768 point (synthetic, normalised)
+    for src, section in (("synthetic_gaussian", synth), ("paper_dims_synthetic", results["paper_dims_synthetic"])):
+        cell = section.get("768")
+        if not isinstance(cell, dict) or "ADCPE" not in cell:
+            continue
+        i = PAPER_FIG5["dims"].index(768)
+        for method in METHODS:
+            findings.append(
+                {
+                    "kind": "paper_fig5_comparison",
+                    "dim": 768,
+                    "source": src,
+                    "method": method,
+                    "ours_asr10": cell[method]["asr@10"],
+                    "paper_asr10": PAPER_FIG5[method][i] / 100.0,
+                    "abs_diff_pp": abs(cell[method]["asr@10"] - PAPER_FIG5[method][i] / 100.0) * 100,
+                }
+            )
+    # real-m sweep trend (database density explanation for the residual gap)
+    mvals = sorted(int(k) for k, v in results["real_m_sweep"].items() if isinstance(v, dict) and "ADCPE" in v)
+    if len(mvals) >= 2:
+        findings.append(
+            {
+                "kind": "real_m_density",
+                "m_values": mvals,
+                "asr10_adcpe": [results["real_m_sweep"][str(mm)]["ADCPE"]["asr@10"] for mm in mvals],
+                "asr10_caprise": [results["real_m_sweep"][str(mm)]["CAPRISE"]["asr@10"] for mm in mvals],
+                "nn_distance": [results["real_m_sweep"][str(mm)]["plaintext_gap_stats"]["nn_distance_mean"] for mm in mvals],
+                "interpretation": "ASR drops as the database grows denser (smaller NN gaps): the paper does not report m for Fig. 5, so its absolute ASR level is not identifiable from the text.",
+            }
+        )
+    # normalisation control outcome
+    norm_ctrl = results["normalization_control"]
+    if norm_ctrl:
+        findings.append(
+            {
+                "kind": "normalization_control",
+                "dims": sorted(int(k) for k in norm_ctrl),
+                "asr10_adcpe": [norm_ctrl[k]["ADCPE"]["asr@10"] for k in sorted(norm_ctrl, key=int)],
+                "asr10_caprise": [norm_ctrl[k]["CAPRISE"]["asr@10"] for k in sorted(norm_ctrl, key=int)],
+                "interpretation": "unnormalised vectors make the fixed noise radius negligible at large d (ASR->1); this cannot reproduce the paper's low ASR at small dimensions, so A4 is not the explanation of the paper's trend.",
+            }
+        )
     n_rev = sum(1 for f in findings if f["kind"] == "main_cell" and not f["caprise_lower_asr10"])
     results["findings"] = findings
     results["summary"] = {
@@ -560,6 +687,19 @@ def run_experiment(cfg: dict) -> dict:
             np.mean([f["asr10_caprise"] for f in findings if f["kind"] == "main_cell"])
         ),
     }
+    if results["paper_dims_synthetic"]:
+        pds = results["paper_dims_synthetic"]
+        results["summary"]["paper_dims_caprise_lower_all"] = bool(
+            all(pds[k]["CAPRISE"]["asr@10"] < pds[k]["ADCPE"]["asr@10"] for k in pds)
+        )
+        results["summary"]["paper_dims_asr10_caprise_mean"] = float(
+            np.mean([pds[k]["CAPRISE"]["asr@10"] for k in pds])
+        )
+        results["summary"]["paper_dims_asr10_adcpe_mean"] = float(
+            np.mean([pds[k]["ADCPE"]["asr@10"] for k in pds])
+        )
+        results["summary"]["paper_fig5_asr10_caprise_mean"] = float(np.mean(PAPER_FIG5["CAPRISE"]) / 100.0)
+        results["summary"]["paper_fig5_asr10_adcpe_mean"] = float(np.mean(PAPER_FIG5["ADCPE"]) / 100.0)
 
     results["runtime"] = {
         "seconds": round(time.time() - t_start, 2),

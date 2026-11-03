@@ -1,0 +1,104 @@
+{
+  "module": "M15",
+  "name": "phase2",
+  "owner": "data-retrieval",
+  "paper_ref": "Algorithm 2 lines 10-21 / Phase 2 retrieve / Theorem 1",
+  "pass": true,
+  "checks": [
+    {
+      "check": "01_caprise_no_dp_k_equal_k_works",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "100 retrievals x k=10; recall@10 vs plaintext = 0.9620"
+    },
+    {
+      "check": "02_no_dp_uses_k_prime_equal_k",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "k' values = [10]"
+    },
+    {
+      "check": "03_oversampling_k_plus_10",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "k'=20 requested; recall@10 = 1.0000 (vs 0.9620 at k'=k)"
+    },
+    {
+      "check": "04_dp_k_prime_from_theorem1",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "r=0.02: k'=[55] == ceil(Theorem1(k=10, m=8000, n=768, r=0.02)) = 55"
+    },
+    {
+      "check": "05_dp_perturbation_radius_reported",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "realised radii = [0.02]"
+    },
+    {
+      "check": "06_only_ciphertext_query_transmitted",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "server received q' (d=768), | ||q'|| - s||q|| | <= sβ/8=0.0750; ||q'||=3.0044, s||q||=3.0012"
+    },
+    {
+      "check": "07_all_search_calls_are_ciphertext",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "300 server search calls, all with a (d,) ciphertext query"
+    },
+    {
+      "check": "08_rerank_reproducible",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "manual DecDB+plaintext rerank over the server's k'=20 candidates reproduces the returned top-10 ids exactly (ids_match=True, distances_match=True)"
+    },
+    {
+      "check": "09_no_dp_recall_high",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "CAPRISE k'=k recall@10 vs plaintext = 0.9620 (encryption-noise boundary flips)"
+    },
+    {
+      "check": "10_oversampling_helps",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "recall: k'=10 -> 0.9620; k'=20 -> 1.0000"
+    },
+    {
+      "check": "11_dp_recall_high",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "CAPRISE+DistanceDP(r=0.02), k'=55: recall@10 vs plaintext = 1.0000"
+    }
+  ],
+  "notes": [
+    "Phase-2 on real data (m=8000, d=768, k=10, 100 queries): plaintext search 0.695 ms/query; encrypted pipeline (EncQ+search+DecDB+rerank): k'=k 0.583 ms, k'=20 0.645 ms, DP(r=0.02, k'=55) 1.078 ms",
+    "recall@10 vs plaintext: CAPRISE(k'=k)=0.9620, CAPRISE(k'=20)=1.0000, CAPRISE+DP(r=0.02, k'=55)=1.0000",
+    "Phase-1 upload (re-used from protocol): m=8000, 0.11s"
+  ],
+  "duration_s": 0.549,
+  "timestamp": "2026-11-03T16:11:38+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}
