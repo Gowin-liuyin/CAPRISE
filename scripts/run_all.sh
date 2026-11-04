@@ -24,7 +24,7 @@ if [ "$SKIP_DATA" = "1" ]; then
   echo "skipped (--skip-data)"
 else
   if [ ! -f data/meta.json ]; then
-    env -u ALL_PROXY "$PY" scripts/prepare_data.py --m 50000
+    env -u ALL_PROXY "$PY" scripts/prepare_data.py --m 100000
   else
     echo "data/meta.json exists, reuse"
   fi
@@ -37,9 +37,10 @@ $PY -m gates.run_gates --from M12 --to M13
 echo "== 4/6 ppRAG pipeline gates (M14-M16) =="
 $PY -m gates.run_gates --from M14 --to M16
 
-echo "== 5/6 privacy + efficiency gates (M10, M11, M17, M18) =="
+echo "== 5/6 privacy + efficiency gates (M10, M11, M17, M18, M20) =="
 $PY -m gates.run_gates --from M10 --to M11
 $PY -m gates.run_gates --from M17 --to M18
+$PY -m gates.run_gates --from M20 --to M20
 
 echo "== 6/6 experiments =="
 $PY experiments/exp5_query_dp.py
@@ -47,6 +48,9 @@ $PY experiments/exp1_efficiency.py
 $PY experiments/exp2_retrieval.py
 $PY experiments/exp3_vec2text.py
 $PY experiments/exp4_vector_analysis.py
+$PY experiments/exp6_asr_protocol.py
+# optional C2 budget study (~50 min, needs .venv-vec2text):
+# .venv-vec2text/bin/python scripts/plaintext_budget.py
 
 echo
 echo "ALL DONE. See results/ and REPRODUCTION_REPORT.md"

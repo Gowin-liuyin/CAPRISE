@@ -14,7 +14,7 @@
 | C3 | Eq.(2) | `‖eq−e1‖<‖eq−e2‖−β ⇒ ‖e'q−e'1‖<‖e'q−e'2‖` | 50,000 组前提构造三元组 **0 违反**；边界 gap=β+1e-6 亦 0 违反 | VERIFIED | results/gate_M7_eq2.json |
 | C4 | Eq.(3) | `‖e1−e2‖<‖e1−e3‖−β ⇏ ‖e'1−e'2‖<‖e'1−e'3‖`（存在性） | 构造出合法噪声实现使顺序反转（lhs 2.4594 > rhs 2.3283）；命题为真 | VERIFIED | results/gate_M8_eq3.json |
 | C5 | ADCPE §5.1 | ADCPE/SAP 是 β-DCP（所有向量同一噪声半径 sβ/4） | 20,000 组 0 违反；噪声界 0.15 严格成立 | VERIFIED | results/gate_M9_adcpe.json |
-| C6 | §III-B1, §IV-1, Fig.5 | CAPRISE 打乱库内距离结构，向量分析攻击 ASR 低于 ADCPE | 27/27 个 cell CAPRISE ASR 更低：真实 GTR d=768 ASR@10 0.928 vs 0.951（−2.3pt）；合成 d=768/1536/3072 −6.1/−6.8/−4.0pt；距离重建误差 2.16×（真实）/1.77–2.08×（合成）。方向成立但真实数据幅度小（见 F2/F11） | VERIFIED（定性；幅度小于论文暗示） | results/exp4_vector_analysis.json, results/gate_M10_vector_analysis.json |
+| C6 | §III-B1, §IV-1, Fig.5 | CAPRISE 打乱库内距离结构，向量分析攻击 ASR 低于 ADCPE | 27/27 个 cell CAPRISE ASR 更低：真实 GTR d=768 0.936 vs 0.961（−2.5pt）；合成 d=768/1536/3072 −6.1/−6.8/−4.0pt；距离重建误差 1.90×（真实）/1.77–2.07×（合成）。方向成立但真实数据幅度小（见 F2/F11） | VERIFIED（定性；幅度小于论文暗示） | results/exp4_vector_analysis.json, results/gate_M10_vector_analysis.json |
 | C7 | §IV-1 | CAPRISE 继承 ADCPE 的 IND 类安全保证 | 未重做密码学证明；仅做经验泄漏检查 | BLOCKED（超出复现范围，见 F10） | docs/FINDINGS.md F10 |
 | C8 | §III-B1 Eq.(4)–(20) | 证明的每一中间不等式成立（Eq.(2) 的 Eq.(8)–(12)；Eq.(3) 的 Eq.(13)–(20)） | 4000 组满足前提的查询三元组 + 4000 组库三元组逐式复核：Eq.(5)–(11)、Eq.(13)–(20) 全部 0 违反；Eq.(12) 打印式 4000/4000 不成立（符号笔误，F16），改为 `+` 后 0/4000；结论 Eq.(2) 0/4000 违反。附加条件 δ+δ'<sβ/2 在随机噪声下 0/4000 触发（F2） | VERIFIED（Eq.(12) 需按修正符号；论文排版错误） | results/proof_chain_check.json, scripts/check_proof_chain.py |
 
@@ -40,17 +40,18 @@
 
 | id | 论文出处 | 论文值 / 命题 | 复现值 | 判定 | 证据 |
 |---|---|---|---|---|---|
-| P1 | Table II | 明文 GTR 嵌入可被 Vec2Text 重建：BLEU 83.021/P .947/R .950/F1 .948/ROUGE .950 | **50 条**真实 MS MARCO passage（32-token 预算，bootstrap 95% CI）：BLEU **69.875** [61.99, 78.17]/P .924/R .928/F1 .926/ROUGE-L .860 —— 同量级（0.84×，−13.1 BLEU）；10 条小样本时曾为 63.7；同 5 条上 20/4→50/10 明文 BLEU 55.7→77.4（+21.7）说明绝对基线依赖未声明的反演预算 | VERIFIED（量级/形态一致；绝对值受论文未给设置影响，F6/F15） | results/exp3_vec2text.json, results/gate_M11_vec2text.json |
+| P1 | Table II | 明文 GTR 嵌入可被 Vec2Text 重建：BLEU 83.021/P .947/R .950/F1 .948/ROUGE .950 | **50 条**真实 MS MARCO passage（32-token 预算，bootstrap 95% CI）：BLEU **69.875** [61.99, 78.17]/P .924/R .928/F1 .926/ROUGE-L .860 —— 同量级（0.84×，−13.1 BLEU）；10 条小样本时曾为 63.7；同 20 条上 20/4→50/10 明文 BLEU 67.4→77.8（+10.4，50/10 的 95% CI 64.2–89.2 覆盖论文 83.0）说明绝对基线依赖未声明的反演预算 | VERIFIED（量级/形态一致；绝对值受论文未给设置影响，F6/F15） | results/exp3_vec2text.json, results/gate_M11_vec2text.json |
 | P2 | Table II | CAPRISE(s=3,β=0.2) 后：BLEU 12.425/P .482/R .498/F1 .487/ROUGE .492 | raw 攻击（论文口径，50 条 + 95% CI）：BLEU **13.696** [9.72, 17.48]/P .534/R .529/F1 .531/ROUGE-L .409 —— 与论文值差 +1.27（1.10×），CI 覆盖论文值；去缩放最强攻击：BLEU 34.584（安全限定，A11/F3）；同 5 条上 20/4→50/10 raw BLEU 7.21→7.16（−0.05，加密后水平对反演预算不敏感） | VERIFIED（加密后水平在 CI 内复现；强攻击口径见 F3） | results/exp3_vec2text.json, results/gate_M11_vec2text.json |
-| P3 | Fig.5 | 向量分析 ASR：CAPRISE 在所有维度上低于 ADCPE | 27/27 cell 成立：真实 d=768 −2.3pt；合成 d=768/1536/3072 −6.1/−6.8/−4.0pt；β↑ 差距↑（−3.4/−4.2/−11.6pt）；论文 Fig.5 数字化对照见 F11 | VERIFIED（趋势成立；真实数据幅度小） | results/gate_M10_vector_analysis.json, results/exp4_vector_analysis.json |
-| P4 | Table III, Fig.5, §VI | 隐私-精度 trade-off：r 越大 k' 越大、隐私越强但检索精度越低 | k' 随 r 上升：r=0.02→k'=72、r=0.05→k'=785（Theorem 1）；EXP2 中 k' 上升使 recall 保持 1.0 但耗时 3.11→11.81ms/query；β 越大噪声越大 recall 越低（0.9910→0.9401）；r 与隐私的量化见 exp5（角帽扩张）与 exp4（ASR） | VERIFIED | results/exp2_retrieval.json, results/exp5_query_dp.json |
+| P3 | Fig.5 | 向量分析 ASR：CAPRISE 在所有维度上低于 ADCPE | 27/27 cell 成立：真实 d=768 −2.5pt；合成 d=768/1536/3072 −6.1/−6.8/−4.0pt；β↑ 差距↑（−3.4/−4.2/−11.6pt）；论文 Fig.5 数字化对照见 F11 | VERIFIED（趋势成立；真实数据幅度小） | results/gate_M10_vector_analysis.json, results/exp4_vector_analysis.json |
+| P5 | Fig.5 12 维趋势 | ASR 随 embedding size 64→2048 单调上升（CAPRISE 53.5→88.8%，ADCPE 65.8→94.6%） | 协议研究（exp6/M20，真实 100k GTR 语料）：**截断不归一化（H2）** 给 CAPRISE 51.7→95.7%（ρ=0.951，平均偏差 10.4pp；ADCPE 7.3pp）；单位球面协议（投影/截断+归一化）平坦（动态范围 12.3–14.6pp）⇒ 趋势可由"低维范数更小 ⇒ 固定噪声相对更大"解释；高维残余 +7–10pp 未解释（论文未给 β/ASR 公式/数据协议）；m=5k→100k 影响 <2pp | VERIFIED（趋势与机制）/ PARTIAL（绝对水平） | results/exp6_asr_protocol.json, results/gate_M20_asr_protocol.json, notes/exp6_asr_protocol.md |
+| P4 | Table III, Fig.5, §VI | 隐私-精度 trade-off：r 越大 k' 越大、隐私越强但检索精度越低 | k' 随 r 上升：m=100k 时 r=0.02→k'=79、r=0.05→k'=989（Theorem 1）；EXP2 中 k' 上升使 recall 保持 1.0 但耗时 6.48→21.99ms/query；β 越大噪声越大 recall 越低（0.9915→0.9368）；r 与隐私的量化见 exp5（角帽扩张）与 exp4（ASR） | VERIFIED | results/exp2_retrieval.json, results/exp5_query_dp.json |
 
 ## E. 检索质量声明
 
 | id | 论文出处 | 论文值 / 命题 | 复现值 | 判定 | 证据 |
 |---|---|---|---|---|---|
-| R1 | §V 摘要/正文 | ppRAG 保持 "high retrieval accuracy"（无数值） | 真实数据 m=50k/1000q：qrels MRR@10 0.7230（与明文完全相同）；Recall@10 相对明文：k'=k 0.9699，k'=15 0.9999，k'=2k 1.0000；CAPRISE+DP r=0.02 (k'=72) 1.0000；β 单调 0.9910→0.9401 | VERIFIED（需 small oversampling；严格 k'=k 损失 3%，见 F13） | results/exp2_retrieval.json, results/gate_M18_retrieval.json |
-| R2 | Alg.2 L13–L19 | 密文 top-k' 检索 + 本地解密重排流程可行 | M14–M16 门禁全部 PASS：服务器仅收 e'_q（300 次调用全密文）；DP r=0.02 k'=55=Theorem1；解密+明文距离重排与客户端 top-10 完全一致；真实 recall@10 k'=k=0.964（m=8000，门禁）/0.9699（m=50k，exp2）/ k'=20=1.0000 / DP=1.0000；Phase3 prompt 无泄漏 | VERIFIED | results/gate_M14_phase1.json, results/gate_M15_phase2.json, results/gate_M16_phase3.json |
+| R1 | §V 摘要/正文 | ppRAG 保持 "high retrieval accuracy"（无数值） | 真实数据 m=100k/1000q：qrels MRR@10 0.7105（与明文完全相同）；Recall@10 相对明文：k'=k 0.9660，k'=15 0.9997，k'=2k 1.0000；CAPRISE+DP r=0.02 (k'=79) 1.0000；β 单调 0.9915→0.9368 | VERIFIED（需 small oversampling；严格 k'=k 损失 3.4%，见 F13） | results/exp2_retrieval.json, results/gate_M18_retrieval.json |
+| R2 | Alg.2 L13–L19 | 密文 top-k' 检索 + 本地解密重排流程可行 | M14–M16 门禁全部 PASS：服务器仅收 e'_q（300 次调用全密文）；DP r=0.02 k'=55=Theorem1；解密+明文距离重排与客户端 top-10 完全一致；真实 recall@10 k'=k=0.964（m=8000，门禁）/0.9660（m=100k，exp2）/ k'=20=1.0000 / DP=1.0000；Phase3 prompt 无泄漏 | VERIFIED | results/gate_M14_phase1.json, results/gate_M15_phase2.json, results/gate_M16_phase3.json |
 
 ## F. 论文问题清单（详见 docs/FINDINGS.md）
 
@@ -77,7 +78,7 @@
 
 | 判定 | 数量 |
 |---|---|
-| VERIFIED | **20**（C1–C6, C8, T1, T4, E1–E4, P1–P4, R1, R2） |
+| VERIFIED | **21**（C1–C6, C8, T1, T4, E1–E4, P1–P5, R1, R2） |
 | FALSIFIED | 2（T2、T3——Table III 与定理"必要/最小"解读；证据见 FINDINGS F1/F9） |
 | BLOCKED | 1（C7——形式化安全性，超出复现范围） |
 | UNKNOWN | **0** |

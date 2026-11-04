@@ -21,11 +21,11 @@
 | 距离比较性质 (Eq.2 / Eq.3) 验证 | §III-B1 | ✅ M7–M8 PASS（M8 含 finding F2） |
 | DistanceDP + Theorem 1 | §III-B2, Eq.21 | ✅ M12–M13 PASS（含 finding F1/F9） |
 | ppRAG 三阶段流程 | Algorithm 2 | ✅ M14–M16 PASS |
-| 数据: MS MARCO 子集 + gtr-t5-base | §V setup | ✅ M0 PASS（m=50,000，1000 queries） |
+| 数据: MS MARCO 语料 + gtr-t5-base | §V setup | ✅ M0 PASS（m=100,000，1000 queries） |
 | 效率实验 (Fig.4) | §V-1 | ✅ M17 PASS |
-| 检索精度（补充） | §V（论文未给数字） | ✅ M18 PASS（CAPRISE k'=k recall@10=0.9699） |
+| 检索精度（补充） | §V（论文未给数字） | ✅ M18 PASS（m=100k；CAPRISE k'=k recall@10=0.9660） |
 | Vec2Text 攻击 (Table II, 50 条 + 95% CI) | §V-2 | ✅ M11 PASS |
-| 向量分析 ASR (Fig.5) | §V-3 | ✅ M10 PASS（论文图数字化对照） |
+| 向量分析 ASR (Fig.5) | §V-3 | ✅ M10 PASS（论文图数字化对照）；M20 复现 12 维趋势（H2 截断协议 ρ=0.972） |
 | top-k' 扩张表 (Table III) | §V-4 | ✅ M13 PASS（论文表值与公式不一致） |
 
 ## 复现结果速览（全部模块门禁 PASS：`python -m gates.run_gates --all`）
@@ -34,11 +34,11 @@
 |---|---|---|---|
 | CAPRISE 加解密正确性 | Alg.1 | 往返 2.8e-17；噪声界严格；Eq.(2) 50,000 组 0 违反 | ✅ |
 | Eq.(3) 库内不保留 | §III-B1 | 存在性成立（构造反例）；真实采样 0/20,000 反转 → finding F2 | ⚠️ |
-| 检索精度（论文未给） | §V | CAPRISE k'=k Recall@10=0.9699；k'=15→0.9999；qrels MRR 与明文相同 0.7230 | ✅ 补充 |
+| 检索精度（论文未给） | §V | m=100k：CAPRISE k'=k Recall@10=0.9660；k'=15→0.9997；qrels MRR 与明文相同 0.7105 | ✅ 补充 |
 | Table III top-k' | Table III | 四约定枚举 + 舍入感知细分：r=0.02 列 8/8 与 Δα=r 兼容、r=0.033 列 0/8（需 Δα/r=1.21±0.04）；被引实现（N=10^5 默认）自洽于 Δα=r → 论文 r=0.033 列内部不一致 F1 | ❌ FALSIFIED（r=0.033 列） |
 | Theorem 1 | Eq.21 | 公式 vs MC 偏差 ≤2.38%；实测最小 k'≈k → 定理为宽松上界 F9 | ❌ FALSIFIED |
 | Vec2Text (Table II) | 83.02→12.43 BLEU | 50 条 + 95% CI：明文 **69.88** [61.99,78.17] → CAPRISE raw **13.70** [9.72,17.48]（CI 覆盖论文 12.43）；rescaled 强攻击 34.58 | ✅ 加密后水平在 CI 内复现 |
-| 向量分析 ASR (Fig.5) | CAPRISE 更低 | 27/27 cell 更低；真实数据 −2.3pt；距离重建误差 2.16× | ✅ 趋势成立 |
+| 向量分析 ASR (Fig.5) | CAPRISE 更低 | 27/27 cell 更低；真实数据 −2.5pt；距离重建误差 1.90×；12 维趋势在截断协议下 ρ=0.951（M20） | ✅ 趋势成立 |
 | 效率 (Fig.4) | 15 维曲线、2339 vec/s、<19% overhead | 论文 15 维全部实测；paper-style 探针 1.18–2.38×（中位 1.41×）、drop 42.1× vs 论文 44.5×；向量化 43,468 vec/s（18.6×）；overhead 0.19–0.27% | ✅ 趋势+量级（A17/F5） |
 | ppRAG 三阶段 | Alg.2 | 服务器无密钥/无明文；只收 e'_q；prompt 0 泄漏 | ✅ |
 
@@ -62,14 +62,21 @@ uv pip install --python .venv/bin/python -r requirements.txt
 .venv/bin/python gates/run_gates.py --from M1 --to M9
 
 # 3) 数据准备
-env -u ALL_PROXY HF_HOME="$PWD/.cache/huggingface" .venv/bin/python scripts/prepare_data.py --m 50000
+env -u ALL_PROXY HF_HOME="$PWD/.cache/huggingface" .venv/bin/python scripts/prepare_data.py --m 100000
+
+# 3b) 数据规模与论文一致（m=100,000）
+env -u ALL_PROXY HF_HOME="$PWD/.cache/huggingface" .venv/bin/python scripts/prepare_data.py --m 100000
 
 # 4) 实验
 .venv/bin/python experiments/exp1_efficiency.py
 .venv/bin/python experiments/exp2_retrieval.py
-.venv/bin/python experiments/exp3_vec2text.py
-.venv/bin/python experiments/exp4_vector_analysis.py
 .venv/bin/python experiments/exp5_query_dp.py
+.venv/bin/python experiments/exp4_vector_analysis.py
+.venv/bin/python experiments/exp6_asr_protocol.py
+# Vec2Text（Table II）需 .venv-vec2text（见 requirements/说明）
+.venv-vec2text/bin/python experiments/exp3_vec2text.py --phase all
+# 明文预算研究（C2，约 50 min）
+.venv-vec2text/bin/python scripts/plaintext_budget.py
 
 # 5) 一键全流程（自动检查门禁顺序）
 bash scripts/run_all.sh

@@ -66,7 +66,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "load-invariant re-check: artifact stored d=768 48225 emb/s with the fixed calibration workload (d=768, batch=1500, 3 reps) at 48657.1 emb/s -> normalised 0.991; gate re-measured the same two workloads in this process (46341 emb/s and 45576.3 emb/s) -> normalised 1.017; ratio of normalised rates 1.026 within [0.8, 1.25]. The absolute throughput differs between the runs (machine speed varies by several x), which is exactly what the normalisation removes"
+      "detail": "load-invariant re-check: artifact stored d=768 48225 emb/s with the fixed calibration workload (d=768, batch=1500, 3 reps) at 48657.1 emb/s -> normalised 0.991; gate re-measured the same two workloads in this process (92709 emb/s and 92776.1 emb/s) -> normalised 0.999; ratio of normalised rates 1.008 within [0.8, 1.25]. The absolute throughput differs between the runs (machine speed varies by several x), which is exactly what the normalisation removes"
     },
     {
       "check": "paper_style_probe_grid_and_equivalence",
@@ -260,7 +260,7 @@
   ],
   "notes": [
     "exp1 artifacts found; gate does not rerun the full experiment",
-    "informational: per-vector CPU-cost ratio cost(768)/cost(1536) with the artifact's batches (5209/2605) is 0.650 in this gate run vs 0.633 in the artifact (dev 2.7%); it is not asserted because the fixed per-vector cost and the memory-bound part of the work react differently to cache contention, so this ratio moves with the machine-load state -- the load-invariant normalised re-check above is the assertion.",
+    "informational: per-vector CPU-cost ratio cost(768)/cost(1536) with the artifact's batches (5209/2605) is 0.633 in this gate run vs 0.633 in the artifact (dev 0.1%); it is not asserted because the fixed per-vector cost and the memory-bound part of the work react differently to cache contention, so this ratio moves with the machine-load state -- the load-invariant normalised re-check above is the assertion.",
     "Dimension grid = the 15 embedding sizes printed on the paper's Fig.4 x-axis (64, 128, 256, 312, 384, 512, 768, 896, 1024, 1536, 1792, 2048, 2560, 3072, 3584) + d=4096 flagged not_in_paper; vectorised EncDB, batch=max(1000, ceil(4e6/d))>=1000, 5 interleaved rounds with a rotating start, median, wall + CPU time; machine speed factor 1.554x vs the fixed reference run (indicative only; the load-invariant assertions normalise inside each run).",
     "Vectorised throughput: 65417 emb/s at d=64 -> 20823 at d=3584 (3.1x drop, Spearman rho=-1.000, local rises <= 25% = the paper's own max local rise).",
     "Digitised paper Fig.4: Fig.4a 21817 -> 490 embeddings_per_s, Fig.4b 1396435 -> 1869680 elements_per_s; digitisation accuracy +-2.0%, cross-panel median deviation 0.593%, text anchor -1.39% at d=768.",
@@ -268,8 +268,8 @@
     "Phase-1: embedding dominates (533.1-756.1 ms for 128 queries vs CAPRISE 1.42 ms); overhead 0.188-1.786% < 19.0% paper bound.",
     "Phase-2: CAPRISE 43467.6 vectors/s (d=768) vs measured Paillier [(1024, 1.1525), (2048, 0.1747)]; paper 9x internal-consistent; cross-hardware ratios reported but not asserted (A17/A17b)."
   ],
-  "duration_s": 1.941,
-  "timestamp": "2026-11-03T23:59:40+0800",
+  "duration_s": 0.986,
+  "timestamp": "2026-11-04T08:35:38+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

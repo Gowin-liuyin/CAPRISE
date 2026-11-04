@@ -13,7 +13,7 @@
 | 模块 | 依赖 | 状态 | 门禁证据 | 备注 |
 |---|---|---|---|---|
 | P0 骨架 | — | PASS | results/gate_P0_skeleton.json | fail-fast 自检 |
-| M0 数据 | — | PASS | results/gate_M0_data.json | m=50,000；1000 query；qrels 覆盖 100%；MRR@10=0.722 |
+| M0 数据 | — | PASS | results/gate_M0_data.json | **m=100,000**（2026-11-04 重建）；1000 query；qrels 覆盖 100%；MRR@10=0.7105 |
 | M1 PRF | — | PASS | results/gate_M1_prf.json | 确定性/敏感性/KS |
 | M2 KeyGen | M1 | PASS | results/gate_M2_keygen.json | s∈[1,2^16]、K=128 bit |
 | M3 噪声 | M1 | PASS | results/gate_M3_noise.json | 模长<R 严格；球内均匀 |
@@ -23,7 +23,7 @@
 | M7 Eq.(2) | M4,M6 | PASS | results/gate_M7_eq2.json | 50k 前提三元组 0 违反 |
 | M8 Eq.(3) | M4 | PASS | results/gate_M8_eq3.json | 对抗可实现；随机采样 0/20000（F2） |
 | M9 ADCPE | M2,M3 | PASS | results/gate_M9_adcpe.json | 20k β-DCP 0 违反 |
-| M10 向量分析 | M4,M9 | PASS | results/gate_M10_vector_analysis.json | 29 检查；论文 Fig.5 数字化；27/27 cell |
+| M10 向量分析 | M4,M9 | PASS | results/gate_M10_vector_analysis.json | 29 检查；论文 Fig.5 数字化；27/27 cell（真实 −2.5pt） |
 | M11 Vec2Text | M4,M0 | PASS（敏感性收尾中） | results/gate_M11_vec2text.json | 50 条 + 95% CI；敏感性 50/10 见 §3 |
 | M12 DistanceDP | — | PASS | results/gate_M12_distance_dp.json | Gamma 均值 0.099989；KS p=0.996 |
 | M13 Theorem1 | M12 | PASS | results/gate_M13_theorem1.json | 36 检查；四约定 + 舍入细分 + RemoteRAG 交叉验证（N=10^5 已确认） |
@@ -31,8 +31,9 @@
 | M15 Phase2 | M6,M12,M13,M14 | PASS | results/gate_M15_phase2.json | 只收 e'_q；k'=Theorem1；top-10 一致 |
 | M16 Phase3 | M15 | PASS | results/gate_M16_phase3.json | prompt 精确、0 泄漏 |
 | M17 效率 | M4,M6,M1 | PASS | results/gate_M17_efficiency.json | 36 检查；论文 15 维网格；paper-style 探针 |
-| M18 检索精度 | M15,M0 | PASS | results/gate_M18_retrieval.json | recall 0.9699；DP k'=72/785 |
+| M18 检索精度 | M15,M0 | PASS | results/gate_M18_retrieval.json | m=100k：recall 0.9660；DP k'=79/989 |
 | M19 报告 | 全部 | PASS | REPRODUCTION_REPORT.md | 见 §4 |
+| M20 ASR 协议研究 | M10 | PASS | results/gate_M20_asr_protocol.json | 12 检查；H2 截断协议 ρ=0.951、残余 10.4pp |
 
 **独立证明链审计**: `scripts/check_proof_chain.py` → `results/proof_chain_check.json`
 （Eq.(4)–(20) 逐式，4000+4000 组；Eq.(12) 打印式符号笔误 F16）。

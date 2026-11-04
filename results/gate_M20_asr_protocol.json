@@ -1,0 +1,107 @@
+{
+  "module": "M20",
+  "name": "asr_protocol",
+  "owner": "lead",
+  "paper_ref": "arXiv:2601.12331 Fig.5 / Sec. V-C (ASR vs embedding size)",
+  "pass": true,
+  "checks": [
+    {
+      "check": "artifact_present",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "results/exp6_asr_protocol.json"
+    },
+    {
+      "check": "paper_reference_points",
+      "expected": 12,
+      "actual": 12,
+      "pass": true,
+      "detail": "digitised paper Fig.5 values for the 12 sizes"
+    },
+    {
+      "check": "protocols_complete",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "protocols=['H1_proj_renorm', 'H2_trunc_raw', 'H3_trunc_renorm']; 12 paper dims each: [12, 12, 12]"
+    },
+    {
+      "check": "attack_setup_recorded",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "m_main=5000, nq=100, s=3, beta=0.2, source=data/passage_emb.npy"
+    },
+    {
+      "check": "asr_values_finite_and_in_range",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "bad=[]"
+    },
+    {
+      "check": "truncation_protocol_reproduces_paper_trend",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "H2 truncation: Spearman(CAPRISE)=0.951, range=[51.7, 95.70000000000003] pp vs paper [53.5, 88.8] pp"
+    },
+    {
+      "check": "unit_sphere_protocols_are_flat",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "H1 range=[84.2, 96.50000000000003] pp, H3 range=[82.00000000000001, 96.60000000000001] pp (both flat => the paper's trend is not a unit-sphere dimension effect)"
+    },
+    {
+      "check": "truncation_level_within_15pp",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "H2 mean|Δ| vs paper = 10.4 pp (CAPRISE), 7.3 pp (ADCPE); residual offset documented, not fitted"
+    },
+    {
+      "check": "beta_sweep_keeps_trend",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "betas=['0.2', '0.3', '0.4']; Spearman(CAPRISE)=[0.974, 1.0, 0.993]"
+    },
+    {
+      "check": "m_sweep_recorded",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "m sweep dims=['64', '768']; m values=[['100000', '20000', '5000'], ['100000', '20000', '5000']]"
+    },
+    {
+      "check": "conclusion_recorded",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "best protocol by mean|Δ| = H2_trunc_raw"
+    },
+    {
+      "check": "notes_written",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "notes/exp6_asr_protocol.md exists=True"
+    }
+  ],
+  "notes": [],
+  "duration_s": 0.003,
+  "timestamp": "2026-11-04T08:35:39+0800",
+  "hardware": {
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "machine": "arm64",
+    "processor": "arm",
+    "python": "3.12.13",
+    "cpu": "Apple M5",
+    "ncpu": "10",
+    "torch": "2.15.0",
+    "cuda": false,
+    "mps": true
+  }
+}

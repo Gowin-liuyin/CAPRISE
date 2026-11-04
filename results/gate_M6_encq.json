@@ -62,8 +62,8 @@
   "notes": [
     "Query noise bound sβ/8 = 0.075 (s=3,β=0.2) vs DB 3sβ/8 = 0.225."
   ],
-  "duration_s": 0.04,
-  "timestamp": "2026-11-03T23:58:50+0800",
+  "duration_s": 0.02,
+  "timestamp": "2026-11-04T08:35:15+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

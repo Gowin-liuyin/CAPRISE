@@ -38,17 +38,17 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "CAPRISE err=0.00451 > ADCPE err=0.00250 (ratio 1.80x)"
+      "detail": "CAPRISE err=0.00472 > ADCPE err=0.00259 (ratio 1.82x)"
     }
   ],
   "notes": [
     "Constructive realisation confirms the mathematical claim of Eq.(3): the noise support contains a configuration that flips the ordering.",
     "CAPRISE empirical inversion rate on premised triples (real sampler): 0/20000. Existence-only: alignment probability decays like exp(-Omega(d)).",
-    "Distance-reconstruction error (plaintext units): CAPRISE 0.00451 vs ADCPE 0.00250 (theory proj std: 0.00383 / 0.00255); ratio 1.80x = R_db/R_adcpe = 1.5x",
+    "Distance-reconstruction error (plaintext units): CAPRISE 0.00472 vs ADCPE 0.00259 (theory proj std: 0.00383 / 0.00255); ratio 1.82x = R_db/R_adcpe = 1.5x",
     "Finding A19: Eq.(3) holds only as an existence statement at high dimension; the practical vector-analysis advantage of CAPRISE must be sought in the increased distance-reconstruction error / ASR (measured in exp4), not in literal order inversions."
   ],
-  "duration_s": 7.221,
-  "timestamp": "2026-11-03T23:59:05+0800",
+  "duration_s": 2.388,
+  "timestamp": "2026-11-04T08:35:21+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

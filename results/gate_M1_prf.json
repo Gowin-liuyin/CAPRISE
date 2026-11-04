@@ -108,8 +108,8 @@
     "PRF instantiation: HMAC-SHA256 counter mode (TapeGen-style), k=128 bit.",
     "n drawn by PCG64 seeded with 128 PRF bits; u = (128 PRF bits + 1)/2^128 in (0,1)."
   ],
-  "duration_s": 0.066,
-  "timestamp": "2026-11-03T23:58:44+0800",
+  "duration_s": 0.036,
+  "timestamp": "2026-11-04T08:35:11+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

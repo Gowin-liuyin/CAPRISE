@@ -1,22 +1,22 @@
 {
   "n_queries_evaluated": 1000,
-  "MRR@10": 0.7219400793650795,
-  "Recall@10": 0.97,
+  "MRR@10": 0.7105015873015875,
+  "Recall@10": 0.96,
   "Recall@100": 0.997,
-  "nDCG@10": 0.7827913218444017,
-  "corpus_size": 50000,
+  "nDCG@10": 0.7716762371395051,
+  "corpus_size": 100000,
   "corpus_composition": {
     "qrels": 1053,
     "bm25_hard_neg": 18544,
-    "random_fill": 30403
+    "random_fill": 80403
   },
-  "qrels_pairs_in_corpus": 1080,
+  "qrels_pairs_in_corpus": 1133,
   "random_fill_only_control": {
     "n_queries_evaluated": 1000,
-    "MRR@10": 0.9486023809523809,
-    "Recall@10": 0.995,
-    "Recall@100": 0.998,
-    "nDCG@10": 0.9602626123981518
+    "MRR@10": 0.9114174603174605,
+    "Recall@10": 0.985,
+    "Recall@100": 0.997,
+    "nDCG@10": 0.9299498788480556
   },
   "examples": [
     {
@@ -86,47 +86,47 @@
         },
         {
           "rank": 2,
-          "pid": 8773436,
+          "pid": 1574145,
           "relevant": false
         },
         {
           "rank": 3,
-          "pid": 9930,
+          "pid": 8773436,
           "relevant": false
         },
         {
           "rank": 4,
-          "pid": 8052649,
+          "pid": 7200650,
           "relevant": false
         },
         {
           "rank": 5,
-          "pid": 8377431,
+          "pid": 9930,
           "relevant": false
         },
         {
           "rank": 6,
-          "pid": 135982,
+          "pid": 6396995,
           "relevant": false
         },
         {
           "rank": 7,
-          "pid": 135979,
+          "pid": 7820312,
           "relevant": false
         },
         {
           "rank": 8,
-          "pid": 6476891,
+          "pid": 6296250,
           "relevant": false
         },
         {
           "rank": 9,
-          "pid": 8787238,
+          "pid": 7098129,
           "relevant": false
         },
         {
           "rank": 10,
-          "pid": 5943105,
+          "pid": 8052649,
           "relevant": false
         }
       ]
@@ -152,37 +152,37 @@
         },
         {
           "rank": 4,
-          "pid": 587860,
+          "pid": 5593854,
           "relevant": false
         },
         {
           "rank": 5,
-          "pid": 194579,
+          "pid": 1440570,
           "relevant": false
         },
         {
           "rank": 6,
-          "pid": 1132437,
+          "pid": 587860,
           "relevant": false
         },
         {
           "rank": 7,
-          "pid": 226300,
+          "pid": 1015031,
           "relevant": false
         },
         {
           "rank": 8,
-          "pid": 360122,
+          "pid": 194579,
           "relevant": false
         },
         {
           "rank": 9,
-          "pid": 939486,
+          "pid": 2550712,
           "relevant": false
         },
         {
           "rank": 10,
-          "pid": 1005810,
+          "pid": 4516113,
           "relevant": false
         }
       ]
@@ -289,17 +289,17 @@
         },
         {
           "rank": 9,
-          "pid": 5518253,
+          "pid": 5720986,
           "relevant": false
         },
         {
           "rank": 10,
-          "pid": 839678,
+          "pid": 5518253,
           "relevant": false
         }
       ]
     }
   ],
   "note": "primary = exact plaintext top-k over the m-passage corpus. The corpus contains the qrels-relevant passages of the eval queries plus BM25 hard negatives (top1000.dev, query-token-overlap ranked) plus uniform random filler, which makes the retrieval task non-trivial (like MS MARCO reranking). random_fill_only_control repeats the evaluation on the original task-1 spec corpus (uniform random filler only, hard negatives removed); as expected, MRR there is much higher because all remaining distractors are random passages (the full-8.8M-collection MS MARCO dev MRR@10 of GTR-T5-base is ~0.39).",
-  "elapsed_s": 3.14
+  "elapsed_s": 1.36
 }

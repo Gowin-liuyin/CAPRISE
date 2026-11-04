@@ -686,6 +686,65 @@ g.check_true("notes_cover_ci_and_sensitivity",
              "notes document the 50-passage sample, the bootstrap 95% CI and the 50/10 sensitivity")
 
 # --------------------------------------------------------------------------- #
+# 10b) plaintext budget study (C2 follow-up): the undisclosed Vec2Text budget
+# --------------------------------------------------------------------------- #
+BUDGET_PATH = ROOT / "results" / "exp3_plaintext_budget.json"
+if BUDGET_PATH.exists():
+    bud = json.loads(BUDGET_PATH.read_text(encoding="utf-8"))
+    bsetup = bud.get("setup", {})
+    bcomp = bud.get("comparison", {})
+    bbudgets = bud.get("budgets", {})
+    g.check_true("plaintext_budget_artifact", True, detail=f"{BUDGET_PATH.relative_to(ROOT)}")
+    g.check_true(
+        "plaintext_budget_both_budgets_on_same_passages",
+        set(bbudgets) == {"20/4", "50/10"}
+        and bbudgets["20/4"]["num_steps"] == 20 and bbudgets["20/4"]["sequence_beam_width"] == 4
+        and bbudgets["50/10"]["num_steps"] == 50 and bbudgets["50/10"]["sequence_beam_width"] == 10
+        and int(bsetup.get("n_passages", 0)) >= 10,
+        detail=f"n={bsetup.get('n_passages')} passages; budgets={sorted(bbudgets)} "
+               f"(20/4 and 50/10 on the same passages)",
+    )
+    bad_b = []
+    for label, payload in bbudgets.items():
+        for key in METRIC_KEYS:
+            v = payload.get("metrics", {}).get(key)
+            lo = payload.get("bootstrap_ci_95", {}).get(key, {}).get("low")
+            hi = payload.get("bootstrap_ci_95", {}).get(key, {}).get("high")
+            if not (_finite(v) and _finite(lo) and _finite(hi) and lo <= v <= hi):
+                bad_b.append((label, key))
+    g.check_true("plaintext_budget_metrics_and_ci", not bad_b, detail=f"bad={bad_b[:5]}")
+    g.check_true(
+        "plaintext_budget_comparison_recorded",
+        _finite(bcomp.get("delta_bleu_50_10_minus_20_4"))
+        and _finite(bcomp.get("bleu_50_10_minus_paper"))
+        and abs(bcomp["paper_plaintext_bleu"] - PAPER_TABLE_II["w/o Enc"]["bleu"]) < 1e-9,
+        detail=f"delta BLEU 50/10 - 20/4 = {bcomp.get('delta_bleu_50_10_minus_20_4'):+.3f}; "
+               f"50/10 - paper = {bcomp.get('bleu_50_10_minus_paper'):+.3f}; "
+               f"CI(50/10) covers paper = {bcomp.get('ci_50_10_covers_paper')}",
+    )
+    # arithmetic self-consistency (hypotheses are not stored in the budget artefact;
+    # the study is reproducible by re-running scripts/plaintext_budget.py with the
+    # recorded seed, and its aggregate metrics + 95% CI + per-passage BLEU are stored)
+    m20 = bbudgets["20/4"]["metrics"]["bleu"]
+    m50 = bbudgets["50/10"]["metrics"]["bleu"]
+    ci50 = bbudgets["50/10"]["bootstrap_ci_95"]["bleu"]
+    paper_b = PAPER_TABLE_II["w/o Enc"]["bleu"]
+    ok_arith = (
+        abs(bcomp["bleu_20_4"] - m20) < 1e-9
+        and abs(bcomp["bleu_50_10"] - m50) < 1e-9
+        and abs(bcomp["delta_bleu_50_10_minus_20_4"] - (m50 - m20)) < 1e-9
+        and abs(bcomp["bleu_50_10_minus_paper"] - (m50 - paper_b)) < 1e-9
+        and bool(bcomp["ci_50_10_covers_paper"]) == (ci50["low"] <= paper_b <= ci50["high"])
+        and (ci50["low"] <= m50 <= ci50["high"])
+    )
+    g.check_true("plaintext_budget_arithmetic_consistent", ok_arith,
+                 detail=f"20/4 BLEU={m20:.3f}, 50/10 BLEU={m50:.3f} (CI {ci50['low']:.3f}-{ci50['high']:.3f}), "
+                        f"paper={paper_b:.3f}; deltas and CI-coverage flags match the stored metrics")
+else:
+    g.check_true("plaintext_budget_artifact", False,
+                 detail=f"missing {BUDGET_PATH.relative_to(ROOT)} (C2 follow-up)")
+
+# --------------------------------------------------------------------------- #
 # 11) timing / compute budget documented
 # --------------------------------------------------------------------------- #
 pt = artifact.get("summary", {}).get("per_text_seconds_mean")

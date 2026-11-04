@@ -24,7 +24,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "max||lambda||=0.150000 < 0.15000000000000002"
+      "detail": "max||lambda||=0.149999 < 0.15000000000000002"
     },
     {
       "check": "noise_bound_stricter_than_caprise_db",
@@ -51,8 +51,8 @@
   "notes": [
     "ADCPE/SAP baseline verified; its noise radius sβ/4 < 3sβ/8 (CAPRISE DB) is exactly why ADCPE leaks stored-vector structure to vector analysis."
   ],
-  "duration_s": 2.078,
-  "timestamp": "2026-11-03T23:59:08+0800",
+  "duration_s": 1.03,
+  "timestamp": "2026-11-04T08:35:22+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

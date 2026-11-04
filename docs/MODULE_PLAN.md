@@ -5,7 +5,7 @@
 
 ## 执行规则
 
-1. 模块按编号顺序执行（M0 → M1 → … → M19）。**上一个模块 gate 文件 `pass=true` 才允许开始下一个**。
+1. 模块按编号顺序执行（M0 → M1 → … → M18；补充模块 M20 追加在末尾）。**上一个模块 gate 文件 `pass=true` 才允许开始下一个**。
 2. 每个模块必须产出：
    - 代码（`src/` 或 `experiments/`）
    - 门禁脚本（`gates/gate_<id>_<name>.py`）
@@ -40,6 +40,7 @@
 | **M17** | 效率实验（Fig.4 + Phase1/2） | M4,M6,M1 | 吞吐随 d 变化；overhead；CAPRISE vs PHE 对照 | theory |
 | **M18** | 检索精度实验（补充） | M15,M0 | Plaintext/CAPRISE/CAPRISE+DP/ADCPE 的 Recall/MRR；β 扫描 | data-retrieval |
 | **M19** | 复现报告 | 全部 | 论文 vs 复现对照表、偏差分析、歧义清单 | Lead |
+| **M20** | ASR 协议研究（补充）：论文 Fig.5 的 12 维趋势 | M10 | 三种 768→d 协议逐点对照论文数字化值：H2 截断协议趋势复现（Spearman≥0.9、动态范围≥25pp）、H1/H3 平坦（≤20pp）、平均偏差≤15pp；β/m 敏感性记录 | Lead |
 
 ## 门禁脚本约定
 
@@ -51,7 +52,7 @@ ok1 = gate.check("prf_deterministic", expected=True, actual=bool(...), detail=".
 gate.finish()   # 写 results/gate_M1_prf.json，pass = all checks pass
 ```
 
-`run_gates.py` 按 M0→M19 顺序执行（跳过尚未实现的模块并标记 `not_implemented`），遇到 fail 立即停止并打印原因。
+`run_gates.py` 按 M0→M18→M20 顺序执行（跳过尚未实现的模块并标记 `not_implemented`），遇到 fail 立即停止并打印原因。
 
 ## 当前状态
 
@@ -60,7 +61,7 @@ gate.finish()   # 写 results/gate_M1_prf.json，pass = all checks pass
 | 模块 | 状态 | 证据 |
 |---|---|---|
 | P0 骨架 | ✅ PASS | results/gate_P0_skeleton.json |
-| M0 数据 | ✅ PASS | results/gate_M0_data.json（m=50k，1000q） |
+| M0 数据 | ✅ PASS | results/gate_M0_data.json（m=100k，1000q） |
 | M1 PRF | ✅ PASS | results/gate_M1_prf.json |
 | M2 KeyGen | ✅ PASS | results/gate_M2_keygen.json |
 | M3 noise | ✅ PASS | results/gate_M3_noise.json |
@@ -80,3 +81,4 @@ gate.finish()   # 写 results/gate_M1_prf.json，pass = all checks pass
 | M17 效率 | ✅ PASS（论文 15 维网格 + paper-style 探针；37 检查） | results/gate_M17_efficiency.json |
 | M18 检索精度 | ✅ PASS | results/gate_M18_retrieval.json |
 | M19 报告 | ✅ PASS | REPRODUCTION_REPORT.md、docs/PAPER_COVERAGE.md |
+| M20 ASR 协议 | ✅ PASS | results/gate_M20_asr_protocol.json（13 检查；H2 截断趋势 ρ=0.972） |

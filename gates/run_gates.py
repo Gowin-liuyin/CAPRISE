@@ -49,6 +49,7 @@ GATES = [
     ("M16", "phase3", "gates.gate_m16_phase3"),
     ("M17", "efficiency", "gates.gate_m17_efficiency"),
     ("M18", "retrieval", "gates.gate_m18_retrieval"),
+    ("M20", "asr_protocol", "gates.gate_m20_asr_protocol"),
 ]
 
 ORDER = [g[0] for g in GATES]

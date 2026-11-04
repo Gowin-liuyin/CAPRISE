@@ -295,7 +295,7 @@ k' = m · (Ω_{n-1}(π)/Ω_n(π)) · ∫_{α_k}^{α_k'} sin^{n-2}θ dθ + k
 ### 9.1 Setup
 
 [原文] MS MARCO 数据集 [24]；嵌入模型 **gtr-t5-base** [25]；全部实验在 **NVIDIA A100** 上。
-**[复现]** MS MARCO dev 子集（m=50k 起步），gtr-t5-base，**Apple M5 CPU（无 GPU）** —— 效率数字不可直接比，报告声明。
+**[复现]** MS MARCO dev 语料（**m=100,000**，对齐论文 Table III 声明的规模），gtr-t5-base，**Apple M5 CPU（无 GPU）** —— 效率数字不可直接比，报告声明。
 
 ### 9.2 Table II：Vec2Text 重建攻击 (L466–L489)
 

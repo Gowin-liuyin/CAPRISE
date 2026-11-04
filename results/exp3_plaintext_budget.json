@@ -1,0 +1,194 @@
+{
+  "experiment": "exp3_plaintext_budget",
+  "paper_ref": "Table II 'w/o Enc' row (BLEU 83.021); budget not stated (F6/A11)",
+  "question": "is the plaintext BLEU gap (ours 69.9 vs paper 83.0 on N=50) a Vec2Text budget artefact?",
+  "setup": {
+    "n_passages": 20,
+    "selection": "first 20 passages of data/passages.jsonl whose tokenised length is <= 32 tokens (the vec2text gtr__nq__32 corrector generation budget; F6/A11); the candidate pool starts at 400 rows and is expanded with the same rule until 20 passages are found -- 731 rows were scanned (expanded from 400). Full passage text is used as the BLEU/P/R/F1/ROUGE reference (not truncated).",
+    "max_ref_tokens": 32,
+    "attack_embedding_convention": "vec2text_t5_meanpool_v1",
+    "device": "mps:0",
+    "corrector_load_seconds": 17.35,
+    "seed": 20260101,
+    "passage_ids": [
+      85696,
+      3489272,
+      7071501,
+      7075317,
+      7079676,
+      7081193,
+      7082706,
+      7084934,
+      7085473,
+      7089522,
+      7090090,
+      7093987,
+      7094594,
+      7100040,
+      7109165,
+      7114795,
+      7118190,
+      7119316,
+      7141792,
+      7147550
+    ],
+    "ref_token_lengths": [
+      28,
+      30,
+      26,
+      31,
+      31,
+      16,
+      27,
+      25,
+      30,
+      28,
+      29,
+      31,
+      26,
+      29,
+      30,
+      24,
+      29,
+      32,
+      25,
+      32
+    ],
+    "embedding_norm_min": 0.9286366421508339,
+    "embedding_norm_max": 1.5679943096086328,
+    "embedding_norm_mean": 1.1678513320872377
+  },
+  "budgets": {
+    "20/4": {
+      "num_steps": 20,
+      "sequence_beam_width": 4,
+      "batch": 4,
+      "metrics": {
+        "bleu": 67.36971486596426,
+        "precision": 0.9120234604105572,
+        "recall": 0.9255952380952381,
+        "f1": 0.9187592319054653,
+        "rouge": 0.8436651967701391
+      },
+      "bootstrap_ci_95": {
+        "bleu": {
+          "low": 54.949593151347415,
+          "high": 78.22328432897243
+        },
+        "precision": {
+          "low": 0.8598645602232878,
+          "high": 0.9595460465282237
+        },
+        "recall": {
+          "low": 0.8735211476521444,
+          "high": 0.9707665903890159
+        },
+        "f1": {
+          "low": 0.8696723446371829,
+          "high": 0.9616440376611307
+        },
+        "rouge": {
+          "low": 0.7810286162053252,
+          "high": 0.9064222957232825
+        }
+      },
+      "per_text_seconds": 8.411,
+      "per_passage_bleu": [
+        60.974552792236565,
+        56.16347168941238,
+        70.82593633017144,
+        49.44878524313092,
+        37.614350791262964,
+        100.00000000000004,
+        100.00000000000004,
+        49.700883887603304,
+        8.47178590796544,
+        100.00000000000004,
+        42.967809960169845,
+        100.00000000000004,
+        100.00000000000004,
+        28.482376034885757,
+        100.00000000000004,
+        26.153117750218033,
+        79.82437552930244,
+        100.00000000000004,
+        47.139981515162155,
+        37.80336657419927
+      ]
+    },
+    "50/10": {
+      "num_steps": 50,
+      "sequence_beam_width": 10,
+      "batch": 1,
+      "metrics": {
+        "bleu": 77.75065453760105,
+        "precision": 0.9203539823008849,
+        "recall": 0.9285714285714286,
+        "f1": 0.9244444444444444,
+        "rouge": 0.8830150098759356
+      },
+      "bootstrap_ci_95": {
+        "bleu": {
+          "low": 64.22711399986788,
+          "high": 89.18361080314264
+        },
+        "precision": {
+          "low": 0.8583730694188655,
+          "high": 0.9724048559841947
+        },
+        "recall": {
+          "low": 0.8709627791563276,
+          "high": 0.9775957049486461
+        },
+        "f1": {
+          "low": 0.866768647463335,
+          "high": 0.9749658329219685
+        },
+        "rouge": {
+          "low": 0.8123393557432491,
+          "high": 0.946428107916903
+        }
+      },
+      "per_text_seconds": 128.237,
+      "per_passage_bleu": [
+        100.00000000000004,
+        64.84670540817932,
+        100.00000000000004,
+        79.76271123027055,
+        42.84322350977226,
+        100.00000000000004,
+        100.00000000000004,
+        85.69206912092334,
+        19.345299022826186,
+        100.00000000000004,
+        14.324501759034879,
+        80.208150990216,
+        100.00000000000004,
+        44.28500142691474,
+        100.00000000000004,
+        81.37489370974959,
+        100.00000000000004,
+        100.00000000000004,
+        100.00000000000004,
+        22.86960004658594
+      ]
+    }
+  },
+  "comparison": {
+    "paper_plaintext_bleu": 83.021,
+    "bleu_20_4": 67.36971486596426,
+    "bleu_50_10": 77.75065453760105,
+    "delta_bleu_50_10_minus_20_4": 10.380939671636796,
+    "bleu_50_10_minus_paper": -5.27034546239895,
+    "bleu_20_4_minus_paper": -15.651285134035746,
+    "ci_50_10_covers_paper": true,
+    "note": "same passages, same attack-convention embeddings; only num_steps/beam change. The delta bounds how much of the paper-vs-reproduction plaintext gap the undisclosed budget can explain (F6/A11)."
+  },
+  "runtime_seconds": 2753.2,
+  "hardware": {
+    "platform": "darwin",
+    "machine": "arm64",
+    "python": "3.12.13",
+    "numpy": "2.2.6"
+  }
+}

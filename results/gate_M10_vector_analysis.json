@@ -148,7 +148,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "mean ASR@10=0.8757 (<1: encryption noise does flip ranks)"
+      "detail": "mean ASR@10=0.8755 (<1: encryption noise does flip ranks)"
     },
     {
       "check": "caprise_asr10_lower_in_all_cells",
@@ -162,7 +162,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "main cells CAPRISE-ADCPE ASR@10 deltas (pt)=-6.1, -6.8, -4.0, -2.3"
+      "detail": "main cells CAPRISE-ADCPE ASR@10 deltas (pt)=-6.1, -6.8, -4.0, -2.5"
     },
     {
       "check": "caprise_more_dist_err",
@@ -183,7 +183,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "real GTR d=768 ratio=2.16 (M8/A19: CAPRISE ~1.8x)"
+      "detail": "real GTR d=768 ratio=1.90 (M8/A19: CAPRISE ~1.8x)"
     },
     {
       "check": "paper_fig5_reference_stored",
@@ -211,7 +211,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "figures/fig5_vector_analysis.png (447944 bytes)"
+      "detail": "figures/fig5_vector_analysis.png (445922 bytes)"
     },
     {
       "check": "csv_generated",
@@ -225,23 +225,23 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "notes/exp4_vector_analysis.md (9710 chars)"
+      "detail": "notes/exp4_vector_analysis.md (10394 chars)"
     },
     {
       "check": "full_run_time_reasonable",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "exp4 full run 28.11 s"
+      "detail": "exp4 full run 52.09 s"
     }
   ],
   "notes": [
     "ASR definition (A12, paper gives none): ASR@t = |top_t(cipher) & top_t(plain)|/t averaged over 100 stored-ciphertext queries; auxiliary Kendall/Spearman and distance-reconstruction error. Full definition in experiments/exp4_vector_analysis.py + notes/exp4_vector_analysis.md.",
-    "Finding A19/F2: CAPRISE's vector-analysis advantage is real but modest (-6.1 pt, -6.8 pt, -4.0 pt, -2.3 pt ASR@10 on the main cells); the stable, large difference is the distance-reconstruction error (1.85x).",
+    "Finding A19/F2: CAPRISE's vector-analysis advantage is real but modest (-6.1 pt, -6.8 pt, -4.0 pt, -2.5 pt ASR@10 on the main cells); the stable, large difference is the distance-reconstruction error (1.85x).",
     "Paper Fig. 5 values were digitised from figures/exp_asr.png (+-1 pp) because the paper only publishes them as a bar chart; at d=768 our controlled synthetic point matches within 1.3 pp. The paper's ASR-vs-dimension *trend* (53.5%->88.8%) is NOT reproduced by a controlled dimension sweep (flat 81.7-84.9%) - recorded as paper ambiguity A13 (dimensions 64..2048 cannot all come from the 768-dim gtr-t5-base model)."
   ],
-  "duration_s": 1.556,
-  "timestamp": "2026-11-03T23:59:10+0800",
+  "duration_s": 0.701,
+  "timestamp": "2026-11-04T08:35:23+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

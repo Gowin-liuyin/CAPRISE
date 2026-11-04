@@ -1,40 +1,40 @@
 {
-  "device": "mps:0",
-  "dtype": "float16",
-  "torch_num_threads": 10,
+  "device": "cpu",
+  "dtype": "float32",
+  "torch_num_threads": 8,
   "batch_size": 128,
   "batch_ms_runs": [
-    222.2,
-    224.03,
-    220.85
+    549.63,
+    552.56,
+    553.19
   ],
-  "batch_ms_mean": 222.36,
-  "batch_ms_median": 222.2,
-  "per_query_ms": 1.737,
-  "single_query_ms_mean": 45.53,
+  "batch_ms_mean": 551.79,
+  "batch_ms_median": 552.56,
+  "per_query_ms": 4.311,
+  "single_query_ms_mean": 11.68,
   "runs": 3,
   "configs": {
     "batch_128": {
       "n_queries": 128,
       "ms_runs": [
-        222.2,
-        224.03,
-        220.85
+        549.63,
+        552.56,
+        553.19
       ],
-      "ms_mean": 222.36,
-      "ms_median": 222.2,
-      "per_query_ms": 1.737
+      "ms_mean": 551.79,
+      "ms_median": 552.56,
+      "per_query_ms": 4.311
     },
     "batch_64": {
       "n_queries": 64,
       "ms_runs": [
-        64.79,
-        64.08,
-        64.41
+        165.59,
+        172.37,
+        169.38
       ],
-      "ms_mean": 64.43,
-      "ms_median": 64.41,
-      "per_query_ms": 1.007
+      "ms_mean": 169.12,
+      "ms_median": 169.38,
+      "per_query_ms": 2.642
     }
   },
   "paper_reference": "paper: batch=128 query embeddings take ~79.52 ms on an NVIDIA A100 GPU (Phase-1 overhead experiment, Appendix V-1)",
@@ -43,28 +43,28 @@
       "batch_128": {
         "n_queries": 128,
         "ms_runs": [
-          563.82,
-          557.69,
-          574.48
+          549.55,
+          549.35,
+          556.56
         ],
-        "ms_mean": 565.33,
-        "per_query_ms": 4.417
+        "ms_mean": 551.82,
+        "per_query_ms": 4.311
       },
       "batch_64": {
         "n_queries": 64,
         "ms_runs": [
-          166.63,
-          165.94,
-          163.44
+          175.53,
+          179.7,
+          183.79
         ],
-        "ms_mean": 165.34,
-        "per_query_ms": 2.583
+        "ms_mean": 179.67,
+        "per_query_ms": 2.807
       }
     }
   },
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
-    "cpu": "Apple M5 (10 cores)",
+    "cpu": "arm",
     "torch": "2.15.0",
     "sentence_transformers": "6.2.0"
   }

@@ -1,5 +1,19 @@
 # M10 — 向量分析攻击 ASR（论文 Fig. 5）复现笔记
 
+> **2026-11-04 语料重建更新（m=100,000）**：语料由 50k 重建为 100k 后重跑本实验，主结果如下
+> （完整见 `results/exp4_vector_analysis.json`）：
+>
+> | 数据 | ASR@1 (ADCPE/CAPRISE) | ASR@5 | ASR@10 | Kendall τ | 距离重建误差 |
+> |---|---|---|---|---|---|
+> | 真实 GTR d=768（m=5000，抽自 100k） | 0.980 / 0.960 | 0.964 / 0.936 | **0.961 / 0.936（−2.5pt）** | 0.967 / 0.951 | 0.00300 / 0.00570（**1.90×**） |
+> | 合成 d=768 | — | — | 0.888 / 0.827（−6.1pt） | — | 1.77× |
+> | 合成 d=1536 | — | — | 0.888 / 0.820（−6.8pt） | — | 1.85× |
+> | 合成 d=3072 | — | — | 0.879 / 0.839（−4.0pt） | — | 2.07× |
+>
+> 12 维趋势的协议研究见新增的 `experiments/exp6_asr_protocol.py` / `notes/exp6_asr_protocol.md`（M20）：
+> "截断不归一化"协议复现论文趋势（ρ=0.951），单位球面协议平坦。以下正文为 50k 轮记录，保留作对照。
+
+
 > 论文: *Efficient Privacy-Preserving RAG with Distance-Preserving Encryption* (arXiv:2601.12331v1)
 > 位置: §V-C "Defense against Vectors Analysis" + Fig. 5（源文件 `figures/exp_asr.png`）
 > 代码: `experiments/exp4_vector_analysis.py`；门禁: `gates/gate_m10_vector_analysis.py`；

@@ -1,5 +1,9 @@
 # 交叉验收：data-retrieval 的 M0 / M14–M16 / M18（task-5）
 
+> **历史说明（2026-11-04）**：本文档记录当时 m=50,000 语料轮的独立验收；语料已重建为 m=100,000
+> 并重跑 exp2/exp4/gates（见 `results/exp2_retrieval.json`、`results/exp4_vector_analysis.json` 与报告 §4.2/§4.5）。
+> 本文档的数值保留为那一轮的验收记录。
+
 > 验收人: theory-efficiency ｜ 验收对象: data-retrieval（M0 数据管线、M14–M16 ppRAG 三阶段、M18 检索精度 exp2）
 > 结论: **PASS** —— 5 个门禁独立重跑全部 PASS；核心数字独立复算一致；**0 个影响测量值/结论的问题**；
 > 7 条 minor（门禁强度/notes 精度/计时可复现性）建议，不改变判定。

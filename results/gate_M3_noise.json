@@ -38,14 +38,14 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "KS p=0.7682"
+      "detail": "KS p=0.2006"
     },
     {
       "check": "direction_mean_near_zero",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "max|z|=3.07 (<5), frac|z|<3=0.9974 (>0.99)"
+      "detail": "max|z|=3.52 (<5), frac|z|<3=0.9961 (>0.99)"
     },
     {
       "check": "direction_unit_norm",
@@ -73,8 +73,8 @@
     "Noise is bounded (ball), not Gaussian: n supplies only the direction.",
     "d=768: E[u^(1/d)] = 0.99870 -> norms concentrate just below R."
   ],
-  "duration_s": 0.132,
-  "timestamp": "2026-11-03T23:58:46+0800",
+  "duration_s": 0.056,
+  "timestamp": "2026-11-04T08:35:13+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

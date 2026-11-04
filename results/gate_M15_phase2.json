@@ -45,7 +45,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "server received q' (d=768), | ||q'|| - s||q|| | <= sβ/8=0.0750; ||q'||=3.0047, s||q||=3.0012"
+      "detail": "server received q' (d=768), | ||q'|| - s||q|| | <= sβ/8=0.0750; ||q'||=3.0007, s||q||=3.0000"
     },
     {
       "check": "07_all_search_calls_are_ciphertext",
@@ -84,12 +84,12 @@
     }
   ],
   "notes": [
-    "Phase-2 on real data (m=8000, d=768, k=10, 100 queries): plaintext search 1.024 ms/query; encrypted pipeline (EncQ+search+DecDB+rerank): k'=k 1.034 ms, k'=20 1.244 ms, DP(r=0.02, k'=55) 2.138 ms",
+    "Phase-2 on real data (m=8000, d=768, k=10, 100 queries): plaintext search 0.581 ms/query; encrypted pipeline (EncQ+search+DecDB+rerank): k'=k 0.500 ms, k'=20 0.610 ms, DP(r=0.02, k'=55) 1.033 ms",
     "recall@10 vs plaintext: CAPRISE(k'=k)=0.9640, CAPRISE(k'=20)=1.0000, CAPRISE+DP(r=0.02, k'=55)=1.0000",
-    "Phase-1 upload (re-used from protocol): m=8000, 0.22s"
+    "Phase-1 upload (re-used from protocol): m=8000, 0.11s"
   ],
-  "duration_s": 0.999,
-  "timestamp": "2026-11-03T23:59:35+0800",
+  "duration_s": 0.557,
+  "timestamp": "2026-11-04T08:35:36+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

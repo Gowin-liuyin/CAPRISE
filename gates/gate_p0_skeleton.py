@@ -94,7 +94,8 @@ g.check_true("passing_gate_persists_pass_true", ok_pass_json, str(pass_json.rela
 # --------------------------------------------------------------------------- #
 order = [m[0] for m in GATES]
 g.check_true("runner_order_starts_with_P0", order[0] == "P0", f"first={order[0]}")
-expected_order = ["P0"] + [f"M{i}" for i in range(0, 19)]
+# M20 is an ad-hoc supplementary module appended after the canonical P0-M18 chain
+expected_order = ["P0"] + [f"M{i}" for i in range(0, 19)] + ["M20"]
 g.check_true("runner_order_canonical", order == expected_order, f"{order}")
 
 g.note("Skeleton gate: artefacts, plan/claims coverage, fail-fast runner behaviour verified.")

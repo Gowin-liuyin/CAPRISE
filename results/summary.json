@@ -10,7 +10,7 @@
     },
     "M11": {
       "pass": true,
-      "n_checks": 71
+      "n_checks": 76
     },
     "M12": {
       "pass": true,
@@ -43,6 +43,10 @@
     "M1": {
       "pass": true,
       "n_checks": 14
+    },
+    "M20": {
+      "pass": true,
+      "n_checks": 12
     },
     "M2": {
       "pass": true,
@@ -85,7 +89,9 @@
     "exp1_efficiency",
     "exp2_retrieval",
     "exp3_vec2text",
+    "exp3_plaintext_budget",
     "exp4_vector_analysis",
-    "exp5_query_dp"
+    "exp5_query_dp",
+    "exp6_asr_protocol"
   ]
 }

@@ -142,7 +142,7 @@
 | Alg.2 行 | 论文语句 | 实现 | 验证门禁 | 判定 |
 |---|---|---|---|---|
 | 1–9 Phase 1 | 输入 `{x_i}`；`e_i←LLM_e(x_i)`；KeyGen；EncDB；AES KeyGen/加密；上传 `{(e'_i,x'_i)}` | `PPRAGClient.phase1_upload` + `AESDocumentCipher` | M14：服务器仅密文+nonce+AES；8000/8000 AES 往返；DecDB 9.8e-9 | VERIFIED |
-| 10–21 Phase 2 | `e_q←LLM_e(q)`；`k',ẽ_q←DistanceDP`；`e'_q←EncQ`；发送 e'_q；服务器 top-k'；DecDB；ReRank；Top-k | `phase2_retrieve` | M15：只传密文（300 次调用）、k'=55 与定理一致、解密重排与客户端 top-10 完全一致、recall 0.9640(m=8000)/0.9699(m=50k) | VERIFIED |
+| 10–21 Phase 2 | `e_q←LLM_e(q)`；`k',ẽ_q←DistanceDP`；`e'_q←EncQ`；发送 e'_q；服务器 top-k'；DecDB；ReRank；Top-k | `phase2_retrieve` | M15：只传密文（300 次调用）、k'=55 与定理一致、解密重排与客户端 top-10 完全一致、recall 0.9640(m=8000)/0.9660(m=100k) | VERIFIED |
 | 12 | `k', ẽ_q ← DistanceDP(e_q)` | DP 半径 + `theorem.k_prime` | M15 `04_dp_k_prime_from_theorem1` | VERIFIED |
 | 18 | `ReRank`（模型未指定，A6） | 解密后明文精确距离重排 | M15 `08_rerank_reproducible` | VERIFIED（A6 已声明） |
 | 22–27 Phase 3 | `input ← q + {x_1..x_k}`；`Response ← LLM(input)` | `phase3_build_prompt`；LLM 生成不执行 | M16：prompt 精确、10 篇有序、0 泄漏；LLM BLOCKED | prompt VERIFIED / LLM BLOCKED |
@@ -166,7 +166,7 @@
 
 | 论文 | 复现 | 判定 |
 |---|---|---|
-| MS MARCO 数据集 | MS MARCO passage dev 子集：m=50,000（1053 qrels + 18,544 BM25 硬负例 + 随机填充）、1000 query；Table III 用 m=100,000（解析+MC） | PARTIAL（规模差异已声明；论文未给检索实验 m） |
+| MS MARCO 数据集 | MS MARCO passage dev 语料：**m=100,000**（1053 qrels + 18,544 BM25 硬负例 + 80,403 随机填充）、1000 query —— 与论文 Table III 声明的 m=100,000 一致 | VERIFIED（规模与论文唯一声明的 m 一致；论文未给检索实验 m） |
 | gtr-t5-base 嵌入 | `sentence-transformers/gtr-t5-base`，768 维，L2 归一化 | VERIFIED（A4） |
 | 全部实验在 NVIDIA A100 | Apple M5 CPU（10 核/16GB，无 GPU）；每个实验记录硬件，绝对值不跨硬件比较 | PARTIAL（硬件差异已声明） |
 
@@ -176,7 +176,7 @@
 |---|---|---|---|
 | w/o Enc | BLEU 83.021 / P .947 / R .950 / F1 .948 / ROUGE .950 | BLEU **69.875** [61.99,78.17] / .924 / .928 / .926 / .860 | PARTIAL（0.84×；绝对基线受论文未给的样本/步数/嵌入约定影响，F6/F14/F15） |
 | CAPRISE (s=3,β=0.2) | BLEU 12.425 / P .482 / R .498 / F1 .487 / ROUGE .492 | BLEU **13.696** [9.72,17.48] / .534 / .529 / .531 / .409 | VERIFIED（CI 覆盖论文值；A11 两种攻击口径，rescaled 34.58 为最强攻击上界） |
-| steps/beam 敏感性（F6） | 未声明 | 同 5 条：20/4→50/10 明文 55.7→77.4（+21.7）、raw 7.21→7.16（−0.05）、rescaled 29.7→33.0（+3.3） | 明文基线依赖预算；加密后水平不敏感 |
+| steps/beam 敏感性（F6） | 未声明 | 同 5 条：20/4→50/10 明文 55.7→77.4（+21.7）、raw 7.21→7.16（−0.05）、rescaled 29.7→33.0（+3.3）；**C2 预算研究（20 条同 passage）**：明文 67.4→77.8（+10.4），50/10 CI 64.2–89.2 覆盖论文 83.0 | 明文基线依赖预算；加密后水平不敏感 |
 
 ### 10.3 Fig.4（效率）
 
@@ -192,8 +192,9 @@
 | 要素 | 论文 | 复现 | 判定 |
 |---|---|---|---|
 | 协议 | 随机取库向量作测试 query，比较明文/ADCPE/CAPRISE 排序 | exp4：100 个随机库向量、m=5000；ASR@t + Kendall/Spearman + 距离重建误差 | VERIFIED（协议） |
-| 趋势 | CAPRISE ASR 在所有维度低于 ADCPE | 27/27 cells 成立（真实 −2.3pt；合成 −6.1/−6.8/−4.0pt；β 越大差距越大） | VERIFIED（方向） |
+| 趋势 | CAPRISE ASR 在所有维度低于 ADCPE | 27/27 cells 成立（真实 −2.5pt；合成 −6.1/−6.8/−4.0pt；β 越大差距越大） | VERIFIED（方向） |
 | 12 个维度点 | 64…2048 | 12 维合成网格全部跑通；d=768 与论文柱高吻合（83.2/88.2 vs 83.1/87.5） | PARTIAL（论文维度来源未说明，F11/A13） |
+| 12 维趋势的机制（exp6/M20） | ASR 随尺寸单调上升 | **H2 截断不归一化**协议：51.7→95.7%（论文 53.5→88.8），ρ=0.951、平均偏差 10.4pp；H1/H3 单位球面协议平坦（12.3/14.6pp）⇒ 趋势可由范数尺度效应解释；m=5k→100k 影响 <2pp | VERIFIED（趋势）/ 残余水平差 ≤10pp 未解释 |
 
 ### 10.5 Table III（top-k'）
 
@@ -205,11 +206,11 @@
 
 | 声明 | 复现核对 | 判定 |
 |---|---|---|
-| β 不能全局固定，需按数据集/嵌入模型标定 | exp2 β∈{0.05,0.1,0.2,0.4} → recall@10 单调 0.9910→0.9401；exp4 β 扫描 ASR 差距 −3.4→−11.6pt | VERIFIED |
-| DP 半径决定隐私-精度 trade-off；半径越大检索集越大 | exp5：r=0.02→k'=72、r=0.05→k'=785；exp2：耗时 3.11→11.81 ms/query | VERIFIED |
+| β 不能全局固定，需按数据集/嵌入模型标定 | exp2 β∈{0.05,0.1,0.2,0.4} → recall@10 单调 0.9915→0.9368（m=100k）；exp4 β 扫描 ASR 差距 −3.4→−11.6pt | VERIFIED |
+| DP 半径决定隐私-精度 trade-off；半径越大检索集越大 | exp5：m=100k 时 r=0.02→k'=79、r=0.05→k'=989；exp2：耗时 6.48→21.99 ms/query | VERIFIED |
 | 未来工作：自适应参数选择 | 论文未实现，复现未做 | N/A（future work） |
 | 结论：robust defenses（vec2text / query analysis / vector analysis） | M11/M13/M10 已量化；vector analysis 幅度有限（F2/F11） | VERIFIED（方向）/ PARTIAL（幅度） |
-| 结论：high retrieval utility | exp2：recall@10 vs 明文 0.9699（k'=k）、0.9999（k'=15）、1.0000（DP） | VERIFIED |
+| 结论：high retrieval utility | exp2（m=100k）：recall@10 vs 明文 0.9660（k'=k）、0.9997（k'=15）、1.0000（DP） | VERIFIED |
 | 结论：processing throughput | exp1（M17） | PARTIAL（绝对量级跨实现不可比） |
 
 ---

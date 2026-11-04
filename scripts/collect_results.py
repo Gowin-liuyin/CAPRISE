@@ -17,7 +17,7 @@ RESULTS = ROOT / "results"
 
 GATE_ORDER = [
     "P0", "M0", "M1", "M2", "M3", "M4", "M5", "M6", "M7", "M8", "M9",
-    "M10", "M11", "M12", "M13", "M14", "M15", "M16", "M17", "M18",
+    "M10", "M11", "M12", "M13", "M14", "M15", "M16", "M17", "M18", "M20",
 ]
 
 
@@ -37,7 +37,8 @@ def load_gates() -> dict:
 def load_experiments() -> dict:
     out = {}
     for name in ["exp1_efficiency", "exp2_retrieval", "exp3_vec2text",
-                 "exp4_vector_analysis", "exp5_query_dp"]:
+                 "exp3_plaintext_budget", "exp4_vector_analysis", "exp5_query_dp",
+                 "exp6_asr_protocol"]:
         path = RESULTS / f"{name}.json"
         if path.exists():
             try:

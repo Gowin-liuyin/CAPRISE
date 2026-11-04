@@ -1,7 +1,7 @@
 {
   "range": [
     "P0",
-    "M18"
+    "M20"
   ],
   "modules": [
     {
@@ -123,6 +123,12 @@
       "name": "retrieval",
       "status": "PASS",
       "result_file": "results/gate_M18_retrieval.json"
+    },
+    {
+      "module": "M20",
+      "name": "asr_protocol",
+      "status": "PASS",
+      "result_file": "results/gate_M20_asr_protocol.json"
     }
   ],
   "failed_module": null,

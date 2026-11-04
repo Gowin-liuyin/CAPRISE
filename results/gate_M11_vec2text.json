@@ -480,7 +480,7 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "notes/exp3_vec2text.md (7067 chars)"
+      "detail": "notes/exp3_vec2text.md (7867 chars)"
     },
     {
       "check": "notes_cover_ci_and_sensitivity",
@@ -488,6 +488,41 @@
       "actual": true,
       "pass": true,
       "detail": "notes document the 50-passage sample, the bootstrap 95% CI and the 50/10 sensitivity"
+    },
+    {
+      "check": "plaintext_budget_artifact",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "results/exp3_plaintext_budget.json"
+    },
+    {
+      "check": "plaintext_budget_both_budgets_on_same_passages",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "n=20 passages; budgets=['20/4', '50/10'] (20/4 and 50/10 on the same passages)"
+    },
+    {
+      "check": "plaintext_budget_metrics_and_ci",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "bad=[]"
+    },
+    {
+      "check": "plaintext_budget_comparison_recorded",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "delta BLEU 50/10 - 20/4 = +10.381; 50/10 - paper = -5.270; CI(50/10) covers paper = True"
+    },
+    {
+      "check": "plaintext_budget_arithmetic_consistent",
+      "expected": true,
+      "actual": true,
+      "pass": true,
+      "detail": "20/4 BLEU=67.370, 50/10 BLEU=77.751 (CI 64.227-89.184), paper=83.021; deltas and CI-coverage flags match the stored metrics"
     },
     {
       "check": "per_text_time_recorded",
@@ -519,8 +554,8 @@
     "The absolute difference from paper Table II is reported, not fitted: the paper does not state num_steps / beam width / N / per-passage length (A11) and uses an A100; our MPS-feasible settings are recorded in the artefact and explained in notes/exp3_vec2text.md. No gate threshold was relaxed relative to the 10-passage main experiment; coverage was extended (N>=50, CI, 50/10 sensitivity on 5 passages).",
     "This gate validates the committed artefact and recomputes the metric + CI + encryption-audit layer in the calling environment (vec2text inversion itself is not re-run)."
   ],
-  "duration_s": 11.273,
-  "timestamp": "2026-11-03T23:59:23+0800",
+  "duration_s": 5.387,
+  "timestamp": "2026-11-04T08:35:29+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

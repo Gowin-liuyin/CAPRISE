@@ -10,14 +10,14 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "json=17591B, csv=1462B, png=142103B, md=6279B"
+      "detail": "json=17517B, csv=1469B, png=139631B, md=6279B"
     },
     {
       "check": "02_setup_scale",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "m=50000, n_queries=1000"
+      "detail": "m=100000, n_queries=1000"
     },
     {
       "check": "03_setup_params",
@@ -52,35 +52,35 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "plaintext qrels MRR@10=0.7230 for 1000 queries (full-corpus reference ~0.39, 50k-subset corpus higher)"
+      "detail": "plaintext qrels MRR@10=0.7105 for 1000 queries (full-corpus reference ~0.39, 50k-subset corpus higher)"
     },
     {
       "check": "08_caprise_strict_kp_eq_k_high_fidelity",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "CAPRISE k'=k recall@10 vs plaintext = 0.9699 (>=0.90; encryption-noise boundary flips)"
+      "detail": "CAPRISE k'=k recall@10 vs plaintext = 0.9660 (>=0.90; encryption-noise boundary flips)"
     },
     {
       "check": "09_oversampling_recovers",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "recall: k'=k 0.9699, k'=15 0.9999, k'=2k 1.0000"
+      "detail": "recall: k'=k 0.9660, k'=15 0.9997, k'=2k 1.0000"
     },
     {
       "check": "10_dp_theorem_kprime_and_recall",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "r=0.02: k'=72 (expected 72), recall=1.0000; r=0.05: k'=785 (expected 785), recall=1.0000"
+      "detail": "r=0.02: k'=79 (expected 79), recall=1.0000; r=0.05: k'=989 (expected 989), recall=1.0000"
     },
     {
       "check": "11_adcpe_baseline_present",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "ADCPE k'=k recall@10 vs plaintext = 0.9724"
+      "detail": "ADCPE k'=k recall@10 vs plaintext = 0.9721"
     },
     {
       "check": "12_beta_sweep_4_values",
@@ -94,35 +94,35 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "recall@10 vs plaintext: beta=0.05:0.9910, beta=0.1:0.9854, beta=0.2:0.9699, beta=0.4:0.9401"
+      "detail": "recall@10 vs plaintext: beta=0.05:0.9915, beta=0.1:0.9832, beta=0.2:0.9660, beta=0.4:0.9368"
     },
     {
       "check": "14_qrels_mrr_preserved",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "max |qrels MRR@10 - plaintext| = 0.00020 (adcpe_kp=k); local decryption + exact re-rank restores ordering"
+      "detail": "max |qrels MRR@10 - plaintext| = 0.00041 (caprise_beta0.4_kp=k); local decryption + exact re-rank restores ordering"
     },
     {
       "check": "15_encrypted_latency_reasonable",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "CAPRISE k'=k 2.35 ms/query vs plaintext 2.45 ms/query (server search ~2.17 ms)"
+      "detail": "CAPRISE k'=k 5.50 ms/query vs plaintext 4.29 ms/query (server search ~5.25 ms)"
     },
     {
       "check": "16_dp_cost_grows_with_kprime",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "DP(r=0.05,k'=785) 11.81 ms/query > CAPRISE k'=k 2.35 ms/query (cost dominated by decrypting k' candidates)"
+      "detail": "DP(r=0.05,k'=785) 21.99 ms/query > CAPRISE k'=k 5.50 ms/query (cost dominated by decrypting k' candidates)"
     },
     {
       "check": "17_phase1_upload_measured",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "6 uploads recorded; max EncDB+AES throughput = 82379 vec/s"
+      "detail": "6 uploads recorded; max EncDB+AES throughput = 69251 vec/s"
     },
     {
       "check": "18_csv_matches_json",
@@ -136,17 +136,17 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "figures/fig_retrieval.png = 142103 B"
+      "detail": "figures/fig_retrieval.png = 139631 B"
     }
   ],
   "notes": [
-    "exp2 on real data: m=50000, n_queries=1000, beta_default=0.2, total run 45.3s",
-    "plaintext qrels MRR@10=0.7230 | CAPRISE k'=k recall=0.9699 -> k'=2k recall=1.0000",
+    "exp2 on real data: m=100000, n_queries=1000, beta_default=0.2, total run 100.9s",
+    "plaintext qrels MRR@10=0.7105 | CAPRISE k'=k recall=0.9660 -> k'=2k recall=1.0000",
     "paper gives no retrieval table; this supports the qualitative 'high retrieval accuracy' claim. Paper Table III uses m=100,000; here m=50,000, and Delta-alpha = r (SPEC §5 caveat noted).",
-    "beta sensitivity: 0.05:0.9910, 0.1:0.9854, 0.2:0.9699, 0.4:0.9401"
+    "beta sensitivity: 0.05:0.9915, 0.1:0.9832, 0.2:0.9660, 0.4:0.9368"
   ],
   "duration_s": 0.001,
-  "timestamp": "2026-11-03T23:59:41+0800",
+  "timestamp": "2026-11-04T08:35:38+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",

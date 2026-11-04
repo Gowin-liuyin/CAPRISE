@@ -17,14 +17,14 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "meta m=50000 nq=1000 vs npy m=50000 nq=1000"
+      "detail": "meta m=100000 nq=1000 vs npy m=100000 nq=1000"
     },
     {
       "check": "03_m_ge_20000",
       "expected": "m >= 20000",
-      "actual": 50000,
+      "actual": 100000,
       "pass": true,
-      "detail": "m=50000"
+      "detail": "m=100000"
     },
     {
       "check": "04_n_queries_ge_200",
@@ -45,14 +45,14 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "max | ||v||-1 | = 4.868e-04 (passage max dev 4.87e-04, query max dev 4.72e-04)"
+      "detail": "max | ||v||-1 | = 1.804e-07 (passage max dev 1.80e-07, query max dev 1.27e-07)"
     },
     {
       "check": "07_row_counts_consistent",
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "passages: emb=50000 ids=50000 jsonl=50000; queries: emb=1000 ids=1000 jsonl=1000"
+      "detail": "passages: emb=100000 ids=100000 jsonl=100000; queries: emb=1000 ids=1000 jsonl=1000"
     },
     {
       "check": "08_embedding_dim_768",
@@ -80,46 +80,46 @@
       "expected": true,
       "actual": true,
       "pass": true,
-      "detail": "eval qids with >=1 relevant passage in corpus: 1000/1000 (100.00%), qrels pairs in corpus=1080, qids=1027"
+      "detail": "eval qids with >=1 relevant passage in corpus: 1000/1000 (100.00%), qrels pairs in corpus=1133, qids=1080"
     },
     {
       "check": "12_sanity_queries_ge_200",
       "expected": ">=200 evaluated",
       "actual": 1000,
       "pass": true,
-      "detail": "1000 queries, 0.6s"
+      "detail": "1000 queries, 0.7s"
     },
     {
       "check": "13_mrr10_plausible_and_recorded",
       "expected": "random_baseline*100 < MRR@10 < 1.0",
-      "actual": 0.7219,
+      "actual": 0.7105,
       "pass": true,
-      "detail": "MRR@10=0.7219 vs random-ranking baseline 5.86e-05; full-8.8M-corpus reference ~0.39 (corpus here is a 50k random subset, so higher is expected); recorded in results/data_sanity.json"
+      "detail": "MRR@10=0.7105 vs random-ranking baseline 2.93e-05; full-8.8M-corpus reference ~0.39 (corpus here is a 50k random subset, so higher is expected); recorded in results/data_sanity.json"
     },
     {
       "check": "14_recall10_above_random",
       "expected": "Recall@10 > 0.5",
-      "actual": 0.97,
+      "actual": 0.96,
       "pass": true,
-      "detail": "Recall@10=0.9700"
+      "detail": "Recall@10=0.9600"
     },
     {
       "check": "15_mrr_beats_random_baseline",
-      "expected": "> 5.86e-05 (random ranking)",
-      "actual": 0.7219,
+      "expected": "> 2.93e-05 (random ranking)",
+      "actual": 0.7105,
       "pass": true,
-      "detail": "random-ranking baseline MRR@10 ~ 5.86e-05"
+      "detail": "random-ranking baseline MRR@10 ~ 2.93e-05"
     }
   ],
   "notes": [
-    "plaintext sanity (primary, with BM25 hard negatives): MRR@10=0.7219, Recall@10=0.9700, nDCG@10=0.7828, Recall@100=0.9970",
-    "control (original spec: uniform random filler only, hard negatives removed): MRR@10=0.9486023809523809, Recall@10=0.995, n=1000",
-    "corpus composition: {'qrels_relevant': 1053, 'bm25_hard_neg': 18544, 'random_fill': 30403, 'hard_negs_per_query': 20, 'note': \"row order = [qrels-relevant passages sorted by pid] + [BM25 hard negatives sorted by pid] + [random filler sorted by pid]; any corpus prefix of length >= qrels_relevant+bm25_hard_neg contains all relevant passages. Passages.jsonl carries a per-row 'source' field and data/corpus_sources.npy matches it.\"}",
-    "embedding: sentence-transformers/gtr-t5-base dim=768, device=mps:0, dtype=float16",
-    "embedding latency: 222.36 ms / batch=128 queries (paper: 79.52 ms on A100 GPU)"
+    "plaintext sanity (primary, with BM25 hard negatives): MRR@10=0.7105, Recall@10=0.9600, nDCG@10=0.7717, Recall@100=0.9970",
+    "control (original spec: uniform random filler only, hard negatives removed): MRR@10=0.9114174603174605, Recall@10=0.985, n=1000",
+    "corpus composition: {'qrels_relevant': 1053, 'bm25_hard_neg': 18544, 'random_fill': 80403, 'hard_negs_per_query': 20, 'note': \"row order = [qrels-relevant passages sorted by pid] + [BM25 hard negatives sorted by pid] + [random filler sorted by pid]; any corpus prefix of length >= qrels_relevant+bm25_hard_neg contains all relevant passages. Passages.jsonl carries a per-row 'source' field and data/corpus_sources.npy matches it.\"}",
+    "embedding: sentence-transformers/gtr-t5-base dim=768, device=cpu, dtype=float32",
+    "embedding latency: 551.79 ms / batch=128 queries (paper: 79.52 ms on A100 GPU)"
   ],
-  "duration_s": 0.83,
-  "timestamp": "2026-11-03T23:58:42+0800",
+  "duration_s": 0.964,
+  "timestamp": "2026-11-04T08:35:11+0800",
   "hardware": {
     "platform": "macOS-26.6.2-arm64-arm-64bit",
     "machine": "arm64",
